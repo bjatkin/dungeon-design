@@ -4,12 +4,14 @@ from dungeon_level.dungeon_tiles import Tiles as DungeonTiles
 
 class LayerConverter:
     to_tile_world_tile = {
-        DungeonTiles.empty          : TWTiles.empty,
-        DungeonTiles.wall           : TWTiles.wall,
-        DungeonTiles.player         : TWTiles.player,
-        DungeonTiles.finish         : TWTiles.finish,
-        DungeonTiles.movable_block  : TWTiles.movable_block,
-        DungeonTiles.collectable    : TWTiles.chip
+        DungeonTiles.empty                          : TWTiles.empty,
+        DungeonTiles.wall                           : TWTiles.wall,
+        DungeonTiles.player                         : TWTiles.player,
+        DungeonTiles.finish                         : TWTiles.finish,
+        DungeonTiles.movable_block                  : TWTiles.movable_block,
+        DungeonTiles.collectable                    : TWTiles.chip,
+        DungeonTiles.required_collectable_barrier   : TWTiles.socket,
+        DungeonTiles.water                          : TWTiles.water
     }
 
     @staticmethod

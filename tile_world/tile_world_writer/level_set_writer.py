@@ -2,6 +2,8 @@ from tile_world.tile_world_level import TileWorldLevel
 from tile_world.tile_world_writer.level_writer import LevelWriter
 from tile_world.tile_world_writer.file_helpers import *
 
+# https://www.devdungeon.com/content/working-binary-data-python
+# http://www.seasip.info/ccfile.html
 class LevelSetWriter:
     @staticmethod
     def write(level_set, filename):

@@ -4,6 +4,7 @@ from dungeon_level.position import Position
 from tile_world.tile_world_level import TileWorldLevel
 from dungeon_level.dungeon_tiles import Tiles
 from tile_world.tile_world_writer.level_set_writer import LevelSetWriter
+import random
 import subprocess
 
 level_set = LevelSet()
@@ -17,23 +18,36 @@ square_size = 10
 
 E = Tiles.empty
 W = Tiles.wall
-C = Tiles.collectable
 P = Tiles.player
 F = Tiles.finish
 B = Tiles.movable_block
+C = Tiles.collectable
+R = Tiles.required_collectable_barrier
+w = Tiles.water
+
+def r():
+    return random.choices(list(Tiles), [0.65, 0.15, 0.0, 0.0, 0.05, 0.05, 0.0, 0.1])
+
+def populate_layer(layer):
+    for y in range(len(layer)):
+        for x in range(len(layer[y])):
+            if layer[y][x] == E:
+                layer[y][x] = r()[0]
+    return layer
 
 level2.upper_layer = (
    [[E, E, E, E, E, E, E, E, E, E, E, E],
     [E, W, W, W, W, W, W, W, W, W, W, W],
-    [E, W, E, E, E, E, C, E, E, E, F, W],
-    [E, W, P, E, E, E, E, E, E, E, E, W],
+    [E, W, E, E, E, E, E, E, E, E, E, W],
+    [E, W, E, E, P, E, E, E, E, E, E, W],
     [E, W, E, E, E, E, E, E, E, E, E, W],
     [E, W, E, E, E, E, E, E, E, E, E, W],
-    [E, W, E, E, E, E, E, E, E, B, E, W],
-    [E, W, E, C, E, E, E, E, E, W, W, W],
-    [E, W, E, E, E, E, E, E, E, E, F, W],
+    [E, W, E, E, E, E, E, E, E, E, E, W],
+    [E, W, E, E, E, E, E, E, E, W, W, W],
+    [E, W, E, E, E, E, E, E, E, R, F, W],
     [E, W, W, W, W, W, W, W, W, W, W, W]])
 
+level2.upper_layer = populate_layer(level2.upper_layer)
 
 
 
