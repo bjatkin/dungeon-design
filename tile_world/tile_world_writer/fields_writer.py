@@ -1,13 +1,14 @@
 from tile_world.tile_world_writer.file_helpers import *
 from tile_world.tile_world_level import TileWorldLevel
 from tile_world.tile_world_tiles import monster_tiles
-from dungeon_level.position import Position
+
+import numpy as np
 
 class PositionWriter:
     @staticmethod
     def write(data, position, size=WORD_SIZE):
-        wb(data, position.x, size)
-        wb(data, position.y, size)
+        wb(data, position[0], size)
+        wb(data, position[1], size)
 
 
 
@@ -115,7 +116,7 @@ class MonstersField(Field):
             if tile in monster_tiles:
                 y = i // TileWorldLevel.LAYER_WIDTH
                 x = i - TileWorldLevel.LAYER_WIDTH * y
-                monster_positions.append(Position(x, y))
+                monster_positions.append(np.array([x, y]))
         return monster_positions
 
     

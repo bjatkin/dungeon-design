@@ -1,11 +1,13 @@
 from dungeon_level.level_set import LevelSet
-from dungeon_level.position import Position
-
 from tile_world.tile_world_level import TileWorldLevel
 from dungeon_level.dungeon_tiles import Tiles
 from tile_world.tile_world_writer.level_set_writer import LevelSetWriter
+
+import numpy as np
 import random
 import subprocess
+
+from validation.path_finder import PathFinder
 
 level_set = LevelSet()
 
@@ -35,7 +37,7 @@ def populate_layer(layer):
                 layer[y][x] = r()[0]
     return layer
 
-level2.upper_layer = (
+level2.upper_layer = np.array(
    [[E, E, E, E, E, E, E, E, E, E, E, E],
     [E, W, W, W, W, W, W, W, W, W, W, W],
     [E, W, E, E, E, E, E, E, E, E, E, W],

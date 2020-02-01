@@ -1,10 +1,12 @@
+import numpy as np
+
 class Level:
 
     def __init__(self):
         self.time_limit = 0
         self.required_collectable_count = 0
-        self.upper_layer = []
-        self.lower_layer = []
+        self.upper_layer = np.array([])
+        self.lower_layer = np.array([])
         self.map_title = ""
 
     
