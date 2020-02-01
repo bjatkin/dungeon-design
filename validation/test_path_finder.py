@@ -21,7 +21,7 @@ class TestPathFinder(unittest.TestCase):
         layer[2,1:6] = Tiles.wall
         layer[1,1] = Tiles.wall
 
-        f_costs, parents = PathFinder.a_star(layer, np.array([5,4]), np.array([2,1]), True)
+        f_costs, parents = PathFinder.a_star(layer, np.array([4,5]), np.array([1,2]), True)
 
         expected_f_costs = np.array(
             [[np.inf, np.inf, 82,     76,     76,     82,     96],
@@ -32,12 +32,12 @@ class TestPathFinder(unittest.TestCase):
              [np.inf, 88,     74,     68,     62,     62,     70]])
 
         expected_parents = np.array(
-            [[None, None, np.array([1,1]), np.array([1,1]), np.array([1,1]), np.array([0,1]), np.array([-1,1])],
-             [None, None, np.array([1,0]), np.array([1,0]), np.array([1,0]), np.array([1,1]), np.array([0,1])], 
-             [np.array([1, 1]), None, None, None, None, None, np.array([-1, 1])],
-             [np.array([1, 0]), np.array([1, 0]), np.array([1, 0]), np.array([1, 0]), np.array([1, 1]), np.array([0, 1]), np.array([-1, 1])],
-             [np.array([1, -1]), np.array([1, 0]), np.array([1, 0]), np.array([1, 0]), np.array([1, 0]), None, np.array([-1, 0])],
-             [None, np.array([1, -1]), np.array([1, -1]), np.array([1, -1]), np.array([1, -1]), np.array([0, -1]), np.array([-1, -1])]])
+            [[None, None, np.array([1,1]), np.array([1,1]), np.array([1,1]), np.array([1,0]), np.array([1,-1])],
+             [None, None, np.array([0,1]), np.array([0,1]), np.array([0,1]), np.array([1,1]), np.array([1,0])], 
+             [np.array([1, 1]), None, None, None, None, None, np.array([1, -1])],
+             [np.array([0, 1]), np.array([0, 1]), np.array([0, 1]), np.array([0, 1]), np.array([1, 1]), np.array([1, 0]), np.array([1, -1])],
+             [np.array([-1, 1]), np.array([0, 1]), np.array([0, 1]), np.array([0, 1]), np.array([0, 1]), None, np.array([0, -1])],
+             [None, np.array([-1, 1]), np.array([-1, 1]), np.array([-1, 1]), np.array([-1, 1]), np.array([-1, 0]), np.array([-1, -1])]])
 
         self.assertTrue(np.array_equal(f_costs, expected_f_costs))
         
@@ -51,5 +51,5 @@ class TestPathFinder(unittest.TestCase):
         layer = np.array([Tiles.empty] * 8 * 10).reshape([8,10])
         layer[:,4] = Tiles.wall
 
-        f_costs, parents = PathFinder.a_star(layer, np.array([0,2]), np.array([8,2]))
+        f_costs, parents = PathFinder.a_star(layer, np.array([2,0]), np.array([2,8]))
         self.assertEqual(parents, None)

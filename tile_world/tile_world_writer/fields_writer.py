@@ -7,8 +7,8 @@ import numpy as np
 class PositionWriter:
     @staticmethod
     def write(data, position, size=WORD_SIZE):
-        wb(data, position[0], size)
         wb(data, position[1], size)
+        wb(data, position[0], size)
 
 
 

@@ -23,6 +23,12 @@ class PathFinder:
     diagonal_neighbor_offsets = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
     neighbor_offsets = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
+    @staticmethod
+    def is_reachable(layer, position_a, position_b, allow_diagonal=False):
+        results = PathFinder.a_star(layer, position_a, position_b, allow_diagonal=allow_diagonal)
+        is_unreachable = results[1] is None
+        return not is_unreachable
+
 
     @staticmethod
     def a_star(layer, position_a, position_b, allow_diagonal=False):
@@ -54,7 +60,7 @@ class PathFinder:
             if current_position == position_b: # We found a path from a to b
                 return f_costs, parents
 
-            current_g_cost = g_costs[current_position[1], current_position[0]]
+            current_g_cost = g_costs[tuple(current_position)]
             for neighbor_offset in offsets:
                 neighbor_position = current_position + neighbor_offset
 
@@ -62,13 +68,13 @@ class PathFinder:
                     not PathFinder.is_traversable(layer, current_position, neighbor_position)):
                     continue
 
-                old_f = f_costs[neighbor_position[1], neighbor_position[0]]
+                old_f = f_costs[tuple(neighbor_position)]
                 f, g, h = PathFinder.calculate_costs(current_g_cost, current_position, neighbor_position, position_b, distance)
 
 
                 if not neighbor_position in open_tiles or f < old_f:
                     PathFinder.update_costs(f_costs, g_costs, h_costs, f, g, h, neighbor_position)
-                    parents[neighbor_position[1], neighbor_position[0]] = np.negative(neighbor_offset)
+                    parents[tuple(neighbor_position)] = np.negative(neighbor_offset)
                     if not neighbor_position in open_tiles:
                         open_tiles.add(neighbor_position)
 
@@ -83,14 +89,14 @@ class PathFinder:
 
     @staticmethod
     def update_costs(f_costs, g_costs, h_costs, f, g, h, position):
-        f_costs[position[1], position[0]] = f
-        g_costs[position[1], position[0]] = g
-        h_costs[position[1], position[0]] = h
+        f_costs[tuple(position)] = f
+        g_costs[tuple(position)] = g
+        h_costs[tuple(position)] = h
 
 
     @staticmethod
     def find_lowest_f_cost_position(f_cost, open_tiles):
-        open_f_costs = [ ( t, f_cost[t[1], t[0]] ) for t in open_tiles]
+        open_f_costs = [ ( t, f_cost[tuple(t)] ) for t in open_tiles]
         min_f_cost_position = min(open_f_costs, key=lambda t: t[1])[0]
         return min_f_cost_position
 
@@ -99,10 +105,10 @@ class PathFinder:
     @staticmethod
     def is_traversable(layer, current_position, neighbor_position):
         h, w = layer.shape
-        is_within_bounds = neighbor_position[0] >= 0 and neighbor_position[1] >= 0 and neighbor_position[0] < w and neighbor_position[1] < h
+        is_within_bounds = neighbor_position[0] >= 0 and neighbor_position[1] >= 0 and neighbor_position[0] < h and neighbor_position[1] < w
         if not is_within_bounds:
             return False
-        return layer[neighbor_position[1], neighbor_position[0]] not in PathFinder.nontraversable_tiles
+        return layer[tuple(neighbor_position)] not in PathFinder.nontraversable_tiles
 
 
     @staticmethod
