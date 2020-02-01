@@ -1,6 +1,6 @@
 import unittest
 from tile_world.tile_world_writer.level_writer import LevelWriter
-from tile_world.tiles import Tiles
+from tile_world.tile_world_tiles import Tiles
 
 class TestTileWorldLevel(unittest.TestCase):
     def test_uncompress(self):
@@ -55,5 +55,3 @@ class TestTileWorldLevel(unittest.TestCase):
 
         standardized_layer = LevelWriter.standardize_layer(layer)
         self.assertEqual(standardized_layer, expected)
-
-unittest.main()
