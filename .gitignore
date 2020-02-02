@@ -4,7 +4,6 @@ __pycache__/
 *$py.class
 
 bash.exe.stackdump
-.vscode
 
 # C extensions
 *.so
