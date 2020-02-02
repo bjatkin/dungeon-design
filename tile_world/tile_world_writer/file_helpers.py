@@ -24,7 +24,7 @@ def get_data_size_after_placeholder(data, placeholder):
 
 
 def wb(data, value, byte_size, index = -1):
-    bytes_value = value.to_bytes(byte_size, byteorder='little', signed=False)
+    bytes_value = int(value).to_bytes(byte_size, byteorder='little', signed=False)
     if index == -1:
         for byte in bytes_value:
             data.append(byte)

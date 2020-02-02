@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 from validation.path_finder import PathFinder
+from validation.player_status import PlayerStatus
 from dungeon_level.dungeon_tiles import Tiles
 
 class TestPathFinder(unittest.TestCase):
@@ -21,7 +22,7 @@ class TestPathFinder(unittest.TestCase):
         layer[2,1:6] = Tiles.wall
         layer[1,1] = Tiles.wall
 
-        f_costs, parents = PathFinder.a_star(layer, np.array([4,5]), np.array([1,2]), True)
+        f_costs, parents = PathFinder.a_star(layer, np.array([4,5]), np.array([1,2]), PlayerStatus(), True)
 
         expected_f_costs = np.array(
             [[np.inf, np.inf, 82,     76,     76,     82,     96],
@@ -51,5 +52,5 @@ class TestPathFinder(unittest.TestCase):
         layer = np.array([Tiles.empty] * 8 * 10).reshape([8,10])
         layer[:,4] = Tiles.wall
 
-        f_costs, parents = PathFinder.a_star(layer, np.array([2,0]), np.array([2,8]))
+        f_costs, parents = PathFinder.a_star(layer, np.array([2,0]), np.array([2,8]), PlayerStatus())
         self.assertEqual(parents, None)

@@ -9,3 +9,5 @@ class Tiles(Enum):
     collectable                     = 0x05
     required_collectable_barrier    = 0x06
     water                           = 0x07
+    flippers                        = 0x08
+    monster                         = 0x09

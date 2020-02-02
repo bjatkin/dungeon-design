@@ -1,11 +1,12 @@
 import numpy as np
 from dungeon_level.dungeon_tiles import Tiles
 from dungeon_level.level import Level
+from validation.player_status import PlayerStatus
 from hashlib import sha1
 from numpy import ndarray, uint8, array
 
 
-class HashableNdarray(ndarray):
+class HashableNdarray(ndarray): # We need to make numpy arrays hashable so we can add them to sets for PathFinder
     def __hash__(self):
         if not hasattr(hasattr, '__hash'):
             self.__hash = int(sha1(self.view(uint8)).hexdigest(), 16)
@@ -24,14 +25,14 @@ class PathFinder:
     neighbor_offsets = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
     @staticmethod
-    def is_reachable(layer, position_a, position_b, allow_diagonal=False):
-        results = PathFinder.a_star(layer, position_a, position_b, allow_diagonal=allow_diagonal)
+    def is_reachable(layer, position_a, position_b, player_status, allow_diagonal=False):
+        results = PathFinder.a_star(layer, position_a, position_b, player_status, allow_diagonal=allow_diagonal)
         is_unreachable = results[1] is None
         return not is_unreachable
 
 
     @staticmethod
-    def a_star(layer, position_a, position_b, allow_diagonal=False):
+    def a_star(layer, position_a, position_b, player_status, allow_diagonal=False):
         if allow_diagonal:
             offsets = PathFinder.diagonal_neighbor_offsets
             distance = PathFinder.diagonal_manhattan_distance
@@ -65,7 +66,7 @@ class PathFinder:
                 neighbor_position = current_position + neighbor_offset
 
                 if (neighbor_position in closed_tiles or
-                    not PathFinder.is_traversable(layer, current_position, neighbor_position)):
+                    not player_status.can_traverse(layer, current_position, neighbor_position)):
                     continue
 
                 old_f = f_costs[tuple(neighbor_position)]
@@ -99,16 +100,6 @@ class PathFinder:
         open_f_costs = [ ( t, f_cost[tuple(t)] ) for t in open_tiles]
         min_f_cost_position = min(open_f_costs, key=lambda t: t[1])[0]
         return min_f_cost_position
-
-
-    nontraversable_tiles = {Tiles.movable_block, Tiles.wall, Tiles.water}
-    @staticmethod
-    def is_traversable(layer, current_position, neighbor_position):
-        h, w = layer.shape
-        is_within_bounds = neighbor_position[0] >= 0 and neighbor_position[1] >= 0 and neighbor_position[0] < h and neighbor_position[1] < w
-        if not is_within_bounds:
-            return False
-        return layer[tuple(neighbor_position)] not in PathFinder.nontraversable_tiles
 
 
     @staticmethod

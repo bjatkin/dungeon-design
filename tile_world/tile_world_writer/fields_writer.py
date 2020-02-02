@@ -116,7 +116,7 @@ class MonstersField(Field):
             if tile in monster_tiles:
                 y = i // TileWorldLevel.LAYER_WIDTH
                 x = i - TileWorldLevel.LAYER_WIDTH * y
-                monster_positions.append(np.array([x, y]))
+                monster_positions.append(np.array([y, x]))
         return monster_positions
 
     

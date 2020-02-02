@@ -11,7 +11,9 @@ class LayerConverter:
         DungeonTiles.movable_block                  : TWTiles.movable_block,
         DungeonTiles.collectable                    : TWTiles.chip,
         DungeonTiles.required_collectable_barrier   : TWTiles.socket,
-        DungeonTiles.water                          : TWTiles.water
+        DungeonTiles.water                          : TWTiles.water,
+        DungeonTiles.flippers                       : TWTiles.flippers,
+        DungeonTiles.monster                        : TWTiles.ghost_n
     }
 
     @staticmethod

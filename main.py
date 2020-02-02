@@ -14,9 +14,9 @@ import subprocess
 level = TileWorldLevel()
 level.map_title = "Ryan's Level"
 level.map_password = "    "
-level.time_limit = 50
+level.time_limit = 100
 
-size = (12, 20)
+size = (20, 20)
 
 RandomGenerator.generate(level, size)
 while not Solver.is_solvable(level):

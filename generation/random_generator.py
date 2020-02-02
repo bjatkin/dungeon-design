@@ -16,13 +16,33 @@ class RandomGenerator:
         player_position = RandomGenerator.get_random_position_in_level(size)
         level.upper_layer[player_position] = Tiles.player
 
-        finish_position = RandomGenerator.get_random_position_in_level(size)
-        while finish_position == player_position:
-            finish_position = RandomGenerator.get_random_position_in_level(size)
-        level.upper_layer[finish_position] = Tiles.finish
+        finish_offsets = [np.array([-1, 0]), np.array([1, 0]), np.array([0, -1]), np.array([0, 1]), np.array([0, 0])]
+        finish_tiles = [Tiles.wall, Tiles.required_collectable_barrier, Tiles.wall, Tiles.wall, Tiles.finish]
+        RandomGenerator.place_feature(level, size, finish_tiles, finish_offsets)
+
+        RandomGenerator.place_feature(level, size, [Tiles.flippers], np.array([0, 0]))
+
+        # RandomGenerator.place_feature(level, size, [Tiles.monster], np.array([0,0]))
+
 
         level.required_collectable_count = np.count_nonzero(level.upper_layer == Tiles.collectable)
 
+    @staticmethod
+    def place_feature(level, size, feature_tiles, feature_offsets):
+        feature_position = RandomGenerator.get_random_position_in_level(size)
+        while not RandomGenerator.is_free_space(level, feature_position, feature_offsets):
+            feature_position = RandomGenerator.get_random_position_in_level(size)
+        for tile, neighbor in zip(feature_tiles, feature_offsets):
+            level.upper_layer[tuple(neighbor + feature_position)] = tile
+
+
+    @staticmethod
+    def is_free_space(level, position, offsets):
+        not_free_tiles = {Tiles.player, Tiles.finish, Tiles.flippers}
+        for offset in offsets:
+            if level.upper_layer[tuple(position + offset)] in not_free_tiles:
+                return False
+        return True
 
 
     @staticmethod
@@ -32,12 +52,14 @@ class RandomGenerator:
     @staticmethod
     def random_tile():
         return random.choices(list(Tiles), [
-            0.60, # empty
-            0.20, # wall
-            0.0,  # player
-            0.0,  # finish
-            0.05, # movable_block
-            0.05, # collectable
-            0.0,  # required_collectable_barrier
-            0.1   # water
+            0.60,  # empty
+            0.20,  # wall
+            0.0,   # player
+            0.0,   # finish
+            0.05,  # movable_block
+            0.025, # collectable
+            0.0,   # required_collectable_barrier
+            0.1,   # water
+            0.0,   # flippers
+            0.02   # monster
             ])[0]
