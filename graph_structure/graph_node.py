@@ -3,30 +3,28 @@ class GNode(object):
         self.child_s = child_s
         self.parent_s = parent_s
         self.name = name
+
+    @staticmethod
+    def add(list_, items):
+        list_.extend(items) # Modify list_ in place so we don't have to return a value
+
+    @staticmethod
+    def remove(list_, item_name):
+        list_[:] = filter(lambda x: x.name != item_name, list_) # Modify list_ in place so we don't have to return a value
     
     def add_child_s(self, child_s):
-        for child in child_s:
-            self.child_s.append(child)
+        # Instead of having the code to add a child/parent/key here, we call a static method
+        # passing it the list that we want to modify.
+        GNode.add(self.child_s, child_s) 
     
     def remove_child_s(self, child_name_s):
-        new_child_s = []
-        for child in self.child_s:
-            if child.name in child_name_s:
-                pass
-            new_child_s.append(child)
-        self.child_s = new_child_s
+        GNode.remove(self.child_s, child_name_s)
     
     def add_parent_s(self, parent_s):
-        for parent in parent_s:
-            self.parent_s.append(parent)
+        GNode.add(self.parent_s, parent_s)
     
     def remove_parent_s(self, parent_name_s):
-        new_parent_s = []
-        for child in self.parent_s:
-            if parent.name in parent_name_s:
-                pass
-            new_parent_s.append(parent)
-        self.parent_s = new_parent_s
+        GNode.remove(self.parent_s, parent_name_s)
 
     def __repr__(self):
         parent_names = [n.name for n in self.parent_s]
@@ -46,16 +44,10 @@ class Key(GNode):
         self.lock_s = lock_s
     
     def add_lock_s(self, lock_s):
-        for lock in lock_s:
-            self.lock_s.append(lock)
+        GNode.add(self.lock_s, lock_s)
     
     def remove_lock_s(self, lock_name_s):
-        new_lock_s = []
-        for lock in self.lock_s:
-            if lock.name in lock_name_s:
-                pass
-            new_lock_s.append(lock)
-        self.lock_s = new_lock_s
+        GNode.remove(self.lock_s, lock_name_s)
         
 
 class Lock(GNode):
@@ -64,16 +56,10 @@ class Lock(GNode):
         self.key_s = key_s
     
     def add_key_s(self, key_s):
-        for key in key_s:
-            self.key_s.append(key)
+        GNode.add(self.key_s, key_s)
     
     def remove_key_s(self, key_s):
-        new_key_s = []
-        for key in self.key_s:
-            if key.name in key_s:
-                pass
-            new_key_s.append(key)
-        self.key_s = new_key_s
+        GNode.remove(self.key_s, key_s)
 
 
 class End(GNode):
