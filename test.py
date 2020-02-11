@@ -1,5 +1,6 @@
 import unittest
 from tile_world.tile_world_writer.test_level_writer import TestTileWorldLevel
 from validation.test_path_finder import TestPathFinder
+from graph_structure.test_graph_node import TestGraphNode
 
 unittest.main()

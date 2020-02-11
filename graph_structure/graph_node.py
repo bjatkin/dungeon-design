@@ -28,6 +28,14 @@ class GNode(object):
             new_parent_s.append(parent)
         self.parent_s = new_parent_s
 
+    def __repr__(self):
+        parent_names = [n.name for n in self.parent_s]
+        child_names = [n.name for n in self.child_s]
+        class_name = type(self).__name__
+        string = "{}(\'{}\', parents={}, children={})".format(class_name, self.name, parent_names, child_names)
+        return string
+
+
 class Start(GNode):
     def __init__(self, child_s=[]):
         super(Start, self).__init__([], child_s, "Start")
@@ -48,6 +56,7 @@ class Key(GNode):
                 pass
             new_lock_s.append(lock)
         self.lock_s = new_lock_s
+        
 
 class Lock(GNode):
     def __init__(self, key_s=[], parent_s=[], child_s=[], name=""):
