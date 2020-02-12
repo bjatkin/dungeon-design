@@ -1,3 +1,5 @@
+import numpy as np
+
 class GNode(object):
     def __init__(self, parent_s, child_s, name):
         self.child_s = child_s
@@ -6,11 +8,15 @@ class GNode(object):
 
     @staticmethod
     def add(list_, items):
+        if not isinstance(items, list): # Gracefully handle the input whether its a list or not
+            items = [items]
         list_.extend(items) # Modify list_ in place so we don't have to return a value
 
     @staticmethod
-    def remove(list_, item_name):
-        list_[:] = filter(lambda x: x.name != item_name, list_) # Modify list_ in place so we don't have to return a value
+    def remove(list_, item_names):
+        if not isinstance(item_names, list):
+            item_names = [item_names]
+        list_[:] = filter(lambda x: x.name not in item_names, list_) # Modify list_ in place so we don't have to return a value
     
     def add_child_s(self, child_s):
         # Instead of having the code to add a child/parent/key here, we call a static method

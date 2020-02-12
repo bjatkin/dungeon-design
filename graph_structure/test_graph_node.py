@@ -51,35 +51,39 @@ class TestGraphNode(unittest.TestCase):
         c = GNode([], [], "c")
         d = GNode([], [], "d")
         e = GNode([], [], "e")
+        f = GNode([], [], "f")
 
         # Add single
-        add_method(node, [b])
+        add_method(node, b)
         self.assertEqual(get_method(node), [b])
+        # Add single, array
+        add_method(node, [c])
+        self.assertEqual(get_method(node), [b, c])
         # Add multiple
-        add_method(node, [c, d, e])
-        self.assertEqual(get_method(node), [b, c, d, e])
+        add_method(node, [d, e, f])
+        self.assertEqual(get_method(node), [b, c, d, e, f])
         # Add empty list
         add_method(node, [])
-        self.assertEqual(get_method(node), [b, c, d, e])
+        self.assertEqual(get_method(node), [b, c, d, e, f])
 
         # Remove name not in children
-        remove_method(node, "f")
-        self.assertEqual(get_method(node), [b, c, d, e])
+        remove_method(node, "g")
+        self.assertEqual(get_method(node), [b, c, d, e, f])
 
-        # Remove middle child
-        remove_method(node, "c")
-        self.assertEqual(get_method(node), [b, d, e])
+        # Remove multiple, remove middle
+        remove_method(node, ["c", "d"])
+        self.assertEqual(get_method(node), [b, e, f])
 
         # Remove end child
+        remove_method(node, "f")
+        self.assertEqual(get_method(node), [b, e])
+
+        # Remove first child, remove single in array
+        remove_method(node, ["b"])
+        self.assertEqual(get_method(node), [e])
+
+        # Remove final child
         remove_method(node, "e")
-        self.assertEqual(get_method(node), [b, d])
-
-        # Remove first child
-        remove_method(node, "b")
-        self.assertEqual(get_method(node), [d])
-
-        # Remove last child
-        remove_method(node, "d")
         self.assertEqual(get_method(node), [])
 
 

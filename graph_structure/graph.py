@@ -1,4 +1,4 @@
-from graph_node import Start, Key, Lock, End
+from graph_structure.graph_node import Start, Key, Lock, End
 
 class Graph():
     def __init__(self, lock_count):
@@ -24,25 +24,25 @@ class Graph():
 
 
 
-graph = Graph(lock_count=3)
-node = graph.start
+# graph = Graph(lock_count=3)
+# node = graph.start
 
-count = 0
-while not node.name == "End":
-    count += 1
-    print(node.name)
-    for c in node.child_s:
-        print("child: ", c.name)
-    for p in node.parent_s:
-        print("parent: ", p.name)
+# count = 0
+# while not node.name == "End":
+#     count += 1
+#     print(node.name)
+#     for c in node.child_s:
+#         print("child: ", c.name)
+#     for p in node.parent_s:
+#         print("parent: ", p.name)
 
-    if len(node.child_s) == 0:
-        break  
+#     if len(node.child_s) == 0:
+#         break  
 
-    if count > 5:
-        break
+#     if count > 5:
+#         break
 
-    node = node.child_s[0]
-    print("-------------------------")
+#     node = node.child_s[0]
+#     print("-------------------------")
 
-print("End: ", node.name)
+# print("End: ", node.name)
