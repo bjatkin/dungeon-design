@@ -23,6 +23,9 @@ class Unraveler:
             offsets = velocities * time_step
             positions += offsets
 
+            centroid = np.average(positions, axis=0)
+            positions -= centroid
+
             if not frame_debug_method is None:
                 debug_info = frame_debug_method(positions, adjacency_matrix, debug_info, last_frame=False)
 
