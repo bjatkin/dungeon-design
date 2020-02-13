@@ -17,7 +17,7 @@ class SpatialGraphVisualizer:
 
         node_positions = (node_positions - window_min) * resolution
 
-        image = Image.new('RGB', (int(max_dim * resolution), int(max_dim * resolution)), (0, 255, 255))
+        image = Image.new('RGB', (int(max_dim * resolution), int(max_dim * resolution)), (255, 255, 255))
         draw = ImageDraw.Draw(image)
 
         for pos in node_positions:
