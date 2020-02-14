@@ -14,7 +14,7 @@ class Unraveler:
         state_count = 10
         offsets_history = [float('inf')] * state_count
         stopping_epsilon = 0.004
-        max_step_count = 200
+        max_step_count = 400
         steps = 0
 
         while sum(offsets_history) / len(offsets_history) > stopping_epsilon and steps < max_step_count:
@@ -47,7 +47,8 @@ class Unraveler:
                 if i != j:
                     distance = Unraveler.distance(positions[i], positions[j])
                     normal = (positions[j] - positions[i]) / distance
-                    forces[i] += -normal * 1 / (distance ** 2)
+                    force = -normal * 1 / (distance ** 2)
+                    forces[i] += force
         
         spring_length = 1.0
         # Edge Spring Forces
@@ -56,7 +57,8 @@ class Unraveler:
                 if i != j and adjacency_matrix[(i, j)] == 1:
                     distance = Unraveler.distance(positions[i], positions[j])
                     normal = (positions[j] - positions[i]) / distance
-                    forces[i] += normal * (distance - spring_length)
+                    force = normal * (distance - spring_length)
+                    forces[i] += force
         
         # Friction Forces
         for i in range(count):

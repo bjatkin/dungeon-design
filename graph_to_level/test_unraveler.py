@@ -154,6 +154,12 @@ class TestUnraveler(unittest.TestCase):
                 plt.pause(1.0)
             return im, now
 
+        graph, all_nodes = self.get_graph_a()
+        Unraveler.unravel(graph, debug_method)
+
+        graph, all_nodes = self.get_graph_b()
+        Unraveler.unravel(graph, debug_method)
+
         graph, all_nodes = self.get_house_graph()
         Unraveler.unravel(graph, debug_method)
 
@@ -163,3 +169,41 @@ class TestUnraveler(unittest.TestCase):
         graph, all_nodes = self.get_man_graph()
         Unraveler.unravel(graph, debug_method)
 
+
+    def get_graph_a(self):
+        n1 = GNode([], [], "a")
+        n2 = GNode([], [], "b")
+        n3 = GNode([], [], "c")
+        n4 = GNode([], [], "d")
+        n5 = GNode([], [], "e")
+
+        n1.add_child_s([n3, n4, n5])
+        n2.add_child_s([n3, n4, n5])
+        n3.add_child_s([n1, n2, n4, n5])
+        n4.add_child_s([n1, n2, n3, n5])
+        n5.add_child_s([n1, n2, n3, n4])
+
+        return n1, {n1, n2, n3, n4, n5}
+
+    def get_graph_b(self):
+        n1 = GNode([], [], "a")
+        n2 = GNode([], [], "b")
+        n3 = GNode([], [], "c")
+        n4 = GNode([], [], "d")
+        n5 = GNode([], [], "e")
+        n6 = GNode([], [], "f")
+        n7 = GNode([], [], "g")
+        n8 = GNode([], [], "h")
+        n9 = GNode([], [], "i")
+        n10 = GNode([], [], "j")
+
+        n1.add_child_s([n2, n3])
+        n2.add_child_s(n4)
+        n3.add_child_s([n4, n5])
+        n5.add_child_s(n6)
+        n6.add_child_s(n7)
+        n7.add_child_s([n8, n9])
+        n8.add_child_s(n10)
+        n9.add_child_s(n10)
+
+        return n1, {n1, n2, n3, n4, n5, n6, n7, n8, n9, n10}
