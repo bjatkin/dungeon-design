@@ -43,29 +43,26 @@ class Unraveler:
         forces = np.zeros((count, 2))
         # Node Repulsive Forces
         for i in range(count):
-            for j in range(count):
-                if i != j:
-                    distance = Unraveler.distance(positions[i], positions[j])
-                    normal = (positions[j] - positions[i]) / distance
-                    force = -normal * 1 / (distance ** 2)
-                    forces[i] += force
+            distances = Unraveler.distance(positions[i], positions, axis=1).reshape(-1,1)
+            normals = (positions - positions[i]) / distances
+            repulsive_forces = np.nan_to_num(-normals / (distances ** 2))
+            force = np.sum(repulsive_forces, axis=0)
+            forces[i] += force
         
         spring_length = 1.0
         # Edge Spring Forces
         for i in range(count):
-            for j in range(count):
-                if i != j and adjacency_matrix[(i, j)] == 1:
-                    distance = Unraveler.distance(positions[i], positions[j])
-                    normal = (positions[j] - positions[i]) / distance
-                    force = normal * (distance - spring_length)
-                    forces[i] += force
+            distances = Unraveler.distance(positions[i], positions, axis=1).reshape(-1, 1)
+            normals = (positions - positions[i]) / distances
+            spring_forces = np.nan_to_num(normals * (distances - spring_length))
+            spring_forces = spring_forces * adjacency_matrix[i].reshape(-1,1)
+            force = np.sum(spring_forces, axis=0)
+            forces[i] += force
         
         # Friction Forces
-        # for i in range(count):
-        #     forces -= velocities * 0.1
         forces -= velocities * 0.4
 
-        # forces += Unraveler.overlap_repulsive_force(positions, adjacency_matrix)
+        forces += Unraveler.overlap_repulsive_force(positions, adjacency_matrix)
         
         return forces
 
@@ -129,8 +126,6 @@ class Unraveler:
         return forces
         
 
-
-
     @staticmethod
-    def distance(position_a, position_b):
-        return np.linalg.norm(position_a - position_b, axis=0)
+    def distance(position_a, position_b, axis=None):
+        return np.linalg.norm(position_a - position_b, axis=axis)
