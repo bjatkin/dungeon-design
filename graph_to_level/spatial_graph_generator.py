@@ -10,6 +10,7 @@ class SpatialGraphGenerator:
         Unraveler.unravel_spatial_graph(node_positions, adjacency_matrix)
         SpatialGraphGenerator.center_graph_in_level(node_positions, level_size)
         SpatialGraphGenerator.align_nodes_to_grid(node_positions)
+        return nodes, node_positions, adjacency_matrix
 
     @staticmethod
     def center_graph_in_level(node_positions, level_size):

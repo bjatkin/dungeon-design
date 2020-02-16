@@ -34,7 +34,8 @@ class Unraveler:
             steps += 1
             # print("steps {}".format(steps))
 
-        frame_debug_method(node_positions, adjacency_matrix, debug_info, last_frame=True)
+        if not frame_debug_method is None:
+            frame_debug_method(node_positions, adjacency_matrix, debug_info, last_frame=True)
 
 
     @staticmethod
