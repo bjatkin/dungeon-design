@@ -17,6 +17,7 @@ class SpatialGraphGenerator:
         min_position = np.min(node_positions, axis=0)
         max_position = np.max(node_positions, axis=0)
         graph_size = max_position - min_position
+        level_size = np.array(level_size)
         
         # Center graph at 0,0
         center = np.average([max_position, min_position], axis=0)
