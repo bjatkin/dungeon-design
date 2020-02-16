@@ -4,5 +4,6 @@ from validation.test_path_finder import TestPathFinder
 from graph_structure.test_graph_node import TestGraphNode
 from graph_to_level.test_unraveler import TestUnraveler
 from graph_to_level.test_spatial_graph_generator import TestSpatialGraphGenerator
+from generation.test_drawing import TestDrawing
 
 unittest.main()
