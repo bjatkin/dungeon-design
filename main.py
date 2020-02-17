@@ -1,6 +1,7 @@
 from dungeon_level.level_set import LevelSet
 from dungeon_level.dungeon_tiles import Tiles
 from generation.random_generator import RandomGenerator
+from generation.mission_generator import MissionGenerator
 from tile_world.tile_world_level import TileWorldLevel
 from tile_world.tile_world_writer.level_set_writer import LevelSetWriter
 from validation.solver import Solver
@@ -16,13 +17,15 @@ level.map_title = "Ryan's Level"
 level.map_password = "    "
 level.time_limit = 100
 
-size = (20, 20)
+size = (30,30)
 
-RandomGenerator.generate(level, size)
-while not Solver.is_solvable(level):
-    RandomGenerator.generate(level, size)
+# RandomGenerator.generate(level, size)
+# while not Solver.is_solvable(level):
+#     RandomGenerator.generate(level, size)
+MissionGenerator.generate(level, size)
     
 
+    # You are in the middle of adding filled drawing shapes
 
 
 

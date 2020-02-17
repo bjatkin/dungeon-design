@@ -34,7 +34,7 @@ class SpatialGraphGenerator:
 
     @staticmethod
     def align_nodes_to_grid(node_positions):
-        node_positions = np.round(node_positions)
+        node_positions = np.round(node_positions).astype(int)
         return node_positions
         
 

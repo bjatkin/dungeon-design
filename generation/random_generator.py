@@ -28,10 +28,12 @@ class RandomGenerator:
         level.required_collectable_count = np.count_nonzero(level.upper_layer == Tiles.collectable)
 
     @staticmethod
-    def place_feature(level, size, feature_tiles, feature_offsets):
-        feature_position = RandomGenerator.get_random_position_in_level(size)
-        while not RandomGenerator.is_free_space(level, feature_position, feature_offsets):
+    def place_feature(level, size, feature_tiles, feature_offsets, feature_position=None):
+        if feature_position is None:
             feature_position = RandomGenerator.get_random_position_in_level(size)
+            while not RandomGenerator.is_free_space(level, feature_position, feature_offsets):
+                feature_position = RandomGenerator.get_random_position_in_level(size)
+
         for tile, neighbor in zip(feature_tiles, feature_offsets):
             level.upper_layer[tuple(neighbor + feature_position)] = tile
 
