@@ -39,10 +39,17 @@ class GNode(object):
         string = "{}(\'{}\', parents={}, children={})".format(class_name, self.name, parent_names, child_names)
         return string
 
+    def __eq__(self, other): 
+        return str(self) == str(other)
+
+    def __hash__(self):
+        return hash(str(self))
+
 
 class Start(GNode):
     def __init__(self, child_s=[]):
         super(Start, self).__init__([], child_s, "Start")
+
 
 class Key(GNode):
     def __init__(self, lock_s=[], parent_s=[], child_s=[], name=""):
