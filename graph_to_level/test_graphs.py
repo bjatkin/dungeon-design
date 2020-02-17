@@ -1,14 +1,14 @@
-from graph_structure.graph_node import GNode
+from graph_structure.graph_node import GNode, Start, End
 
 class TestGraphs:
     @staticmethod
     def get_man_graph():
-        a = GNode([], [], "a")
+        a = Start()
         b = GNode([], [], "b")
         c = GNode([], [], "c")
         d = GNode([], [], "d")
         e = GNode([], [], "e")
-        f = GNode([], [], "f")
+        f = End()
         g = GNode([], [], "g")
         h = GNode([], [], "h")
         i = GNode([], [], "i")

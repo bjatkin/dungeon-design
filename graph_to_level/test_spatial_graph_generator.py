@@ -38,16 +38,16 @@ class TestSpatialGraphGenerator(unittest.TestCase):
             [7,0],
             [8,0]], dtype=float)
         expected_adjacencies = np.array([
-            #a  b  c  d  e  f  g  h  i
-            [0, 1, 1, 1, 0, 0, 0, 0, 0], #a 
-            [1, 0, 0, 0, 1, 0, 0, 0, 0], #b 
-            [1, 0, 0, 0, 0, 1, 1, 1, 1], #c 
-            [1, 0, 0, 0, 0, 0, 0, 0, 0], #d 
-            [0, 1, 0, 0, 0, 0, 0, 0, 0], #e 
-            [0, 0, 1, 0, 0, 0, 0, 0, 0], #f 
-            [0, 0, 1, 0, 0, 0, 0, 0, 0], #g 
-            [0, 0, 1, 0, 0, 0, 0, 0, 1], #h
-            [0, 0, 1, 0, 0, 0, 0, 1, 0], #i
+            #E  S  b  c  d  e  g  h  i
+            [0, 0, 0, 1, 0, 0, 0, 0, 0], #E 
+            [0, 0, 1, 1, 1, 0, 0, 0, 0], #S 
+            [0, 1, 0, 0, 0, 1, 0, 0, 0], #b 
+            [1, 1, 0, 0, 0, 0, 1, 1, 1], #c 
+            [0, 1, 0, 0, 0, 0, 0, 0, 0], #d 
+            [0, 0, 1, 0, 0, 0, 0, 0, 0], #e 
+            [0, 0, 0, 1, 0, 0, 0, 0, 0], #g 
+            [0, 0, 0, 1, 0, 0, 0, 0, 1], #h
+            [0, 0, 0, 1, 0, 0, 0, 1, 0]  #i
         ])
         self.assertEqual(nodes, sorted(all_nodes, key=lambda x: x.name))
         self.assertTrue((positions == expected_positions).all())
