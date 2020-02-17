@@ -13,9 +13,7 @@ class MissionGenerator:
         start_node, mission_graph_nodes = MissionGenerator.generate_mission_graph()
         spatial_nodes, positions, adjacency_matrix = SpatialGraphGenerator.generate_spatial_graph(MissionGenerator.generate_spatial_graph()[0], size)
 
-        # img = SpatialGraphVisualizer.visualize_graph(positions, adjacency_matrix)
-        # plt.imshow(img)
-        # plt.show()
+        # SpatialGraphVisualizer.visualize_graph(positions, adjacency_matrix)
 
         MissionGenerator.dig_dungeons(level, size, positions, adjacency_matrix)
         mission_space_map = MissionGenerator.map_mission_to_space(mission_graph_nodes, positions)
@@ -49,8 +47,9 @@ class MissionGenerator:
     def map_mission_to_space(mission_graph_nodes, positions):
         mission_space_map = dict()
         position_count, _ = positions.shape
-        for node in mission_graph_nodes:
-            position = positions[np.random.randint(position_count)]
+        position_indices = np.random.choice(range(position_count), size=position_count, replace=False)
+        for i, node in enumerate(mission_graph_nodes):
+            position = positions[position_indices[i]]
             mission_space_map[node] = position
 
         return mission_space_map
