@@ -1,4 +1,5 @@
 from graph_to_level.unraveler import Unraveler
+# from graph_to_level.test_unraveler_debug_method import debug_method
 import numpy as np
 
 class SpatialGraphGenerator:
@@ -8,6 +9,7 @@ class SpatialGraphGenerator:
         nodes, node_positions, adjacency_matrix = SpatialGraphGenerator.init_spatial_graph(mission_graph_start_node)
 
         Unraveler.unravel_spatial_graph(node_positions, adjacency_matrix)
+        # Unraveler.unravel_spatial_graph(node_positions, adjacency_matrix, frame_debug_method=debug_method)
         node_positions = SpatialGraphGenerator.center_graph_in_level(node_positions, level_size)
         node_positions = SpatialGraphGenerator.align_nodes_to_grid(node_positions)
         return nodes, node_positions, adjacency_matrix

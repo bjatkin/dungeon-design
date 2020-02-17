@@ -1,35 +1,15 @@
 import unittest
 import numpy as np
 from graph_to_level.unraveler import Unraveler
+from graph_to_level.test_unraveler_debug_method import debug_method
 from graph_structure.graph_node import GNode
-from graph_to_level.spatial_graph_visualizer import SpatialGraphVisualizer
 from graph_to_level.test_graphs import TestGraphs
 from graph_to_level.spatial_graph_generator import SpatialGraphGenerator
-import matplotlib.pyplot as plt
-from PIL import Image
-import time
+
 
 class TestUnraveler(unittest.TestCase):
     def test_unravel(self):
         return
-        def debug_method(node_positions, adjacency_matrix, debug_info, last_frame):
-            if debug_info == None:
-                im = plt.imshow(Image.new('RGB', (1,1)))
-                now = time.time()
-                plt.draw()
-            else:
-                im = debug_info[0]
-                now = debug_info[1]
-
-            img = SpatialGraphVisualizer.visualize_graph(node_positions, adjacency_matrix, resolution=25, window_min=np.array([-8, -8]), window_max=np.array([8,8]))
-            im.set_data(img)
-            plt.draw()
-            plt.pause(0.0001)
-            # print(time.time() - now)
-            now = time.time()
-            if last_frame:
-                plt.pause(1.0)
-            return im, now
 
         graph, all_nodes = TestGraphs.get_graph_a()
         _, nodes, adjacencies = SpatialGraphGenerator.init_spatial_graph(graph)
