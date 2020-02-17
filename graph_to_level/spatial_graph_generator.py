@@ -8,8 +8,8 @@ class SpatialGraphGenerator:
         nodes, node_positions, adjacency_matrix = SpatialGraphGenerator.init_spatial_graph(mission_graph_start_node)
 
         Unraveler.unravel_spatial_graph(node_positions, adjacency_matrix)
-        SpatialGraphGenerator.center_graph_in_level(node_positions, level_size)
-        SpatialGraphGenerator.align_nodes_to_grid(node_positions)
+        node_positions = SpatialGraphGenerator.center_graph_in_level(node_positions, level_size)
+        node_positions = SpatialGraphGenerator.align_nodes_to_grid(node_positions)
         return nodes, node_positions, adjacency_matrix
 
     @staticmethod
@@ -29,11 +29,13 @@ class SpatialGraphGenerator:
 
         # Center graph at center of level
         node_positions += level_size * 0.5
+        return node_positions
 
 
     @staticmethod
     def align_nodes_to_grid(node_positions):
         node_positions = np.round(node_positions)
+        return node_positions
         
 
     @staticmethod
