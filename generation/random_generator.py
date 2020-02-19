@@ -7,10 +7,16 @@ class RandomGenerator:
     @staticmethod
     def generate(level, size):
         level.upper_layer = np.full(size, Tiles.empty)
-        level.upper_layer = np.pad(level.upper_layer, 1, mode='constant', constant_values=Tiles.wall)
 
-        for y in range(size[0]):
-            for x in range(size[1]):
+        #not sure why but this had to be changed as padding with the tile directly wasn't working :(
+        level.upper_layer = np.pad(level.upper_layer, pad_width=1, mode='constant', constant_values=10)
+        for row in range(len(level.upper_layer)):
+            for col in range(len(level.upper_layer[0])):
+                if level.upper_layer[row][col] == 10:
+                    level.upper_layer[row][col] = Tiles.wall
+
+        for y in range(size[0]-1):
+            for x in range(size[1]-1):
                 level.upper_layer[y + 1, x + 1] = RandomGenerator.random_tile()
 
         player_position = RandomGenerator.get_random_position_in_level(size)
