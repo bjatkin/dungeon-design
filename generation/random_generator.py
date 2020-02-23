@@ -1,5 +1,4 @@
 from dungeon_level.dungeon_tiles import Tiles
-import random
 import numpy as np
 
 
@@ -49,19 +48,22 @@ class RandomGenerator:
 
     @staticmethod
     def get_random_position_in_level(size):
-        return random.randint(1, size[0]), random.randint(1, size[1])
+        return np.random.randint(1, size[0]), np.random.randint(1, size[1])
 
     @staticmethod
     def random_tile():
-        return random.choices(list(Tiles), [
+        tiles = list(Tiles)
+        return np.random.choice(tiles, p= [
             0.60,  # empty
             0.20,  # wall
             0.0,   # player
             0.0,   # finish
             0.05,  # movable_block
-            0.025, # collectable
+            0.03,  # collectable
             0.0,   # required_collectable_barrier
             0.1,   # water
             0.0,   # flippers
-            0.02   # monster
-            ])[0]
+            0.02,  # monster
+            0.0,   # key_red
+            0.0    # lock_red
+            ])
