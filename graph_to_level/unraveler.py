@@ -39,11 +39,13 @@ class Unraveler:
 
     @staticmethod
     def add_node_repulsive_forces(positions, forces):
+        count, _ = positions.shape
+        max_repulsive_force = 10
         for i in range(count):
             distances = Unraveler.distance(positions[i], positions, axis=1).reshape(-1,1)
             normals = (positions - positions[i]) / distances
             repulsive_forces = np.nan_to_num(-normals / (distances ** 2))
-            force = np.sum(repulsive_forces, axis=0)
+            force = np.clip(np.sum(repulsive_forces, axis=0), -max_repulsive_force, max_repulsive_force)
             forces[i] += force
 
     @staticmethod
@@ -63,6 +65,12 @@ class Unraveler:
     def add_friction_forces(velocities, forces):
         forces -= velocities * 0.4
 
+    
+    @staticmethod
+    def add_bounding_forces(positions, forces):
+        window_size = 1
+        forces += -np.maximum(np.abs(positions) - window_size, 0.) * np.sign(positions)
+
 
     @staticmethod
     def accumulate_forces(positions, velocities, adjacency_matrix):
@@ -71,6 +79,7 @@ class Unraveler:
 
         Unraveler.add_node_repulsive_forces(positions, forces)
         Unraveler.add_spring_forces(positions, adjacency_matrix, forces)
+        # Unraveler.add_bounding_forces(positions, forces)
         Unraveler.add_friction_forces(velocities, forces)
         Unraveler.add_overlap_repulsive_force(positions, adjacency_matrix, forces)
         
