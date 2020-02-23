@@ -37,21 +37,19 @@ class Unraveler:
         if not frame_debug_method is None:
             frame_debug_method(node_positions, adjacency_matrix, debug_info, last_frame=True)
 
-
     @staticmethod
-    def accumulate_forces(positions, velocities, adjacency_matrix):
-        count, _ = positions.shape
-        forces = np.zeros((count, 2))
-        # Node Repulsive Forces
+    def add_node_repulsive_forces(positions, forces):
         for i in range(count):
             distances = Unraveler.distance(positions[i], positions, axis=1).reshape(-1,1)
             normals = (positions - positions[i]) / distances
             repulsive_forces = np.nan_to_num(-normals / (distances ** 2))
             force = np.sum(repulsive_forces, axis=0)
             forces[i] += force
-        
+
+    @staticmethod
+    def add_spring_forces(positions, adjacency_matrix, forces):
+        count, _ = positions.shape
         spring_length = 1.0
-        # Edge Spring Forces
         for i in range(count):
             distances = Unraveler.distance(positions[i], positions, axis=1).reshape(-1, 1)
             normals = (positions - positions[i]) / distances
@@ -59,13 +57,25 @@ class Unraveler:
             spring_forces = spring_forces * adjacency_matrix[i].reshape(-1,1)
             force = np.sum(spring_forces, axis=0)
             forces[i] += force
-        
-        # Friction Forces
+
+
+    @staticmethod
+    def add_friction_forces(velocities, forces):
         forces -= velocities * 0.4
 
-        forces += Unraveler.overlap_repulsive_force(positions, adjacency_matrix)
+
+    @staticmethod
+    def accumulate_forces(positions, velocities, adjacency_matrix):
+        count, _ = positions.shape
+        forces = np.zeros((count, 2))
+
+        Unraveler.add_node_repulsive_forces(positions, forces)
+        Unraveler.add_spring_forces(positions, adjacency_matrix, forces)
+        Unraveler.add_friction_forces(velocities, forces)
+        Unraveler.add_overlap_repulsive_force(positions, adjacency_matrix, forces)
         
         return forces
+
 
     # http://www.cs.swan.ac.uk/~cssimon/line_intersection.html
     @staticmethod
@@ -99,10 +109,8 @@ class Unraveler:
 
     
     @staticmethod
-    def overlap_repulsive_force(positions, adjacency_matrix):
+    def add_overlap_repulsive_force(positions, adjacency_matrix, forces):
         node_count, _ = positions.shape
-        forces = np.zeros((node_count, 2))
-
         edges = np.argwhere(adjacency_matrix)
         edge_count, _ = edges.shape
         for i in range(edge_count - 1):
@@ -122,9 +130,6 @@ class Unraveler:
                     force = -normal
                     forces[n1] += force
                     forces[n2] += force
-
-        
-        return forces
         
 
     @staticmethod
