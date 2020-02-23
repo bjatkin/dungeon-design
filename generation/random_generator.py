@@ -1,4 +1,5 @@
 from dungeon_level.dungeon_tiles import Tiles
+from generation.drawing import Drawing
 import numpy as np
 
 
@@ -6,11 +7,11 @@ class RandomGenerator:
     @staticmethod
     def generate(level, size):
         level.upper_layer = np.full(size, Tiles.empty)
-        level.upper_layer = np.pad(level.upper_layer, 1, mode='constant', constant_values=Tiles.wall)
+        Drawing.draw_rectangle(level.upper_layer, (0,0), np.array(size) - 1, Tiles.wall)
 
-        for y in range(size[0]):
-            for x in range(size[1]):
-                level.upper_layer[y + 1, x + 1] = RandomGenerator.random_tile()
+        for y in range(1, size[0] - 1):
+            for x in range(1, size[1] - 1):
+                level.upper_layer[y, x] = RandomGenerator.random_tile()
 
         player_position = RandomGenerator.get_random_position_in_level(size)
         level.upper_layer[player_position] = Tiles.player
@@ -48,7 +49,7 @@ class RandomGenerator:
 
     @staticmethod
     def get_random_position_in_level(size):
-        return np.random.randint(1, size[0]), np.random.randint(1, size[1])
+        return np.random.randint(1, size[0] - 1), np.random.randint(1, size[1] - 1)
 
     @staticmethod
     def random_tile():

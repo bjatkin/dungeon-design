@@ -11,7 +11,7 @@ class MissionGenerator:
     @staticmethod
     def generate(level, size):
         start_node, mission_graph_nodes = MissionGenerator.generate_mission_graph()
-        spatial_nodes, positions, adjacency_matrix = SpatialGraphGenerator.generate_spatial_graph(MissionGenerator.generate_spatial_graph()[0], size)
+        spatial_nodes, positions, adjacency_matrix = SpatialGraphGenerator.generate_spatial_graph(MissionGenerator.generate_spatial_graph()[0], np.array(size) - 1)
 
         # SpatialGraphVisualizer.visualize_graph(positions, adjacency_matrix)
 
@@ -58,7 +58,7 @@ class MissionGenerator:
     @staticmethod
     def dig_dungeons(level, size, positions, adjacency_matrix):
         level.upper_layer = np.full(size, Tiles.wall)
-        level.upper_layer = np.pad(level.upper_layer, 1, mode='constant', constant_values=Tiles.wall)
+        Drawing.draw_rectangle(level.upper_layer, (0,0), np.array(size) - 1, Tiles.wall)
         level.lower_layer = np.full(size, Tiles.empty)
         for position in positions:
             Drawing.fill_ellipse(level.upper_layer, position, 3, 3, Tiles.empty)
