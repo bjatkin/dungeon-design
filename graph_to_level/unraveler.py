@@ -17,7 +17,9 @@ class Unraveler:
         max_step_count = 400
         steps = 0
 
+
         while sum(offsets_history) / len(offsets_history) > stopping_epsilon and steps < max_step_count:
+
             forces = Unraveler.accumulate_forces(node_positions, velocities, adjacency_matrix)
             velocities += forces / node_mass * time_step
             offsets = velocities * time_step
@@ -49,13 +51,13 @@ class Unraveler:
             forces[i] += force
 
     @staticmethod
-    def add_spring_forces(positions, adjacency_matrix, forces):
+    def add_spring_forces(positions, adjacency_matrix, spring_k, forces):
         count, _ = positions.shape
         spring_length = 1.0
         for i in range(count):
             distances = Unraveler.distance(positions[i], positions, axis=1).reshape(-1, 1)
             normals = (positions - positions[i]) / distances
-            spring_forces = np.nan_to_num(normals * (distances - spring_length))
+            spring_forces = np.nan_to_num(normals * spring_k * (distances - spring_length))
             spring_forces = spring_forces * adjacency_matrix[i].reshape(-1,1)
             force = np.sum(spring_forces, axis=0)
             forces[i] += force
@@ -73,13 +75,13 @@ class Unraveler:
 
 
     @staticmethod
-    def accumulate_forces(positions, velocities, adjacency_matrix):
+    def accumulate_forces(positions, velocities, adjacency_matrix, spring_k=1.0):
         count, _ = positions.shape
         forces = np.zeros((count, 2))
 
         Unraveler.add_node_repulsive_forces(positions, forces)
-        Unraveler.add_spring_forces(positions, adjacency_matrix, forces)
-        # Unraveler.add_bounding_forces(positions, forces)
+        Unraveler.add_spring_forces(positions, adjacency_matrix, spring_k, forces)
+        Unraveler.add_bounding_forces(positions, forces)
         Unraveler.add_friction_forces(velocities, forces)
         Unraveler.add_overlap_repulsive_force(positions, adjacency_matrix, forces)
         

@@ -67,3 +67,28 @@ class TestUnraveler(unittest.TestCase):
         self.assertTrue(np.allclose(Unraveler.find_intersection(p1, p2, p3, p4, count_endpoints=True), np.array([5., 5.]), rtol=0.0))
 
         
+    
+    def test_add_bounding_forces(self):
+        positions = np.array([
+            [ 0.5,  0.7],
+            [ 1.6,  0.5],
+            [ 0.8,  2.3],
+            [-0.3,  0.6],
+            [-2.2, -0.3],
+            [-4.3, -3.1],
+            [-0.3, -6.3],
+            [ 4.5, -3.3]])
+
+        count, _ = positions.shape
+        forces = np.zeros((count, 2))
+        Unraveler.add_bounding_forces(positions, forces)
+        expected_forces = np.array([
+            [ 0.0,  0.0],
+            [-0.6,  0.0],
+            [ 0.0, -1.3],
+            [ 0.0,  0.0],
+            [ 1.2,  0.0],
+            [ 3.3,  2.1],
+            [ 0.0,  5.3],
+            [-3.5,  2.3]])
+        self.assertTrue(np.allclose(forces, expected_forces, rtol=0.0))
