@@ -4,14 +4,14 @@ class TestGraphs:
     @staticmethod
     def get_man_graph():
         a = Start()
-        b = GNode([], [], "b")
-        c = GNode([], [], "c")
-        d = GNode([], [], "d")
-        e = GNode([], [], "e")
+        b = GNode("b")
+        c = GNode("c")
+        d = GNode("d")
+        e = GNode("e")
         f = End()
-        g = GNode([], [], "g")
-        h = GNode([], [], "h")
-        i = GNode([], [], "i")
+        g = GNode("g")
+        h = GNode("h")
+        i = GNode("i")
 
         a.add_child_s(b)
         a.add_child_s(c)
@@ -27,11 +27,11 @@ class TestGraphs:
 
     @staticmethod
     def get_house_graph():
-        a = GNode([], [], "a")
-        b = GNode([], [], "b")
-        c = GNode([], [], "c")
-        d = GNode([], [], "d")
-        e = GNode([], [], "e")
+        a = GNode("a")
+        b = GNode("b")
+        c = GNode("c")
+        d = GNode("d")
+        e = GNode("e")
         a.add_child_s(b)
         b.add_child_s(c)
         c.add_child_s(d)
@@ -44,10 +44,10 @@ class TestGraphs:
 
     @staticmethod
     def get_triangle_graph():
-        a = GNode([], [], "a")
-        b = GNode([], [], "b")
-        c = GNode([], [], "c")
-        d = GNode([], [], "d")
+        a = GNode("a")
+        b = GNode("b")
+        c = GNode("c")
+        d = GNode("d")
         a.add_child_s(b)
         b.add_child_s(c)
         c.add_child_s(a)
@@ -59,11 +59,11 @@ class TestGraphs:
 
     @staticmethod
     def get_graph_a():
-        n1 = GNode([], [], "a")
-        n2 = GNode([], [], "b")
-        n3 = GNode([], [], "c")
-        n4 = GNode([], [], "d")
-        n5 = GNode([], [], "e")
+        n1 = GNode("a")
+        n2 = GNode("b")
+        n3 = GNode("c")
+        n4 = GNode("d")
+        n5 = GNode("e")
 
         n1.add_child_s([n3, n4, n5])
         n2.add_child_s([n3, n4, n5])
@@ -75,16 +75,16 @@ class TestGraphs:
 
     @staticmethod
     def get_graph_b():
-        n1 = GNode([], [], "a")
-        n2 = GNode([], [], "b")
-        n3 = GNode([], [], "c")
-        n4 = GNode([], [], "d")
-        n5 = GNode([], [], "e")
-        n6 = GNode([], [], "f")
-        n7 = GNode([], [], "g")
-        n8 = GNode([], [], "h")
-        n9 = GNode([], [], "i")
-        n10 = GNode([], [], "j")
+        n1 = GNode("a")
+        n2 = GNode("b")
+        n3 = GNode("c")
+        n4 = GNode("d")
+        n5 = GNode("e")
+        n6 = GNode("f")
+        n7 = GNode("g")
+        n8 = GNode("h")
+        n9 = GNode("i")
+        n10 = GNode("j")
 
         n1.add_child_s([n2, n3])
         n2.add_child_s(n4)

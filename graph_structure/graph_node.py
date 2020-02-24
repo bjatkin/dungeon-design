@@ -1,7 +1,12 @@
 import numpy as np
 
 class GNode(object):
-    def __init__(self, parent_s, child_s, name):
+    def __init__(self, name="", parent_s=None, child_s=None):
+        if child_s == None:
+            child_s = []
+        if parent_s == None:
+            parent_s = []
+
         self.child_s = child_s
         self.parent_s = parent_s
         self.name = name
@@ -47,13 +52,23 @@ class GNode(object):
 
 
 class Start(GNode):
-    def __init__(self, child_s=[]):
-        super(Start, self).__init__([], child_s, "Start")
+    def __init__(self, child_s=None):
+        if child_s == None:
+            child_s = []
+
+        super(Start, self).__init__("Start", [], child_s)
 
 
 class Key(GNode):
-    def __init__(self, lock_s=[], parent_s=[], child_s=[], name=""):
-        super(Key, self).__init__(parent_s, child_s, name)
+    def __init__(self, name="", parent_s=None, child_s=None, lock_s=None):
+        if child_s == None:
+            child_s = []
+        if parent_s == None:
+            parent_s = []
+        if lock_s == None:
+            lock_s = []
+
+        super(Key, self).__init__(name, parent_s, child_s)
         self.lock_s = lock_s
     
     def add_lock_s(self, lock_s):
@@ -64,8 +79,15 @@ class Key(GNode):
         
 
 class Lock(GNode):
-    def __init__(self, key_s=[], parent_s=[], child_s=[], name=""):
-        super(Lock, self).__init__(parent_s, child_s, name)
+    def __init__(self, name="", parent_s=None, child_s=None, key_s=None):
+        if child_s == None:
+            child_s = []
+        if parent_s == None:
+            parent_s = []
+        if key_s == None:
+            key_s = []
+
+        super(Lock, self).__init__(name, parent_s, child_s)
         self.key_s = key_s
     
     def add_key_s(self, key_s):
@@ -76,5 +98,8 @@ class Lock(GNode):
 
 
 class End(GNode):
-    def __init__(self, parent_s=[]):
-        super(End, self).__init__(parent_s, [], "End")
+    def __init__(self, parent_s=None):
+        if parent_s == None:
+            parent_s = []
+
+        super(End, self).__init__("End", parent_s, [])
