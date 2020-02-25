@@ -186,7 +186,7 @@ class TestGraphNode(unittest.TestCase):
         self.add_remove_item_test(node, add_method, remove_method, get_method, get_inverse_method, constructor_method)
 
 
-    def test_traverse(self):
+    def test_traverse_depth_first(self):
         node, all_nodes = TestGraphs.get_man_graph()
         visited_expected = ["Start", "b", "e", "c", "End", "g", "h", "i", "d"]
 
@@ -198,13 +198,13 @@ class TestGraphNode(unittest.TestCase):
 
         # Traverse with no will_traverse_method specified
         visited = []
-        GNode.traverse_nodes(node, visit_method)#, will_traverse_method)
+        GNode.traverse_nodes_depth_first(node, visit_method)
         visited_names = [x.name for x in visited]
         self.assertEqual(visited_names, visited_expected)
 
         # Traverse with will_traverse_method that allows all nodes
         visited = []
-        GNode.traverse_nodes(node, visit_method, will_traverse_method)
+        GNode.traverse_nodes_depth_first(node, visit_method, will_traverse_method)
         visited_names = [x.name for x in visited]
         self.assertEqual(visited_names, visited_expected)
     
@@ -212,10 +212,48 @@ class TestGraphNode(unittest.TestCase):
         def will_traverse_method2(node, child, visited_nodes):
             return child.name != "c"
         visited = []
-        GNode.traverse_nodes(node, visit_method, will_traverse_method2)
+        GNode.traverse_nodes_depth_first(node, visit_method, will_traverse_method2)
         visited_names = [x.name for x in visited]
         visited_expected = ["Start", "b", "e", "d"]
         self.assertEqual(visited_names, visited_expected)
+
+
+    #    S-------c---E
+    #   / \     /|\
+    #  b   d   / | \
+    #  |      h--i  g
+    #  e
+    def test_traverse_breadth_first(self):
+        node, all_nodes = TestGraphs.get_man_graph()
+        visited_expected = ["Start", "b", "c", "d", "e", "End", "g", "h", "i"]
+
+        def visit_method(node, visited_nodes):
+            visited.append(node)
+
+        def will_traverse_method(node, visited_nodes):
+            return True
+
+        # Traverse with no will_traverse_method specified
+        visited = []
+        GNode.traverse_nodes_breadth_first(node, visit_method)
+        visited_names = [x.name for x in visited]
+        self.assertEqual(visited_names, visited_expected)
+
+        # Traverse with will_traverse_method that allows all nodes
+        visited = []
+        GNode.traverse_nodes_breadth_first(node, visit_method, will_traverse_method)
+        visited_names = [x.name for x in visited]
+        self.assertEqual(visited_names, visited_expected)
+    
+        # Traverse with will_traverse_method that ignores node "c"
+        def will_traverse_method2(node, visited_nodes):
+            return node.name != "c"
+        visited = []
+        GNode.traverse_nodes_breadth_first(node, visit_method, will_traverse_method2)
+        visited_names = [x.name for x in visited]
+        visited_expected = ["Start", "b", "d", "e"]
+        self.assertEqual(visited_names, visited_expected)
+
         
 
     def test_find_all_nodes(self):

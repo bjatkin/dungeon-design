@@ -12,30 +12,50 @@ class GNode(object):
         self.name = name
 
     @staticmethod
-    def traverse_nodes(node, visit_method, will_traverse_method = lambda node, child, visited_nodes: True):
+    def traverse_nodes_depth_first(node, visit_method, will_traverse_method = lambda node, child, visited_nodes: True):
         visited_nodes = set()
-        GNode._traverse_nodes(node, visit_method, will_traverse_method, visited_nodes)
+        GNode._traverse_nodes_depth_first(node, visit_method, will_traverse_method, visited_nodes)
 
 
     @staticmethod
-    def _traverse_nodes(node, visit_method, will_traverse_method, visited_nodes):
+    def _traverse_nodes_depth_first(node, visit_method, will_traverse_method, visited_nodes):
         visited_nodes.add(node)
         visit_method(node, visited_nodes)
         for child in node.child_s:
             if child not in visited_nodes:
                 will_traverse = will_traverse_method(node, child, visited_nodes)
                 if will_traverse:
-                    GNode._traverse_nodes(child, visit_method, will_traverse_method, visited_nodes)
+                    GNode._traverse_nodes_depth_first(child, visit_method, will_traverse_method, visited_nodes)
 
     @staticmethod
-    def find_all_nodes(node):
+    def traverse_nodes_breadth_first(node, visit_method, will_traverse_method = lambda node, visited_nodes: True):
+        visited_nodes = set()
+        queue = []
+        queue.append(node)
+        while (len(queue) > 0):
+            node = queue.pop(0)
+            if node not in visited_nodes:
+                will_traverse = will_traverse_method(node, visited_nodes)
+                if will_traverse:
+                    visited_nodes.add(node)
+                    visit_method(node, visited_nodes)
+                    for child in node.child_s:
+                        queue.append(child)
+
+
+    @staticmethod
+    def find_all_nodes(node, method="depth-first"):
         visited = []
 
         def visit_method(node, visited_nodes):
             nonlocal visited
             visited.append(node)
 
-        GNode.traverse_nodes(node, visit_method)
+        if method == "depth-first":
+            GNode.traverse_nodes_depth_first(node, visit_method)
+        else:
+            GNode.traverse_nodes_breadth_first(node, visit_method)
+
         return visited
 
     @staticmethod
