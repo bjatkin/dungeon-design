@@ -38,33 +38,41 @@ class GNode(object):
         GNode.traverse_nodes(node, visit_method)
         return visited
 
-
-
     @staticmethod
-    def _add(list_, items):
-        if not isinstance(items, list): # Gracefully handle the input whether its a list or not
+    def _listify(items):
+        if not isinstance(items, list):
             items = [items]
-        list_.extend(items) # Modify list_ in place so we don't have to return a value
+        return items
 
     @staticmethod
-    def _remove(list_, item_names):
-        if not isinstance(item_names, list):
-            item_names = [item_names]
-        list_[:] = filter(lambda x: x.name not in item_names, list_) # Modify list_ in place so we don't have to return a value
-    
+    def _add(_self, items, get_self_list_method, get_items_list_method):
+        items = GNode._listify(items)
+        get_self_list_method(_self).extend(items)
+        for item in items:
+            get_items_list_method(item).append(_self)
+
+
+    @staticmethod
+    def _remove(_self, item_names, get_self_list_method, get_items_list_method):
+        item_names = GNode._listify(item_names)
+        items = [item for item in get_self_list_method(_self) if item.name in item_names]
+        get_self_list_method(_self)[:] = [item for item in get_self_list_method(_self) if item.name not in item_names]
+        for item in items:
+            get_items_list_method(item)[:] = [item for item in get_items_list_method(item) if item.name != _self.name]
+
     def add_child_s(self, child_s):
         # Instead of having the code to add a child/parent/key here, we call a static method
         # passing it the list that we want to modify.
-        GNode._add(self.child_s, child_s) 
+        GNode._add(self, child_s, lambda x: x.child_s, lambda x: x.parent_s)
     
     def remove_child_s(self, child_name_s):
-        GNode._remove(self.child_s, child_name_s)
+        GNode._remove(self, child_name_s, lambda x: x.child_s, lambda x: x.parent_s)
     
     def add_parent_s(self, parent_s):
-        GNode._add(self.parent_s, parent_s)
+        GNode._add(self, parent_s, lambda x: x.parent_s, lambda x: x.child_s)
     
     def remove_parent_s(self, parent_name_s):
-        GNode._remove(self.parent_s, parent_name_s)
+        GNode._remove(self, parent_name_s, lambda x: x.parent_s, lambda x: x.child_s)
 
 
     def __repr__(self):
@@ -102,10 +110,10 @@ class Key(GNode):
         self.lock_s = lock_s
     
     def add_lock_s(self, lock_s):
-        GNode._add(self.lock_s, lock_s)
+        GNode._add(self, lock_s, lambda x: x.lock_s, lambda x: x.key_s)
     
     def remove_lock_s(self, lock_name_s):
-        GNode._remove(self.lock_s, lock_name_s)
+        GNode._remove(self, lock_name_s, lambda x: x.lock_s, lambda x: x.key_s)
         
 
 class Lock(GNode):
@@ -121,10 +129,10 @@ class Lock(GNode):
         self.key_s = key_s
     
     def add_key_s(self, key_s):
-        GNode._add(self.key_s, key_s)
+        GNode._add(self, key_s, lambda x: x.key_s, lambda x: x.lock_s)
     
-    def remove_key_s(self, key_s):
-        GNode._remove(self.key_s, key_s)
+    def remove_key_s(self, key_name_s):
+        GNode._remove(self, key_name_s, lambda x: x.key_s, lambda x: x.lock_s)
 
 
 class End(GNode):

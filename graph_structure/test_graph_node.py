@@ -16,21 +16,27 @@ class TestGraphNode(unittest.TestCase):
         self.assertEqual(str(start), "Start(\'Start\', parents=[], children=[\'a\', \'key\'])")
         c.add_parent_s([e, d])
         self.assertEqual(str(c), "End(\'End\', parents=[\'e\', \'key\'], children=[])")
-        self.assertEqual(str(d), "Key(\'key\', parents=[], children=[])")
-        self.assertEqual(str(e), "Lock(\'e\', parents=[], children=[])")
-        self.assertEqual(str(a), "GNode(\'a\', parents=[], children=[])")
+        self.assertEqual(str(d), "Key(\'key\', parents=[\'Start\'], children=[\'End\'])")
+        self.assertEqual(str(e), "Lock(\'e\', parents=[], children=[\'End\'])")
+        self.assertEqual(str(a), "GNode(\'a\', parents=[\'Start\'], children=[])")
 
     def test_add(self):
-        l = []
+        n0 = GNode("0")
         n1 = GNode("1")
         n2 = GNode("2")
         n3 = GNode("3")
         n4 = GNode("4")
         n5 = GNode("5")
-        GNode._add(l, [n1])
-        self.assertEqual(l, [n1])
-        GNode._add(l, [n2, n3, n4, n5])
-        self.assertEqual(l, [n1, n2, n3, n4, n5])
+        GNode._add(n0, [n1], lambda x: x.child_s, lambda x: x.parent_s)
+        self.assertEqual(n0.child_s, [n1])
+        self.assertEqual(n1.parent_s, [n0])
+        GNode._add(n0, [n2, n3, n4, n5], lambda x: x.child_s, lambda x: x.parent_s)
+        self.assertEqual(n0.child_s, [n1, n2, n3, n4, n5])
+        self.assertEqual(n1.parent_s, [n0])
+        self.assertEqual(n2.parent_s, [n0])
+        self.assertEqual(n3.parent_s, [n0])
+        self.assertEqual(n4.parent_s, [n0])
+        self.assertEqual(n5.parent_s, [n0])
 
     def test_remove(self):
         n1 = GNode("1")
@@ -39,27 +45,54 @@ class TestGraphNode(unittest.TestCase):
         n4 = GNode("4")
         n5 = GNode("5")
 
-        l = [n1, n2, n3, n4, n5]
-        GNode._remove(l, n2.name)
-        self.assertEqual(l, [n1, n3, n4, n5])
+        n0 = GNode("0")
+        n0.child_s = [n1, n2, n3, n4, n5]
+        n1.parent_s.append(n0)
+        n2.parent_s.append(n0)
+        n2.parent_s.append(n0)
+        n3.parent_s.append(n0)
+        n4.parent_s.append(n0)
+        n5.parent_s.append(n0)
+        GNode._remove(n0, n2.name, lambda x: x.child_s, lambda x: x.parent_s)
+        self.assertEqual(n0.child_s, [n1, n3, n4, n5])
+        self.assertEqual(n1.parent_s, [n0])
+        self.assertEqual(n2.parent_s, [])
+        self.assertEqual(n3.parent_s, [n0])
+        self.assertEqual(n4.parent_s, [n0])
+        self.assertEqual(n5.parent_s, [n0])
         
 
-    def add_remove_item_test(self, node, add_method, remove_method, get_method):
-        b = GNode("b")
-        c = GNode("c")
-        d = GNode("d")
-        e = GNode("e")
-        f = GNode("f")
+    def add_remove_item_test(self, node, add_method, remove_method, get_method, get_inverse_method, constructor_method):
+        b = constructor_method("b")
+        c = constructor_method("c")
+        d = constructor_method("d")
+        e = constructor_method("e")
+        f = constructor_method("f")
 
         # Add single
         add_method(node, b)
         self.assertEqual(get_method(node), [b])
+        self.assertEqual(get_inverse_method(b), [node])
+        self.assertEqual(get_inverse_method(c), [])
+        self.assertEqual(get_inverse_method(d), [])
+        self.assertEqual(get_inverse_method(e), [])
+        self.assertEqual(get_inverse_method(f), [])
         # Add single, array
         add_method(node, [c])
         self.assertEqual(get_method(node), [b, c])
+        self.assertEqual(get_inverse_method(b), [node])
+        self.assertEqual(get_inverse_method(c), [node])
+        self.assertEqual(get_inverse_method(d), [])
+        self.assertEqual(get_inverse_method(e), [])
+        self.assertEqual(get_inverse_method(f), [])
         # Add multiple
         add_method(node, [d, e, f])
         self.assertEqual(get_method(node), [b, c, d, e, f])
+        self.assertEqual(get_inverse_method(b), [node])
+        self.assertEqual(get_inverse_method(c), [node])
+        self.assertEqual(get_inverse_method(d), [node])
+        self.assertEqual(get_inverse_method(e), [node])
+        self.assertEqual(get_inverse_method(f), [node])
         # Add empty list
         add_method(node, [])
         self.assertEqual(get_method(node), [b, c, d, e, f])
@@ -67,22 +100,47 @@ class TestGraphNode(unittest.TestCase):
         # Remove name not in children
         remove_method(node, "g")
         self.assertEqual(get_method(node), [b, c, d, e, f])
+        self.assertEqual(get_inverse_method(b), [node])
+        self.assertEqual(get_inverse_method(c), [node])
+        self.assertEqual(get_inverse_method(d), [node])
+        self.assertEqual(get_inverse_method(e), [node])
+        self.assertEqual(get_inverse_method(f), [node])
 
         # Remove multiple, remove middle
         remove_method(node, ["c", "d"])
         self.assertEqual(get_method(node), [b, e, f])
+        self.assertEqual(get_inverse_method(b), [node])
+        self.assertEqual(get_inverse_method(c), [])
+        self.assertEqual(get_inverse_method(d), [])
+        self.assertEqual(get_inverse_method(e), [node])
+        self.assertEqual(get_inverse_method(f), [node])
 
         # Remove end child
         remove_method(node, "f")
         self.assertEqual(get_method(node), [b, e])
+        self.assertEqual(get_inverse_method(b), [node])
+        self.assertEqual(get_inverse_method(c), [])
+        self.assertEqual(get_inverse_method(d), [])
+        self.assertEqual(get_inverse_method(e), [node])
+        self.assertEqual(get_inverse_method(f), [])
 
         # Remove first child, remove single in array
         remove_method(node, ["b"])
         self.assertEqual(get_method(node), [e])
+        self.assertEqual(get_inverse_method(b), [])
+        self.assertEqual(get_inverse_method(c), [])
+        self.assertEqual(get_inverse_method(d), [])
+        self.assertEqual(get_inverse_method(e), [node])
+        self.assertEqual(get_inverse_method(f), [])
 
         # Remove final child
         remove_method(node, "e")
         self.assertEqual(get_method(node), [])
+        self.assertEqual(get_inverse_method(b), [])
+        self.assertEqual(get_inverse_method(c), [])
+        self.assertEqual(get_inverse_method(d), [])
+        self.assertEqual(get_inverse_method(e), [])
+        self.assertEqual(get_inverse_method(f), [])
 
 
 
@@ -91,33 +149,41 @@ class TestGraphNode(unittest.TestCase):
         add_method = lambda n, c: n.add_child_s(c)
         remove_method = lambda n, c: n.remove_child_s(c)
         get_method = lambda n: n.child_s
+        get_inverse_method = lambda n: n.parent_s
+        constructor_method = lambda x: GNode(x)
         node = GNode("node")
 
-        self.add_remove_item_test(node, add_method, remove_method, get_method)
+        self.add_remove_item_test(node, add_method, remove_method, get_method, get_inverse_method, constructor_method)
 
     def test_add_remove_parent(self):
         add_method = lambda n, c: n.add_parent_s(c)
         remove_method = lambda n, c: n.remove_parent_s(c)
         get_method = lambda n: n.parent_s
+        get_inverse_method = lambda n: n.child_s
+        constructor_method = lambda x: GNode(x)
         node = GNode("node")
 
-        self.add_remove_item_test(node, add_method, remove_method, get_method)
+        self.add_remove_item_test(node, add_method, remove_method, get_method, get_inverse_method, constructor_method)
 
     def test_add_remove_key(self):
         add_method = lambda n, c: n.add_key_s(c)
         remove_method = lambda n, c: n.remove_key_s(c)
         get_method = lambda n: n.key_s
+        get_inverse_method = lambda n: n.lock_s
+        constructor_method = lambda x: Key(x)
         node = Lock("lock")
 
-        self.add_remove_item_test(node, add_method, remove_method, get_method)
+        self.add_remove_item_test(node, add_method, remove_method, get_method, get_inverse_method, constructor_method)
 
     def test_add_remove_lock(self):
         add_method = lambda n, c: n.add_lock_s(c)
         remove_method = lambda n, c: n.remove_lock_s(c)
         get_method = lambda n: n.lock_s
+        get_inverse_method = lambda n: n.key_s
+        constructor_method = lambda x: Lock(x)
         node = Key("key")
 
-        self.add_remove_item_test(node, add_method, remove_method, get_method)
+        self.add_remove_item_test(node, add_method, remove_method, get_method, get_inverse_method, constructor_method)
 
 
     def test_traverse(self):
