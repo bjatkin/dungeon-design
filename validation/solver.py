@@ -40,12 +40,15 @@ class Solver:
                 reached_final_node = True
         
 
-        def can_reach_node(child, _=None):
+        def can_reach_node(node, child, _=None):
+            if child not in positions_map:
+                return False
+
             tile_position = positions_map[child]
             is_reachable = PathFinder.is_reachable(layer, player_position, tile_position, player_status)
             return is_reachable
 
-        GNode.traverse_nodes_breadth_first(mission_start_node, visit_method, can_reach_node)
+        GNode.traverse_nodes_depth_first(mission_start_node, visit_method, can_reach_node)
 
         if give_failure_reason:
             if reached_node_too_soon:
