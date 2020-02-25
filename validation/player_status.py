@@ -8,7 +8,7 @@ class PlayerStatus:
         self.required_collectable_count = required_collectable_count
 
     
-    def can_traverse(self, layer, current_position, neighbor_position):
+    def can_traverse(self, layer, current_position, neighbor_position, is_final_step):
         h, w = layer.shape
         is_within_bounds = neighbor_position[0] >= 0 and neighbor_position[1] >= 0 and neighbor_position[0] < h and neighbor_position[1] < w
         if not is_within_bounds:
@@ -32,7 +32,7 @@ class PlayerStatus:
         if neighbor_tile == Tiles.movable_block: # TODO: We can't path find with blocks yet.
             return False
 
-        if neighbor_tile == Tiles.lock_red and self.red_key_count == 0:
+        if (neighbor_tile == Tiles.lock_red and self.red_key_count == 0) or (neighbor_tile == Tiles.lock_red and not is_final_step): # We can only step on a lock if we have a key for it and it is destination. If we don't impose the destination rule, then A* becomes much more complicated as we have to try the key with every potential door.
             return False
 
         return True
