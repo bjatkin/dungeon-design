@@ -11,3 +11,5 @@ class Tiles(Enum):
     water                           = 0x07
     flippers                        = 0x08
     monster                         = 0x09
+    key_red                         = 0x0A
+    lock_red                        = 0x0B

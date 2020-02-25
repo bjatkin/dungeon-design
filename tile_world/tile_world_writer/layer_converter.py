@@ -13,7 +13,9 @@ class LayerConverter:
         DungeonTiles.required_collectable_barrier   : TWTiles.socket,
         DungeonTiles.water                          : TWTiles.water,
         DungeonTiles.flippers                       : TWTiles.flippers,
-        DungeonTiles.monster                        : TWTiles.ghost_n
+        DungeonTiles.monster                        : TWTiles.ghost_n,
+        DungeonTiles.key_red                        : TWTiles.red_key,
+        DungeonTiles.lock_red                       : TWTiles.red_door,
     }
 
     @staticmethod

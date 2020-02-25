@@ -1,4 +1,4 @@
-from graph_node import Start, Key, Lock, End
+from graph_structure.graph_node import Start, Key, Lock, End
 from random import randint
 
 class Graph():
@@ -74,10 +74,6 @@ class Graph():
             base += self.recurse_string(c)
         
         return base
-
-
-                
-
 
 
 graph = Graph()
