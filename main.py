@@ -1,20 +1,17 @@
 from dungeon_level.level_set import LevelSet
 from dungeon_level.dungeon_tiles import Tiles
 from generation.random_generator import RandomGenerator
-from puzzle_script.puzzle_script_level import PuzzleScriptLevel
-# from tile_world.tile_world_level import TileWorldLevel
-from puzzle_script.puzzle_world_writer.level_set_writer import LevelSetWriter
-# from tile_world.tile_world_writer.level_set_writer import LevelSetWriter
+# from puzzle_script.puzzle_script_level import PuzzleScriptLevel
+from tile_world.tile_world_level import TileWorldLevel
+# from puzzle_script.puzzle_world_writer.level_set_writer import LevelSetWriter
+from tile_world.tile_world_writer.level_set_writer import LevelSetWriter
 from validation.solver import Solver
 
 import numpy as np
 import subprocess
 
-
-
-
-# level = TileWorldLevel()
-level = PuzzleScriptLevel()
+level = TileWorldLevel()
+# level = PuzzleScriptLevel()
 level.map_title = "Brandon's Level"
 level.map_password = "    "
 level.time_limit = 100

@@ -1,48 +1,84 @@
 from graph_node import Start, Key, Lock, End
+from random import randint
 
 class Graph():
-    def __init__(self, lock_count):
+    def __init__(self, difficulty=1):
         # Generate starting and ending nodes
         start = Start()
         end = End()
 
-        # Generate key and door sets
-        node = start
-        for i in range(lock_count+1):
-            # Not sure why but child_s must be set to [] but if it's not the graph is broken
-            k = Key(parent_s=[node], child_s=[], name="Key"+str(i))
-            l = Lock(key_s=[k], parent_s=[node], child_s=[], name="Lock"+str(i))
+        n = start
+        for i in range(2):
+            n = self.grow_graph(n)
+        
+        a = self.grow_graph(n)
+        b = self.grow_graph(n)
 
-            k.add_lock_s([l])
-            node.add_child_s([l, k])
-            node = l
+        n = b
+        for i in range(2):
+            n = self.grow_graph(n, multi=True)
 
-        end.add_parent_s([node])
-        node.add_child_s([end])
-
+        n.add_child_s([end])
+        end.add_parent_s([n])
         self.start = start
+    
+    def grow_graph(self, start, multi=False):
+        # Add a door
+        n = start
+
+        lid = self.get_lock_id()
+        name = "Lock"+str(lid)
+        l = Lock(parent_s=[n], child_s=[], name=name)
+        n.add_child_s([l])
+        for i in range(randint(0, 2)):
+            if len(n.parent_s) > 0:
+                n = n.parent_s[0]
+    
+        tmp_n = n
+        keys = 1
+        if multi:
+            keys = randint(2, 4)
+        
+        for k in range(keys):
+            n = tmp_n
+            for i in range(randint(0, 3)):
+                c_len = len(n.child_s)
+                if c_len > 1:
+                    new_c = n.child_s[randint(0, c_len-1)]
+                    if new_c.name != name and not "Key" in new_c.name:
+                        n = new_c
+
+            kid = self.get_key_id()
+            k = Key(parent_s=[n], child_s=[], name="Key{}({})".format(kid,lid))
+            n.add_child_s([k])
+        
+        return l
+
+    lock_id = -1
+    def get_lock_id(self):
+        self.lock_id += 1
+        return self.lock_id
+    
+    key_id = -1
+    def get_key_id(self):
+        self.key_id += 1
+        return self.key_id
+
+    def string(self):
+        return self.recurse_string(self.start)
+    
+    def recurse_string(self, node):
+        base = node.name + "\n"
+        for i, c in enumerate(node.child_s):
+            base += "Child {} for {}: ".format(i, node.name)
+            base += self.recurse_string(c)
+        
+        return base
+
+
+                
 
 
 
-graph = Graph(lock_count=3)
-node = graph.start
-
-count = 0
-while not node.name == "End":
-    count += 1
-    print(node.name)
-    for c in node.child_s:
-        print("child: ", c.name)
-    for p in node.parent_s:
-        print("parent: ", p.name)
-
-    if len(node.child_s) == 0:
-        break  
-
-    if count > 5:
-        break
-
-    node = node.child_s[0]
-    print("-------------------------")
-
-print("End: ", node.name)
+graph = Graph()
+print(graph.string())

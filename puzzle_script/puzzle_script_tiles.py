@@ -1,7 +1,7 @@
 from enum import Enum
 
 class Tiles(Enum):
-    empty                       = 'g'
+    empty                       = '.'
     wall                        = 'i'
     chip                        = '*'
     water                       = 'c'
