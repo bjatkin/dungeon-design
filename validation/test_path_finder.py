@@ -48,6 +48,20 @@ class TestPathFinder(unittest.TestCase):
             self.assertTrue(np.array_equal(parents[i], expected_parents[i]))
 
 
+        path = PathFinder.find_path(layer, np.array([4,5]), np.array([1,2]), PlayerStatus(0), True)
+        expected_path = [
+            [4,5],
+            [3,5],
+            [2,6],
+            [1,5],
+            [1,4],
+            [1,3],
+            [1,2]]
+
+        self.assertTrue(np.array_equal(np.array(path), np.array(expected_path)))
+
+
+
     def test_path_finder_unconnected(self):
         layer = np.array([Tiles.empty] * 8 * 10).reshape([8,10])
         layer[:,4] = Tiles.wall
