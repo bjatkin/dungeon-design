@@ -1,11 +1,11 @@
 from graph_to_level.unraveler import Unraveler
+from graph_structure.graph_node import GNode
 # from graph_to_level.test_unraveler_debug_method import debug_method
 import numpy as np
 
 class SpatialGraphGenerator:
     @staticmethod
     def generate_spatial_graph(mission_graph_start_node, level_size=np.array([30,30])): # Max Tile World level is 32,32
-
         nodes, node_positions, adjacency_matrix = SpatialGraphGenerator.init_spatial_graph(mission_graph_start_node)
 
         Unraveler.unravel_spatial_graph(node_positions, adjacency_matrix)
@@ -42,8 +42,7 @@ class SpatialGraphGenerator:
 
     @staticmethod
     def init_spatial_graph(mission_graph_start_node, random_initial_positions=True):
-        nodes = set()
-        SpatialGraphGenerator.find_all_nodes(mission_graph_start_node, nodes)
+        nodes = GNode.find_all_nodes(mission_graph_start_node)
         nodes = sorted(nodes, key=lambda x: x.name)
         if random_initial_positions:
             node_positions = np.random.random([len(nodes), 2]) * 10
@@ -57,15 +56,5 @@ class SpatialGraphGenerator:
                     adjacency_matrix[(i, j)] = 1
                     adjacency_matrix[(j, i)] = 1
         return nodes, node_positions, adjacency_matrix
-
-
-
-    @staticmethod
-    def find_all_nodes(node, nodes_set):
-        nodes_set.add(node)
-        for child in node.child_s:
-            if not child in nodes_set:
-                SpatialGraphGenerator.find_all_nodes(child, nodes_set)
-
         
         

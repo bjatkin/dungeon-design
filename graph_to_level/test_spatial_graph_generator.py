@@ -5,21 +5,6 @@ from graph_to_level.test_graphs import TestGraphs
 
 class TestSpatialGraphGenerator(unittest.TestCase):
 
-    def test_find_all_nodes(self):
-        a, all_nodes = TestGraphs.get_man_graph()
-        nodes = set()
-        SpatialGraphGenerator.find_all_nodes(a, nodes)
-        self.assertEqual(nodes, all_nodes)
-
-        a, all_nodes = TestGraphs.get_house_graph()
-        nodes = set()
-        SpatialGraphGenerator.find_all_nodes(a, nodes)
-        self.assertEqual(nodes, all_nodes)
-
-        a, all_nodes = TestGraphs.get_graph_b()
-        nodes = set()
-        SpatialGraphGenerator.find_all_nodes(a, nodes)
-        self.assertEqual(nodes, all_nodes)
 
 
 
@@ -38,11 +23,11 @@ class TestSpatialGraphGenerator(unittest.TestCase):
             [7,0],
             [8,0]], dtype=float)
         expected_adjacencies = np.array([
-            #E  S  b  c  d  e  g  h  i
+            #E  S  K  L  d  e  g  h  i
             [0, 0, 0, 1, 0, 0, 0, 0, 0], #E 
             [0, 0, 1, 1, 1, 0, 0, 0, 0], #S 
-            [0, 1, 0, 0, 0, 1, 0, 0, 0], #b 
-            [1, 1, 0, 0, 0, 0, 1, 1, 1], #c 
+            [0, 1, 0, 0, 0, 1, 0, 0, 0], #K 
+            [1, 1, 0, 0, 0, 0, 1, 1, 1], #L 
             [0, 1, 0, 0, 0, 0, 0, 0, 0], #d 
             [0, 0, 1, 0, 0, 0, 0, 0, 0], #e 
             [0, 0, 0, 1, 0, 0, 0, 0, 0], #g 

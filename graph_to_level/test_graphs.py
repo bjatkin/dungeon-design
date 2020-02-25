@@ -1,6 +1,11 @@
-from graph_structure.graph_node import GNode, Start, End
+from graph_structure.graph_node import GNode, Start, End, Key, Lock
 
 class TestGraphs:
+    #    a-------c---f
+    #   / \     /|\
+    #  b   d   / | \
+    #  |      h--i  g
+    #  e
     @staticmethod
     def get_man_graph():
         a = Start()

@@ -12,3 +12,9 @@ class Level:
     
     def convert_to_native_tiles(self, layer):
         pass
+
+
+    @staticmethod
+    def find_tiles(layer, tile):
+        positions = np.argwhere(layer == tile)
+        return positions

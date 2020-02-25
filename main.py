@@ -1,7 +1,8 @@
 from dungeon_level.level_set import LevelSet
 from dungeon_level.dungeon_tiles import Tiles
 from generation.random_generator import RandomGenerator
-from generation.mission_generator import MissionGenerator
+# from generation.mission_generator import MissionGenerator
+from generation.random_mission_generator import RandomMissionGenerator
 from tile_world.tile_world_level import TileWorldLevel
 from tile_world.tile_world_writer.level_set_writer import LevelSetWriter
 from validation.solver import Solver
@@ -12,8 +13,10 @@ import subprocess
 
 seed = 1
 random.seed(seed)
-np.random.seed(seed)
+# np.random.seed(seed)
 
+
+# You are adding traverse method to GNode, and writing tests for it!
 
 
 level = TileWorldLevel()
@@ -21,12 +24,12 @@ level.map_title = "Ryan's Level"
 level.map_password = "    "
 level.time_limit = 100
 
-size = (32,32)
+size = (10, 10)
 
 # RandomGenerator.generate(level, size)
 # while not Solver.is_solvable(level):
 #     RandomGenerator.generate(level, size)
-MissionGenerator.generate(level, size)
+RandomMissionGenerator.generate(level, size)
     
 
 
