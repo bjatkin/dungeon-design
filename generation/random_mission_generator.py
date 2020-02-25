@@ -28,7 +28,6 @@ class RandomMissionGenerator:
 
             Drawing.draw_line(level.upper_layer, p0, p1, Tiles.wall)
 
-
         for node in mission_graph_nodes:
             position = RandomMissionGenerator.get_random_point(size)
             positions_map[node] = position
@@ -43,9 +42,6 @@ class RandomMissionGenerator:
             elif isinstance(node, GNode):
                 level.upper_layer[tuple(position)] = Tiles.collectable
 
-
-        Drawing.draw_line(level.upper_layer, (1,0), (1,20), Tiles.wall)
-        Drawing.draw_line(level.upper_layer, (3,0), (3,20), Tiles.wall)
         Drawing.draw_rectangle(level.upper_layer, (0,0), size - 1, Tiles.wall)
 
         return positions_map
@@ -62,10 +58,10 @@ class RandomMissionGenerator:
     @staticmethod
     def generate_mission_graph():
         a = Start()
-        b = Key()
-        c = Lock()
-        d = Key()
-        e = Lock()
+        b = Key("key1")
+        c = Lock("lock1")
+        d = Key("key2")
+        e = Lock("lock2")
         f = End()
         a.add_child_s(b)
         b.add_child_s(c)

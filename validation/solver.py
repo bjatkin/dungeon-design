@@ -19,6 +19,7 @@ class Solver:
         reached_node_too_soon = False
         reached_finish = False
         player_status = PlayerStatus(level.required_collectable_count)
+        log = []
 
         def visit_method(node, visited_nodes):
             nonlocal unreached
@@ -32,18 +33,23 @@ class Solver:
 
             unreached = unreached - visited_nodes - set(node.child_s)
             for unreached_node in unreached:
-                if can_reach_node(node, unreached_node, status=PlayerStatus(0)):
+                if can_reach_node(node, unreached_node):
                     reached_node_too_soon = True
             
             if isinstance(node, End):
                 reached_finish = True
         
 
-        def can_reach_node(node, child, _=None, status=None):
+        def can_reach_node(node, child, _=None):#, status=None):
             tile_position = positions_map[child]
-            if status is None:
-                status = player_status
-            is_reachable = PathFinder.is_reachable(level.upper_layer, player_position, tile_position, status)
+            # if status is None:
+            #     s = player_status
+            # else:
+            #     s = status
+            is_reachable = PathFinder.is_reachable(level.upper_layer, player_position, tile_position, player_status)
+            # is_reachable = PathFinder.is_reachable(level.upper_layer, player_position, tile_position, s)
+            # if status is None:
+            #     log.append((node, child, is_reachable))
             return is_reachable
 
         GNode.traverse_nodes(mission_start_node, visit_method, can_reach_node)
@@ -63,7 +69,7 @@ class Solver:
     def update_player_status(player_status, child_node):
         if isinstance(child_node, Start):
             pass
-        if isinstance(child_node, End):
+        elif isinstance(child_node, End):
             pass
         elif isinstance(child_node, Key):
             player_status.red_key_count += 1
@@ -71,6 +77,7 @@ class Solver:
             player_status.red_key_count -= 1
         elif isinstance(child_node, GNode):
             player_status.collectable_count += 1
+        pass
 
 
 

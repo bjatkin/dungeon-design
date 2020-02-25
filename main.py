@@ -24,7 +24,7 @@ level.map_title = "Ryan's Level"
 level.map_password = "    "
 level.time_limit = 100
 
-size = (10, 10)
+size = (6,6)
 
 # RandomGenerator.generate(level, size)
 # while not Solver.is_solvable(level):
