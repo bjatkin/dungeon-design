@@ -1,4 +1,4 @@
-from graph_structure.graph_node import Start, Key, Lock, End
+from graph_structure.graph_node import GNode, Start, Key, Lock, End
 from random import randint
 
 class Graph():
@@ -11,15 +11,15 @@ class Graph():
         for i in range(2):
             n = self.grow_graph(n)
         
-        a = self.grow_graph(n)
-        b = self.grow_graph(n)
+        # a = self.grow_graph(n)
+        # b = self.grow_graph(n)
 
-        n = b
-        for i in range(2):
-            n = self.grow_graph(n, multi=True)
+        # n = b
+        # for i in range(2):
+        #     n = self.grow_graph(n, multi=False)
 
         n.add_child_s([end])
-        end.add_parent_s([n])
+        # end.add_parent_s([n])
         self.start = start
     
     def grow_graph(self, start, multi=False):
@@ -49,7 +49,7 @@ class Graph():
                         n = new_c
 
             kid = self.get_key_id()
-            k = Key(parent_s=[n], child_s=[], name="Key{}({})".format(kid,lid))
+            k = Key(parent_s=[n], child_s=[], name="Key{}({})".format(kid,lid), lock_s=[l])
             n.add_child_s([k])
         
         return l
@@ -75,6 +75,26 @@ class Graph():
         
         return base
 
+    def convert_graph_to_mission_format(self):
+        self.add_doors_as_children_to_locks()
+        self.sort_key_children_first()
 
-graph = Graph()
-print(graph.string())
+    def sort_key_children_first(self):
+        def sort_keys_first(node):
+            if isinstance(node, Key):
+                return 0
+            else:
+                return 1
+
+        nodes = GNode.find_all_nodes(self.start, method="breadth-first")
+        for node in nodes:
+            node.child_s.sort(key=sort_keys_first)
+        pass
+
+
+    def add_doors_as_children_to_locks(self):
+        nodes = GNode.find_all_nodes(self.start, method="breadth-first")
+        for key_node in nodes:
+            if isinstance(key_node, Key):
+                key_node.add_child_s(key_node.lock_s)
+

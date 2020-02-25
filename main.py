@@ -11,8 +11,9 @@ import numpy as np
 import random
 import subprocess
 
-seed = 1
+seed = 2
 random.seed(seed)
+np.random.seed(seed)
 
 
 level = TileWorldLevel()

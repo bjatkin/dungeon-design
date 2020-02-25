@@ -208,7 +208,6 @@ class TestSolver(unittest.TestCase):
         self.assertEqual(reason, "trivial")
 
     def test_solver_branch_trivial2(self):
-        return
         level = Level()
         level.upper_layer = np.array([
             [e, l, e],
@@ -252,3 +251,39 @@ class TestSolver(unittest.TestCase):
         does_level_follow_mission, reason = Solver.does_level_follow_mission(level, start, end, positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, False)
         self.assertEqual(reason, "trivial")
+
+    def test_solver_double_parent(self):
+        level = Level()
+        level.upper_layer = np.array([
+            [s, l, e, l, f],
+            [k, w, k, w, e]], dtype=object)
+
+        # S--L--L--E
+        #  \ |\ |
+        #   \| \|
+        #    K  K
+        start = Start()
+        key1 = Key("key1")
+        lock1 = Lock("lock1")
+        key2 = Key("key2")
+        lock2 = Lock("lock2")
+        end = End()
+        start.add_child_s(lock1)
+        start.add_child_s(key1)
+        key1.add_child_s(lock1)
+        lock1.add_child_s(lock2)
+        lock1.add_child_s(key2)
+        key2.add_child_s(lock2)
+        lock2.add_child_s(end)
+
+        positions_map = {
+            start:  np.array([0,0]),
+            key1:   np.array([1,0]),
+            lock1:  np.array([0,1]),
+            key2:   np.array([1,2]),
+            lock2:  np.array([0,3]),
+            end:    np.array([0,4])
+            }
+
+        does_level_follow_mission, reason = Solver.does_level_follow_mission(level, start, end, positions_map, give_failure_reason=True)
+        self.assertEqual(does_level_follow_mission, True)

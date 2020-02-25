@@ -1,6 +1,7 @@
 from dungeon_level.dungeon_tiles import Tiles
 from generation.drawing import Drawing
 from graph_structure.graph_node import GNode, Start, End, Key, Lock
+from graph_structure.graph import Graph
 from validation.solver import Solver
 import numpy as np
 
@@ -103,6 +104,14 @@ class RandomMissionGenerator:
 
     @staticmethod
     def generate_mission_graph():
+        graph = Graph()
+        graph.convert_graph_to_mission_format()
+
+        return graph.start, GNode.find_all_nodes(graph.start, method="breadth-first")
+
+
+
+
         # a = Start()
         # b = Key("key1")
         # c = Lock("lock1")
@@ -117,17 +126,18 @@ class RandomMissionGenerator:
 
         # return a, GNode.find_all_nodes(a, method="breadth-first")
 
-        start = Start()
-        key1 = Key("key1")
-        lock1 = Lock("lock1")
-        key2 = Key("key2")
-        lock2 = Lock("lock2")
-        end = End()
-        start.add_child_s(key1)
-        key1.add_child_s(lock1)
-        lock1.add_child_s(lock2)
-        start.add_child_s(key2)
-        key2.add_child_s(lock2)
-        lock2.add_child_s(end)
+        # start = Start()
+        # key1 = Key("key1")
+        # lock1 = Lock("lock1")
+        # key2 = Key("key2")
+        # lock2 = Lock("lock2")
+        # end = End()
+        # start.add_child_s(lock1)
+        # start.add_child_s(key1)
+        # key1.add_child_s(lock1)
+        # lock1.add_child_s(lock2)
+        # lock1.add_child_s(key2)
+        # key2.add_child_s(lock2)
+        # lock2.add_child_s(end)
 
-        return start, GNode.find_all_nodes(start, method="breadth-first")
+        # return start, GNode.find_all_nodes(start, method="breadth-first")
