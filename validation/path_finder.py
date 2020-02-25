@@ -30,6 +30,21 @@ class PathFinder:
         is_unreachable = results[1] is None
         return not is_unreachable
 
+    @staticmethod
+    def find_path(layer, position_a, position_b, player_status, allow_diagonal=False):
+        f_costs, parents = PathFinder.a_star(layer, position_a, position_b, player_status, allow_diagonal=allow_diagonal)
+        if parents is None:
+            return None
+        else:
+            current_position = position_b
+            path = [current_position]
+            while not np.array_equal(current_position, position_a):
+                direction = parents[tuple(current_position)]
+                current_position = current_position + direction
+                path.append(current_position)
+            path.reverse()
+            return path
+
 
     @staticmethod
     def a_star(layer, position_a, position_b, player_status, allow_diagonal=False):
@@ -66,7 +81,7 @@ class PathFinder:
                 neighbor_position = current_position + neighbor_offset
 
                 if (neighbor_position in closed_tiles or
-                    not player_status.can_traverse(layer, current_position, neighbor_position)):
+                    not player_status.can_traverse(layer, current_position, neighbor_position, neighbor_position == position_b)):
                     continue
 
                 old_f = f_costs[tuple(neighbor_position)]

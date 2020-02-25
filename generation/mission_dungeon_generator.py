@@ -7,17 +7,17 @@ from graph_to_level.spatial_graph_visualizer import SpatialGraphVisualizer
 import matplotlib.pyplot as plt
 import numpy as np
 
-class MissionGenerator:
+class MissionDungeonGenerator:
     @staticmethod
     def generate(level, size):
-        start_node, mission_graph_nodes = MissionGenerator.generate_mission_graph()
-        spatial_nodes, positions, adjacency_matrix = SpatialGraphGenerator.generate_spatial_graph(MissionGenerator.generate_spatial_graph()[0], np.array(size) - 1)
+        start_node, mission_graph_nodes = MissionDungeonGenerator.generate_mission_graph()
+        spatial_nodes, positions, adjacency_matrix = SpatialGraphGenerator.generate_spatial_graph(MissionDungeonGenerator.generate_spatial_graph()[0], np.array(size) - 1)
 
         # SpatialGraphVisualizer.visualize_graph(positions, adjacency_matrix)
 
-        MissionGenerator.dig_dungeons(level, size, positions, adjacency_matrix)
-        mission_space_map = MissionGenerator.map_mission_to_space(mission_graph_nodes, positions)
-        collectables_count = MissionGenerator.place_mission_in_space(level, mission_space_map)
+        MissionDungeonGenerator.dig_dungeons(level, size, positions, adjacency_matrix)
+        mission_space_map = MissionDungeonGenerator.map_mission_to_space(mission_graph_nodes, positions)
+        collectables_count = MissionDungeonGenerator.place_mission_in_space(level, mission_space_map)
         level.required_collectable_count = collectables_count
 
 
@@ -61,7 +61,8 @@ class MissionGenerator:
         Drawing.draw_rectangle(level.upper_layer, (0,0), np.array(size) - 1, Tiles.wall)
         level.lower_layer = np.full(size, Tiles.empty)
         for position in positions:
-            Drawing.fill_ellipse(level.upper_layer, position, 3, 3, Tiles.empty)
+            # Drawing.fill_ellipse(level.upper_layer, position, 3, 3, Tiles.empty)
+            Drawing.fill_rectangle(level.upper_layer, position - 2, position + 2, Tiles.empty)
         
         count, _ = positions.shape
         for i in range(count):
@@ -75,7 +76,7 @@ class MissionGenerator:
 
     @staticmethod
     def generate_spatial_graph():
-        return MissionGenerator.generate_mission_graph()
+        return MissionDungeonGenerator.generate_mission_graph()
 
 
     @staticmethod
