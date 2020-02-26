@@ -3,6 +3,8 @@ from generation.drawing import Drawing
 from graph_structure.graph_node import GNode, Start, End, Key, Lock
 from graph_structure.graph import Graph
 from validation.solver import Solver
+from scipy.ndimage.measurements import label as label_connected_components
+from scipy.ndimage import convolve
 import numpy as np
 
 class RandomMissionGenerator:
@@ -101,6 +103,29 @@ class RandomMissionGenerator:
         Drawing.draw_rectangle(level.upper_layer, (0,0), size - 1, Tiles.wall)
 
 
+    # https://docs.scipy.org/doc/scipy-0.16.0/reference/generated/scipy.ndimage.measurements.label.html
+    @staticmethod
+    def find_rooms(layer):
+        empty_mask = (layer == Tiles.empty).astype(int)
+        labeled_components, component_count = label_connected_components(empty_mask)
+        return labeled_components, component_count
+
+    @staticmethod
+    def get_random_positions_in_component(labeled_layer, component_number, position_count=1):
+        mask = (labeled_layer == component_number).astype(int)
+        return RandomMissionGenerator.get_random_position_in_mask(mask, position_count)
+
+    @staticmethod
+    def get_random_position_in_mask(mask, position_count=1):
+        positions_in_mask = np.argwhere(mask == 1)
+        indices = np.random.choice(positions_in_mask.shape[0], size=position_count, replace=False)
+        random_positions = positions_in_mask[indices,:]
+
+        if position_count == 1:
+            return random_positions[0]
+        else:
+            return random_positions
+
 
     @staticmethod
     def generate_mission_graph():
@@ -110,34 +135,19 @@ class RandomMissionGenerator:
         return graph.start, GNode.find_all_nodes(graph.start, method="breadth-first")
 
 
+    # Returns a mask representing all the possible locations for a lock
+    # https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.ndimage.filters.convolve.html
+    @staticmethod
+    def find_potential_lock_mask(layer):
+        convolutional_result1 = 2 # Based on the filter, a horizontal wall has a result == 2
+        convolutional_result2 = 8 # Based on the filter, a vertical wall has a result == 8
+        # We can't just use a symmetric kernel because we need to ignore corners.
+        wall_kernel = np.array([
+            [0., 4., 0.],
+            [1., 0, 1.],
+            [0., 4., 0.],])
 
-
-        # a = Start()
-        # b = Key("key1")
-        # c = Lock("lock1")
-        # d = Key("key2")
-        # e = Lock("lock2")
-        # f = End()
-        # a.add_child_s(b)
-        # b.add_child_s(c)
-        # c.add_child_s(d)
-        # d.add_child_s(e)
-        # e.add_child_s(f)
-
-        # return a, GNode.find_all_nodes(a, method="breadth-first")
-
-        # start = Start()
-        # key1 = Key("key1")
-        # lock1 = Lock("lock1")
-        # key2 = Key("key2")
-        # lock2 = Lock("lock2")
-        # end = End()
-        # start.add_child_s(lock1)
-        # start.add_child_s(key1)
-        # key1.add_child_s(lock1)
-        # lock1.add_child_s(lock2)
-        # lock1.add_child_s(key2)
-        # key2.add_child_s(lock2)
-        # lock2.add_child_s(end)
-
-        # return start, GNode.find_all_nodes(start, method="breadth-first")
+        wall_mask = (layer == Tiles.wall).astype(int)
+        conv_result = convolve(wall_mask, wall_kernel, mode='constant', cval=0.0)
+        potential_lock_mask = (np.logical_or(conv_result == convolutional_result1, conv_result == convolutional_result2)).astype(int)
+        return potential_lock_mask
