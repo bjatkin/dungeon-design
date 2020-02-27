@@ -173,8 +173,8 @@ class TestSolver(unittest.TestCase):
     def test_solver_branch_solvable(self):
         level = Level()
         level.upper_layer = np.array([
-            [s,kR,lR,lR, e, f],
-            [e,kR, w, w, e, e]], dtype=object)
+            [s,kR,lR,lB, e, f],
+            [e,kB, w, w, e, e]], dtype=object)
         
         # S--K1--L1--L2--E
         #  \         /
@@ -209,7 +209,7 @@ class TestSolver(unittest.TestCase):
         level = Level()
         level.upper_layer = np.array([
             [ s,kR,lR, e, e, f],
-            [lR,kR, w, w, e, e]], dtype=object)
+            [lB,kB, w, w, e, e]], dtype=object)
         
         # S--K--L--L--E
         #  \      /

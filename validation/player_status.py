@@ -1,4 +1,5 @@
 from dungeon_level.dungeon_tiles import Tiles, lock_tiles, key_tiles
+import numpy as np
 
 class PlayerStatus:
     def __init__(self, required_collectable_count):
@@ -6,6 +7,7 @@ class PlayerStatus:
         self.key_counts = [0] * len(lock_tiles)
         self.collectable_count = 0
         self.required_collectable_count = required_collectable_count
+        self.player_position = np.array([0,0])
 
 
     @staticmethod

@@ -10,46 +10,35 @@ class Solver:
     @staticmethod
     def does_level_follow_mission(level, mission_start_node, mission_final_node, positions_map, give_failure_reason=False):
         layer = np.array(level.upper_layer)
-        player_position = Level.find_tiles(layer, Tiles.player)
-        if player_position.shape[0] == 0:
-            return False
-        else:
-            player_position = player_position[0]
-
+        visited_nodes = set()
         unreached = set(GNode.find_all_nodes(mission_start_node))
-        reached_node_too_soon = False
-        reached_final_node = False
         player_status = PlayerStatus(level.required_collectable_count)
 
-        def visit_method(node, visited_nodes):
-            nonlocal unreached
-            nonlocal player_status
-            nonlocal player_position
-            nonlocal reached_node_too_soon
-            nonlocal reached_final_node
+        solution_node_order = GNode.find_all_nodes(mission_start_node, method="topological-sort")
 
-            player_position = positions_map[node]
-            Solver.update_player_and_layer_status(layer, player_status, node, positions_map)
+        for i, node in enumerate(solution_node_order):
+            if i > 0: # We don't need to check if we can reach the first node, since we start there
+                if not Solver.can_reach_node(node, positions_map, layer, player_status):
+                    return Solver.get_return_result(False, False, give_failure_reason)
 
-            unreached = unreached - visited_nodes - set(node.child_s)
-            for unreached_node in unreached:
-                if can_reach_node(node, unreached_node):
-                    reached_node_too_soon = True
+            Solver.update_state(layer, player_status, node, positions_map, visited_nodes)
+
+            if Solver.has_trivial_solutions(node, visited_nodes, unreached, positions_map, layer, player_status):
+                return Solver.get_return_result(True, False, give_failure_reason)
             
             if node == mission_final_node:
-                reached_final_node = True
-        
+                return Solver.get_return_result(False, True, give_failure_reason)
 
-        def can_reach_node(node, child, _=None):
-            if child not in positions_map:
-                return False
 
-            tile_position = positions_map[child]
-            is_reachable = PathFinder.is_reachable(layer, player_position, tile_position, player_status)
-            return is_reachable
+    @staticmethod
+    def has_trivial_solutions(current_node, visited_nodes, unreached, positions_map, layer, player_status):
+        unreached -= visited_nodes.union(set(current_node.child_s))
+        has_trivial_solutions = [Solver.can_reach_node(n, positions_map, layer, player_status) for n in unreached]
+        return any(has_trivial_solutions)
+            
 
-        GNode.traverse_nodes_depth_first(mission_start_node, visit_method, can_reach_node)
-
+    @staticmethod
+    def get_return_result(reached_node_too_soon, reached_final_node, give_failure_reason):
         if give_failure_reason:
             if reached_node_too_soon:
                 return False, "trivial"
@@ -61,8 +50,19 @@ class Solver:
 
 
     @staticmethod
-    def update_player_and_layer_status(layer, player_status, current_node, positions_map):
-        current_position = tuple(positions_map[current_node])
+    def can_reach_node(node, positions_map, layer, player_status):
+        if node not in positions_map:
+            return False
+        tile_position = positions_map[node]
+        is_reachable = PathFinder.is_reachable(layer, player_status.player_position, tile_position, player_status)
+        return is_reachable
+
+
+    @staticmethod
+    def update_state(layer, player_status, current_node, positions_map, visited_nodes):
+        visited_nodes.add(current_node)
+        player_status.player_position = positions_map[current_node]
+        current_position = tuple(player_status.player_position)
         current_tile = layer[current_position]
         if isinstance(current_node, Start):
             pass
