@@ -35,11 +35,14 @@ class RandomMissionGenerator:
             Drawing.draw_rectangle(level.upper_layer, p0, p1, Tiles.wall)
 
         random_positions = RandomMissionGenerator.get_random_positions(size)
-        percentage = 0.2
+        percentage = 0.4
         percentage_index = int(percentage * random_positions.shape[0])
         random_positions = random_positions[:percentage_index]
         for position in random_positions:
-            level.upper_layer[tuple(position)] = Tiles.wall
+            if np.random.randint(2) == 0:
+                level.upper_layer[tuple(position)] = Tiles.wall
+            else:
+                level.upper_layer[tuple(position)] = Tiles.empty
 
         Drawing.draw_rectangle(level.upper_layer, (0,0), size - 1, Tiles.wall)
 
@@ -201,12 +204,15 @@ class RandomMissionGenerator:
         return potential_lock_mask
 
 
+    i = 0
     @staticmethod
     def generate_mission_graph():
-        graph = Graph()
-        graph.convert_graph_to_mission_format()
+        RandomMissionGenerator.i += 1
+        if RandomMissionGenerator.i % 2 == 0:
+            graph = Graph()
+            graph.convert_graph_to_mission_format()
 
-        # return graph.start, GNode.find_all_nodes(graph.start, method="breadth-first")
+            return graph.start, GNode.find_all_nodes(graph.start, method="breadth-first")
 
 
         start = Start()

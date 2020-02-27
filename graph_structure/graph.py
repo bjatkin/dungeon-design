@@ -11,15 +11,14 @@ class Graph():
         for i in range(2):
             n = self.grow_graph(n)
         
-        # a = self.grow_graph(n)
+        a = self.grow_graph(n)
         b = self.grow_graph(n)
 
         n = b
-        # for i in range(2):
-        #     n = self.grow_graph(n, multi=False)
+        for i in range(2):
+            n = self.grow_graph(n, multi=False)
 
         n.add_child_s(end)
-        # end.add_parent_s([n])
         self.start = start
     
     def grow_graph(self, start, multi=False):
