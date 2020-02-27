@@ -11,12 +11,12 @@ class Graph():
         for i in range(2):
             n = self.grow_graph(n)
         
-        a = self.grow_graph(n)
+        # a = self.grow_graph(n)
         b = self.grow_graph(n)
 
         n = b
-        for i in range(2):
-            n = self.grow_graph(n, multi=False)
+        # for i in range(2):
+        #     n = self.grow_graph(n, multi=False)
 
         n.add_child_s(end)
         self.start = start
@@ -77,20 +77,6 @@ class Graph():
 
     def convert_graph_to_mission_format(self):
         self.add_doors_as_children_to_locks()
-        self.sort_key_children_first()
-
-    def sort_key_children_first(self):
-        def sort_keys_first(node):
-            if isinstance(node, Key):
-                return 0
-            else:
-                return 1
-
-        nodes = GNode.find_all_nodes(self.start, method="breadth-first")
-        for node in nodes:
-            node.child_s.sort(key=sort_keys_first)
-        pass
-
 
     def add_doors_as_children_to_locks(self):
         nodes = GNode.find_all_nodes(self.start, method="breadth-first")

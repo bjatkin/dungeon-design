@@ -1,6 +1,11 @@
 import unittest
+from graph_structure.graph_node import GNode, Start, End, Key, Lock
 from generation.mission_generator import MissionGenerator
 from dungeon_level.dungeon_tiles import Tiles
+from dungeon_level.level import Level
+from validation.solver import Solver
+from log import Log
+
 import numpy as np
 
 e = Tiles.empty
@@ -173,3 +178,52 @@ class TestMissionGenerator(unittest.TestCase):
 
 
         
+    def test_works_with_branched_graphs(self):
+        # S
+        # |-----------
+        # |    |     |
+        # L1   K2    L2
+        # |          |
+        # E          K1
+        n0 = Start()
+        n1 = Lock("1")
+        n2 = Key("2")
+        n3 = Lock("2")
+        n4 = Key("1")
+        n5 = End()
+
+        n0.add_child_s([n1, n2, n3])
+        n1.add_child_s(n5)
+        n2.add_child_s(n3)
+        n2.add_lock_s(n3)
+        n3.add_child_s(n4)
+        n4.add_child_s(n1)
+        n4.add_lock_s(n1)
+
+        # Seed 2 incorrectly places lock1 in a different room
+        np.random.seed(2)
+        
+        level = Level()
+        w = Tiles.wall
+        e = Tiles.empty
+        layer = np.array([
+            [w, w, w, w, w, w, w, w],
+            [w, e, e, e, e, e, e, w],
+            [w, e, e, e, e, e, e, w],
+            [w, w, w, w, w, w, w, w],
+            [w, e, e, w, e, e, e, w],
+            [w, e, e, w, e, e, e, w],
+            [w, e, e, w, e, e, e, w],
+            [w, w, w, w, w, w, w, w]], dtype=object)
+
+        solution_node_order = GNode.find_all_nodes(n0, method="topological-sort")
+        is_solvable = False
+        i = 0
+        MAX_LOOP_COUNT = 50
+        while not is_solvable:
+            level.upper_layer = layer.copy()
+            positions_map = MissionGenerator.generate_mission(level, level.upper_layer.shape, solution_node_order)
+            is_solvable = Solver.does_level_follow_mission(level, solution_node_order[0], solution_node_order[-1], positions_map)
+            i += 1
+            self.assertTrue(i < MAX_LOOP_COUNT) # We're checking to make sure we haven't gotten stuck in a loop
+        Log.print(level)

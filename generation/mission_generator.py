@@ -4,6 +4,7 @@ from graph_structure.graph_node import GNode, Start, End, Key, Lock
 from scipy.ndimage.measurements import label as label_connected_components
 from scipy.ndimage import convolve
 from graph_structure.graph import Graph
+from log import Log
 import numpy as np
 
 class MissionGenerator:
@@ -12,7 +13,7 @@ class MissionGenerator:
         positions_map = dict()
         node_to_key_color = dict()
         for node in mission_graph_nodes:
-            print("Adding {}".format(node))
+            Log.print("Adding {}".format(node))
             if isinstance(node, Lock):
                 random_positions = MissionGenerator.find_random_positions_for_lock(level.upper_layer)
             else:
@@ -21,7 +22,8 @@ class MissionGenerator:
             i = 0
             previous_tile = None
             previous_position = None
-            while not Solver.does_level_follow_mission(level, mission_graph_nodes[0], node, positions_map):
+            does_level_follow_mission = False
+            while not does_level_follow_mission:
                 if previous_tile is not None:
                     level.upper_layer[tuple(previous_position)] = previous_tile
 
@@ -34,8 +36,10 @@ class MissionGenerator:
                 i += 1
                 if i >= random_positions.shape[0]:
                     return positions_map
-                print("\n\n")
-                print(level)
+                Log.print("\n\n")
+                Log.print(level)
+
+                does_level_follow_mission = Solver.does_level_follow_mission(level, mission_graph_nodes[0], node, positions_map)
 
         return positions_map
 
@@ -155,7 +159,7 @@ class MissionGenerator:
         graph = Graph()
         graph.convert_graph_to_mission_format()
 
-        return graph.start, GNode.find_all_nodes(graph.start, method="breadth-first")
+        return graph.start, GNode.find_all_nodes(graph.start, method="topological-sort")
 
 
         # start = Start()

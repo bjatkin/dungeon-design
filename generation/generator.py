@@ -15,6 +15,6 @@ class Generator:
         while not is_solvable:
             LevelSpaceGenerator.generate_level_space(level, size)
 
-            start_node, mission_graph_nodes = MissionGenerator.generate_mission_graph()
-            positions_map = MissionGenerator.generate_mission(level, size, mission_graph_nodes)
-            is_solvable = Solver.does_level_follow_mission(level, start_node, mission_graph_nodes[-1], positions_map)
+            start_node, solution_node_order = MissionGenerator.generate_mission_graph()
+            positions_map = MissionGenerator.generate_mission(level, size, solution_node_order)
+            is_solvable = Solver.does_level_follow_mission(level, start_node, solution_node_order[-1], positions_map)

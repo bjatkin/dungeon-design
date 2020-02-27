@@ -5,11 +5,13 @@ from tile_world.tile_world_level import TileWorldLevel
 # from puzzle_script.puzzle_world_writer.level_set_writer import LevelSetWriter
 from tile_world.tile_world_writer.level_set_writer import LevelSetWriter
 from validation.solver import Solver
+from log import Log
 
 import numpy as np
 import random
 import subprocess
 
+Log.verbose = True
 # We randomly choose our random seed.... why?
 # So that if we want to reproduce the level, we know what seed to use,
 # and so that we don't have to change the seed each time we run the program.
