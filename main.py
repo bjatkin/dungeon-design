@@ -39,7 +39,7 @@ for i in range(level_count):
 
 
 
-
+# TODO: change the wd's to be pulled from a local config file
 def run_supercc():
     wd = "C:/Users/Ryan/Drive/BYU/2020_Winter/cs_673/supercc/"
     subprocess.run("java -jar {}supercc.jar \"C:\\Program Files\\Tile World\\sets\\test.dat\"".format(wd), cwd=wd)
