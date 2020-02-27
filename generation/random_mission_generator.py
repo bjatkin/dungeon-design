@@ -16,6 +16,7 @@ class RandomMissionGenerator:
         is_solvable = False
         while not is_solvable:
             RandomMissionGenerator.create_initial_level(level, size, mission_graph_nodes)
+            print(level)
             positions_map = RandomMissionGenerator.add_mission(level, size, mission_graph_nodes)
             is_solvable = Solver.does_level_follow_mission(level, start_node, mission_graph_nodes[-1], positions_map)
 
@@ -95,7 +96,7 @@ class RandomMissionGenerator:
     @staticmethod
     def get_random_positions_per_component(components_mask, component_count, positions_per_component=1):
         random_position_list = []
-        for component_number in range(component_count):
+        for component_number in range(1, component_count + 1):
             random_positions = RandomMissionGenerator.get_random_positions_in_component(components_mask, component_number, positions_per_component)
             random_position_list.extend(random_positions)
         random_positions = np.vstack(random_position_list)

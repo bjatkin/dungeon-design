@@ -11,7 +11,12 @@ import numpy as np
 import random
 import subprocess
 
-seed = 3
+# We randomly choose our random seed.... why?
+# So that if we want to reproduce the level, we know what seed to use,
+# and so that we don't have to change the seed each time we run the program.
+seed = np.random.randint(1e5)
+# seed = 96935
+print("Level seed: {}".format(seed))
 random.seed(seed)
 np.random.seed(seed)
 
@@ -48,3 +53,5 @@ save_file = "test.dat"
 LevelSetWriter.write(level_set, "{}/sets/{}".format(working_dir, save_file))
 
 run_supercc()
+
+print("Level seed: {}".format(seed))

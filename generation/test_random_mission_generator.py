@@ -30,6 +30,26 @@ class TestRandomMissionGenerator(unittest.TestCase):
             [4, 4, 4, 0, 0, 0]])
         
         self.assertTrue(np.array_equal(labels, expected_labels))
+
+    def test_find_rooms_components_with_other_tiles(self):
+        layer = np.array([
+            [e, e, w, w, s, w],
+            [e, e, e, w, w, w],
+            [w, w, l, w, e, e],
+            [e, e, e, w, k, w],
+            [w, w, w, e, e, w],
+            [e, f, e, w, w, w]], dtype=object)
+
+        labels, count = RandomMissionGenerator.find_rooms_components(layer)
+        expected_labels = np.array([
+            [1, 1, 0, 0, 0, 0],
+            [1, 1, 1, 0, 0, 0],
+            [0, 0, 0, 0, 2, 2],
+            [3, 3, 3, 0, 0, 0],
+            [0, 0, 0, 4, 4, 0],
+            [5, 0, 6, 0, 0, 0]])
+        
+        self.assertTrue(np.array_equal(labels, expected_labels))
     
     def test_get_random_position_in_component(self):
         labeled_layer = np.array([
