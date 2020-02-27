@@ -1,5 +1,5 @@
 import unittest
-from generation.random_mission_generator import RandomMissionGenerator
+from generation.mission_generator import MissionGenerator
 from dungeon_level.dungeon_tiles import Tiles
 import numpy as np
 
@@ -10,7 +10,7 @@ f = Tiles.finish
 l = Tiles.lock_red
 k = Tiles.key_red
 
-class TestRandomMissionGenerator(unittest.TestCase):
+class TestMissionGenerator(unittest.TestCase):
     def test_find_rooms_components(self):
         layer = np.array([
             [e, e, w, w, e, w],
@@ -20,7 +20,7 @@ class TestRandomMissionGenerator(unittest.TestCase):
             [w, w, w, e, e, w],
             [e, e, e, w, w, w]], dtype=object)
         
-        labels, count = RandomMissionGenerator.find_rooms_components(layer)
+        labels, count = MissionGenerator.find_rooms_components(layer)
         expected_labels = np.array([
             [1, 1, 0, 0, 2, 0],
             [1, 1, 1, 0, 0, 0],
@@ -40,7 +40,7 @@ class TestRandomMissionGenerator(unittest.TestCase):
             [w, w, w, e, e, w],
             [e, f, e, w, w, w]], dtype=object)
 
-        labels, count = RandomMissionGenerator.find_rooms_components(layer)
+        labels, count = MissionGenerator.find_rooms_components(layer)
         expected_labels = np.array([
             [1, 1, 0, 0, 0, 0],
             [1, 1, 1, 0, 0, 0],
@@ -61,10 +61,10 @@ class TestRandomMissionGenerator(unittest.TestCase):
             [4, 4, 4, 0, 0, 0]])
         
         np.random.seed(1)
-        position = RandomMissionGenerator.get_random_positions_in_component(labeled_layer, 1)
+        position = MissionGenerator.get_random_positions_in_component(labeled_layer, 1)
         self.assertTrue(np.array_equal(position[0], np.array([3, 2])))
 
-        position = RandomMissionGenerator.get_random_positions_in_component(labeled_layer, 1, 6)
+        position = MissionGenerator.get_random_positions_in_component(labeled_layer, 1, 6)
 
         self.assertTrue(np.array_equal(position, np.array([
             [1, 1],
@@ -75,10 +75,10 @@ class TestRandomMissionGenerator(unittest.TestCase):
             [1, 2],
             ])))
 
-        position = RandomMissionGenerator.get_random_positions_in_component(labeled_layer, 2)
+        position = MissionGenerator.get_random_positions_in_component(labeled_layer, 2)
         self.assertTrue(np.array_equal(position[0], np.array([0, 4])))
 
-        position = RandomMissionGenerator.get_random_positions_in_component(labeled_layer, 3, 3)
+        position = MissionGenerator.get_random_positions_in_component(labeled_layer, 3, 3)
         self.assertTrue(np.array_equal(position, np.array([
             [4, 3],
             [2, 4],
@@ -94,7 +94,7 @@ class TestRandomMissionGenerator(unittest.TestCase):
             [w, w, w, w, w]], dtype=object)
 
         expected_results = np.zeros([5,5])
-        results = RandomMissionGenerator.find_potential_lock_mask(layer)
+        results = MissionGenerator.find_potential_lock_mask(layer)
         self.assertTrue(np.array_equal(results, expected_results))
 
     def test_find_potential_lock_mask(self):
@@ -168,7 +168,7 @@ class TestRandomMissionGenerator(unittest.TestCase):
         expected_results = [True] * 4 + [False] * 12
 
         for i, layer in enumerate(layers):
-            single_walls = RandomMissionGenerator.find_potential_lock_mask(layer)
+            single_walls = MissionGenerator.find_potential_lock_mask(layer)
             self.assertEqual(single_walls[1,1], expected_results[i])
 
 

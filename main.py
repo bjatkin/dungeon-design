@@ -1,7 +1,6 @@
 from dungeon_level.level_set import LevelSet
 from dungeon_level.dungeon_tiles import Tiles
-from generation.random_generator import RandomGenerator
-from generation.random_mission_generator import RandomMissionGenerator
+from generation.generator import Generator
 from tile_world.tile_world_level import TileWorldLevel
 # from puzzle_script.puzzle_world_writer.level_set_writer import LevelSetWriter
 from tile_world.tile_world_writer.level_set_writer import LevelSetWriter
@@ -32,7 +31,7 @@ for i in range(level_count):
     level.map_password = "    "
     level.time_limit = 100
 
-    RandomMissionGenerator.generate(level, size)
+    Generator.generate(level, size)
     level_set.levels.append(level)
     
 
