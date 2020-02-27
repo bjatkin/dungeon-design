@@ -11,10 +11,10 @@ class RandomMissionGenerator:
     @staticmethod
     def generate(level, size):
         size = np.array(size)
-        start_node, mission_graph_nodes = RandomMissionGenerator.generate_mission_graph()
 
         is_solvable = False
         while not is_solvable:
+            start_node, mission_graph_nodes = RandomMissionGenerator.generate_mission_graph()
             RandomMissionGenerator.create_initial_level(level, size, mission_graph_nodes)
             print(level)
             positions_map = RandomMissionGenerator.add_mission(level, size, mission_graph_nodes)
@@ -26,23 +26,20 @@ class RandomMissionGenerator:
         level.upper_layer = np.full(size, Tiles.empty)
         level.lower_layer = np.full(size, Tiles.empty)
 
-        # random_positions = RandomMissionGenerator.get_random_positions(size)
-        # percentage = 0.4
-        # percentage_index = int(percentage * random_positions.shape[0])
-        # random_positions = random_positions[:percentage_index]
-        # for position in random_positions:
-        #     level.upper_layer[tuple(position)] = Tiles.wall
 
         for _ in range(20):
             p0 = RandomMissionGenerator.get_random_positions(size, 1)[0]
             p1 = p0 + RandomMissionGenerator.get_random_positions(np.array([10, 10]), 1)[0] + 4
-            # p1 = p0 + RandomMissionGenerator.get_random_positions(np.array([20, 20]), 1)[0] - 10
-            # p1 = np.array(p0)
-            # p1[np.random.randint(2)] += np.random.randint(10)
 
             Drawing.fill_rectangle(level.upper_layer, p0 + 1, p1 - 1, Tiles.empty)
             Drawing.draw_rectangle(level.upper_layer, p0, p1, Tiles.wall)
 
+        random_positions = RandomMissionGenerator.get_random_positions(size)
+        percentage = 0.2
+        percentage_index = int(percentage * random_positions.shape[0])
+        random_positions = random_positions[:percentage_index]
+        for position in random_positions:
+            level.upper_layer[tuple(position)] = Tiles.wall
 
         Drawing.draw_rectangle(level.upper_layer, (0,0), size - 1, Tiles.wall)
 
