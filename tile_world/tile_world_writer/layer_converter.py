@@ -14,8 +14,14 @@ class LayerConverter:
         DungeonTiles.water                          : TWTiles.water,
         DungeonTiles.flippers                       : TWTiles.flippers,
         DungeonTiles.monster                        : TWTiles.ghost_n,
+        DungeonTiles.key_blue                       : TWTiles.blue_key,
+        DungeonTiles.lock_blue                      : TWTiles.blue_door,
         DungeonTiles.key_red                        : TWTiles.red_key,
         DungeonTiles.lock_red                       : TWTiles.red_door,
+        DungeonTiles.key_green                      : TWTiles.green_key,
+        DungeonTiles.lock_green                     : TWTiles.green_door,
+        DungeonTiles.key_yellow                     : TWTiles.yellow_key,
+        DungeonTiles.lock_yellow                    : TWTiles.yellow_door,
     }
 
     @staticmethod

@@ -21,7 +21,7 @@ random.seed(seed)
 np.random.seed(seed)
 
 
-level_count = 5
+level_count = 1
 size = (30, 30)
 level_set = LevelSet()
 

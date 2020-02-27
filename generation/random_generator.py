@@ -65,6 +65,12 @@ class RandomGenerator:
             0.1,   # water
             0.0,   # flippers
             0.02,  # monster
+            0.0,   # key_blue
+            0.0,   # lock_blue
             0.0,   # key_red
-            0.0    # lock_red
+            0.0,   # lock_red
+            0.0,   # key_green
+            0.0,   # lock_green
+            0.0,   # key_yellow
+            0.0,   # lock_yellow
             ])

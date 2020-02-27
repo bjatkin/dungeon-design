@@ -29,19 +29,30 @@ class Level:
             for x in range(w):
                 tile = self.upper_layer[y,x]
                 if tile == Tiles.empty:
-                    string += "."
+                    string += ". "
                 if tile == Tiles.wall:
-                    string += "w"
+                    string += "w "
                 if tile == Tiles.player:
-                    string += "s"
+                    string += "s "
                 if tile == Tiles.finish:
-                    string += "f"
+                    string += "f "
+                if tile == Tiles.key_blue:
+                    string += "kB"
+                if tile == Tiles.lock_blue:
+                    string += "lB"
                 if tile == Tiles.key_red:
-                    string += "k"
+                    string += "kR"
                 if tile == Tiles.lock_red:
-                    string += "l"
+                    string += "lR"
+                if tile == Tiles.key_green:
+                    string += "kG"
+                if tile == Tiles.lock_green:
+                    string += "lG"
+                if tile == Tiles.key_yellow:
+                    string += "kY"
+                if tile == Tiles.lock_yellow:
+                    string += "lY"
                 if tile == Tiles.collectable:
-                    string += "c"
-                string += " "
+                    string += "c "
             string += "\n"
         return string

@@ -18,7 +18,7 @@ class Graph():
         # for i in range(2):
         #     n = self.grow_graph(n, multi=False)
 
-        n.add_child_s([end])
+        n.add_child_s(end)
         # end.add_parent_s([n])
         self.start = start
     
@@ -28,8 +28,8 @@ class Graph():
 
         lid = self.get_lock_id()
         name = "Lock"+str(lid)
-        l = Lock(parent_s=[n], child_s=[], name=name)
-        n.add_child_s([l])
+        l = Lock(name=name)
+        l.add_parent_s(n)
         for i in range(randint(0, 2)):
             if len(n.parent_s) > 0:
                 n = n.parent_s[0]
@@ -49,8 +49,9 @@ class Graph():
                         n = new_c
 
             kid = self.get_key_id()
-            k = Key(parent_s=[n], child_s=[], name="Key{}({})".format(kid,lid), lock_s=[l])
-            n.add_child_s([k])
+            k = Key(name="Key{}({})".format(kid,lid))
+            k.add_parent_s(n)
+            k.add_lock_s(l)
         
         return l
 

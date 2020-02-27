@@ -61,87 +61,18 @@ class Solver:
 
 
     @staticmethod
-    def update_player_and_layer_status(layer, player_status, child_node, positions_map):
-        if isinstance(child_node, Start):
+    def update_player_and_layer_status(layer, player_status, current_node, positions_map):
+        current_position = tuple(positions_map[current_node])
+        current_tile = layer[current_position]
+        if isinstance(current_node, Start):
             pass
-        elif isinstance(child_node, End):
+        elif isinstance(current_node, End):
             pass
-        elif isinstance(child_node, Key):
-            player_status.red_key_count += 1
-        elif isinstance(child_node, Lock):
-            player_status.red_key_count -= 1
-            layer[tuple(positions_map[child_node])] = Tiles.empty
-        elif isinstance(child_node, GNode):
+        elif isinstance(current_node, Key):
+            player_status.add_to_key_count(current_tile)
+        elif isinstance(current_node, Lock):
+            player_status.remove_from_key_count(current_tile)
+            layer[current_position] = Tiles.empty
+        elif isinstance(current_node, GNode):
             player_status.collectable_count += 1
         pass
-
-
-
-    # @staticmethod
-    # def find_level_solution_from_mission(level, mission_start_node, positions_map):
-    #     player_position = Level.find_tiles(level.upper_layer, Tiles.player)
-    #     if player_position.shape[0] == 0:
-    #         return False
-    #     else:
-    #         player_position = player_position[0]
-
-    #     player_status = PlayerStatus(level.required_collectable_count)
-    #     end_node = Solver._get_end_node(positions_map.keys())
-    #     reached_finish = False
-    #     solution_path = [player_position]
-
-    #     def visit_method(node, visited_nodes):
-    #         nonlocal player_status
-    #         nonlocal player_position
-    #         nonlocal reached_finish
-
-    #         player_position = positions_map[node]
-    #         Solver.update_player_status(player_status, node)
-    #         if isinstance(node, End):
-    #             reached_finish = True
-
-    #         if can_reach_node(node, end_node):
-    #             reached_finish = True
-
-
-
-    #     def can_reach_node(node, child, _=None):
-    #         nonlocal solution_path
-    #         if reached_finish:
-    #             return False
-
-    #         tile_position = positions_map[child]
-    #         path = PathFinder.find_path(level.upper_layer, player_position, tile_position, player_status)
-    #         if path is not None:
-    #             solution_path.extend(path[1:])
-    #             return True
-    #         else:
-    #             return False
-        
-    #     GNode.traverse_nodes(mission_start_node, visit_method, can_reach_node)
-
-    #     return solution_path
-
-    # @staticmethod
-    # def does_solution_path_follow_mission(positions_map, solution_path):
-    #     end_position = positions_map[Solver._get_end_node(positions_map.keys())]
-
-    #     if not np.array_equal(solution_path[-1], end_position):
-    #         return False
-
-    #     for position in positions_map.values():
-    #         has_position = False
-    #         for path_position in solution_path:
-    #             if np.array_equal(position, path_position):
-    #                 has_position = True
-    #                 break
-    #         if not has_position:
-    #             return False
-
-    #     return True
-
-
-    # @staticmethod
-    # def _get_end_node(nodes):
-    #     return [node for node in nodes if isinstance(node, End)][0]
-

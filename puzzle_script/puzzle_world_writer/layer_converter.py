@@ -13,7 +13,16 @@ class LayerConverter:
         DungeonTiles.required_collectable_barrier   : PWTiles.socket,
         DungeonTiles.water                          : PWTiles.water,
         DungeonTiles.flippers                       : PWTiles.flippers,
-        DungeonTiles.monster                        : PWTiles.empty
+        DungeonTiles.monster                        : PWTiles.empty,
+        DungeonTiles.key_blue                       : PWTiles.blue_key,
+        DungeonTiles.lock_blue                      : PWTiles.blue_door,
+        DungeonTiles.key_red                        : PWTiles.red_key,
+        DungeonTiles.lock_red                       : PWTiles.red_door,
+        DungeonTiles.key_yellow                     : PWTiles.yellow_key,
+        DungeonTiles.lock_yellow                    : PWTiles.yellow_door,
+        DungeonTiles.key_green                      : PWTiles.empty,    # PW doesn't have a green key or door yet
+        DungeonTiles.lock_green                     : PWTiles.empty,    # PW doesn't have a green key or door yet
+
     }
 
     @staticmethod

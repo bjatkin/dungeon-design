@@ -1,4 +1,4 @@
-from dungeon_level.dungeon_tiles import Tiles
+from dungeon_level.dungeon_tiles import Tiles, key_to_lock, key_tiles
 from generation.drawing import Drawing
 from graph_structure.graph_node import GNode, Start, End, Key, Lock
 from graph_structure.graph import Graph
@@ -47,6 +47,7 @@ class RandomMissionGenerator:
     @staticmethod
     def add_mission(level, size, mission_graph_nodes):
         positions_map = dict()
+        node_to_key_color = dict()
         for node in mission_graph_nodes:
             print("Adding {}".format(node))
             if isinstance(node, Lock):
@@ -66,7 +67,7 @@ class RandomMissionGenerator:
                 previous_tile = level.upper_layer[tuple(position)]
                 previous_position = position
 
-                RandomMissionGenerator.add_mission_tile(level.upper_layer, node, position, positions_map)
+                RandomMissionGenerator.add_mission_tile(level.upper_layer, node, position, positions_map, node_to_key_color)
                 i += 1
                 if i >= random_positions.shape[0]:
                     return positions_map
@@ -100,9 +101,28 @@ class RandomMissionGenerator:
         np.random.shuffle(random_positions)
         return random_positions
 
+    @staticmethod
+    def get_matching_color(node_to_key_color, node, get='key'):
+        if isinstance(node, Key):
+            key_node = node
+        elif isinstance(node, Lock):
+            key_node = node.key_s[0]
+        else:
+            return None
+        
+        if key_node not in node_to_key_color:
+            node_to_key_color[key_node] = np.random.choice(key_tiles)
+
+        key_color = node_to_key_color[key_node]
+
+        if get == 'key':
+            return key_color
+        elif get == 'lock':
+            return key_to_lock[key_color]
+
 
     @staticmethod
-    def add_mission_tile(layer, node, position, positions_map):
+    def add_mission_tile(layer, node, position, positions_map, node_to_key_color):
             positions_map[node] = position
             position = tuple(position)
             if isinstance(node, Start):
@@ -110,9 +130,11 @@ class RandomMissionGenerator:
             elif isinstance(node, End):
                 layer[position] = Tiles.finish
             elif isinstance(node, Key):
-                layer[position] = Tiles.key_red
+                key_tile = RandomMissionGenerator.get_matching_color(node_to_key_color, node, get='key')
+                layer[position] = key_tile
             elif isinstance(node, Lock):
-                layer[position] = Tiles.lock_red
+                lock_tile = RandomMissionGenerator.get_matching_color(node_to_key_color, node, get='lock')
+                layer[position] = lock_tile
             elif isinstance(node, GNode):
                 layer[position] = Tiles.collectable
 
@@ -184,5 +206,31 @@ class RandomMissionGenerator:
         graph = Graph()
         graph.convert_graph_to_mission_format()
 
-        return graph.start, GNode.find_all_nodes(graph.start, method="breadth-first")
+        # return graph.start, GNode.find_all_nodes(graph.start, method="breadth-first")
 
+
+        start = Start()
+        key1 = Key("red")
+        lock1 = Lock("red")
+        key2 = Key("blue")
+        lock2 = Lock("blue")
+        key3 = Key("green")
+        lock3 = Lock("green")
+        key4 = Key("yellow")
+        lock4 = Lock("yellow")
+        end = End()
+        start.add_child_s(key1)
+        key1.add_child_s(lock1)
+        key1.add_lock_s(lock1)
+        lock1.add_child_s(key2)
+        key2.add_child_s(lock2)
+        key2.add_lock_s(lock2)
+        lock2.add_child_s(key3)
+        key3.add_child_s(lock3)
+        key3.add_lock_s(lock3)
+        lock3.add_child_s(key4)
+        key4.add_child_s(lock4)
+        key4.add_lock_s(lock4)
+        lock4.add_child_s(end)
+
+        return start, [start, key1, lock1, key2, lock2, key3, lock3, key4, lock4, end]

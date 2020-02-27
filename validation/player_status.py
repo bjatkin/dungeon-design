@@ -1,11 +1,38 @@
-from dungeon_level.dungeon_tiles import Tiles
+from dungeon_level.dungeon_tiles import Tiles, lock_tiles, key_tiles
 
 class PlayerStatus:
     def __init__(self, required_collectable_count):
         self.can_swim = False
-        self.red_key_count = 0
+        self.key_counts = [0] * len(lock_tiles)
         self.collectable_count = 0
         self.required_collectable_count = required_collectable_count
+
+
+    @staticmethod
+    def _key_index_of_tile(tile):
+        if tile in key_tiles:
+            index = key_tiles.index(tile)
+        elif tile in lock_tiles:
+            index = lock_tiles.index(tile)
+        else:
+            index = None
+        return index
+
+    def get_key_count(self, tile):
+        index = PlayerStatus._key_index_of_tile(tile)
+        if index is not None:
+            return self.key_counts[index]
+        return None
+
+    def add_to_key_count(self, tile, add_count=1):
+        index = PlayerStatus._key_index_of_tile(tile)
+        if index is not None:
+            self.key_counts[index] += add_count
+
+    def remove_from_key_count(self, tile, remove_count=1):
+        index = PlayerStatus._key_index_of_tile(tile)
+        if index is not None:
+            self.key_counts[index] -= remove_count
 
     
     def can_traverse(self, layer, current_position, neighbor_position, is_final_step):
@@ -32,7 +59,9 @@ class PlayerStatus:
         if neighbor_tile == Tiles.movable_block: # TODO: We can't path find with blocks yet.
             return False
 
-        if (neighbor_tile == Tiles.lock_red and self.red_key_count == 0) or (neighbor_tile == Tiles.lock_red and not is_final_step): # We can only step on a lock if we have a key for it and it is destination. If we don't impose the destination rule, then A* becomes much more complicated as we have to try the key with every potential door.
-            return False
+        for lock_tile in lock_tiles:
+            key_count = self.get_key_count(lock_tile)
+            if (neighbor_tile == lock_tile and key_count == 0) or (neighbor_tile == lock_tile and not is_final_step): # We can only step on a lock if we have a key for it and it is destination. If we don't impose the destination rule, then A* becomes much more complicated as we have to try the key with every potential door.
+                return False
 
         return True
