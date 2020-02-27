@@ -277,6 +277,43 @@ class TestGraphNode(unittest.TestCase):
         nodes = GNode.find_all_nodes(a)
         self.assertEqual(set(nodes), all_nodes)
 
+    def test_find_all_nodes_topological_sort(self):
+        top_sort = "topological-sort"
+
+        n0 = GNode("0")
+        n1 = GNode("1")
+        n2 = GNode("2")
+        n3 = GNode("3")
+        n4 = GNode("4")
+        n5 = GNode("5")
+        n5.add_child_s(n0)
+        n5.add_child_s(n2)
+        n5.add_child_s(n4)
+        n4.add_child_s(n0)
+        n4.add_child_s(n1)
+        n2.add_child_s(n3)
+        n3.add_child_s(n1)
+        nodes = GNode.find_all_nodes(n5, method=top_sort)
+        self.assertEqual(nodes, [n5, n4, n2, n3, n1, n0])
+
+        n0 = GNode("0")
+        n1 = GNode("1")
+        n2 = GNode("2")
+        n3 = GNode("3")
+        n4 = GNode("4")
+        n5 = GNode("5")
+        n0.add_child_s(n1)
+        n0.add_child_s(n2)
+        n0.add_child_s(n3)
+        n1.add_child_s(n4)
+        n2.add_child_s(n5)
+        n3.add_child_s(n1)
+        n4.add_child_s(n2)
+        nodes = GNode.find_all_nodes(n0, method=top_sort)
+        self.assertEqual(nodes, [n0, n3, n1, n4, n2, n5])
+
+
+
     def test_mutable_default_argument_bug(self):
         gnode1 = GNode("")
         gnode2 = GNode("")

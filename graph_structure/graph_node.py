@@ -11,21 +11,27 @@ class GNode(object):
         self.parent_s = parent_s
         self.name = name
 
+    # traversal_order=['preorder','postorder']
     @staticmethod
-    def traverse_nodes_depth_first(node, visit_method, will_traverse_method = lambda node, child, visited_nodes: True):
+    def traverse_nodes_depth_first(node, visit_method, will_traverse_method = lambda node, child, visited_nodes: True, traversal_order='preorder'):
         visited_nodes = set()
-        GNode._traverse_nodes_depth_first(node, visit_method, will_traverse_method, visited_nodes)
+        GNode._traverse_nodes_depth_first(node, visit_method, will_traverse_method, visited_nodes, traversal_order)
 
 
     @staticmethod
-    def _traverse_nodes_depth_first(node, visit_method, will_traverse_method, visited_nodes):
+    def _traverse_nodes_depth_first(node, visit_method, will_traverse_method, visited_nodes, traversal_order):
         visited_nodes.add(node)
-        visit_method(node, visited_nodes)
+        if traversal_order == 'preorder':
+            visit_method(node, visited_nodes)
+
         for child in node.child_s:
             if child not in visited_nodes:
                 will_traverse = will_traverse_method(node, child, visited_nodes)
                 if will_traverse:
-                    GNode._traverse_nodes_depth_first(child, visit_method, will_traverse_method, visited_nodes)
+                    GNode._traverse_nodes_depth_first(child, visit_method, will_traverse_method, visited_nodes, traversal_order)
+
+        if traversal_order == 'postorder':
+            visit_method(node, visited_nodes)
 
     @staticmethod
     def traverse_nodes_breadth_first(node, visit_method, will_traverse_method = lambda node, visited_nodes: True):
@@ -43,6 +49,7 @@ class GNode(object):
                         queue.append(child)
 
 
+    # method=['depth-first','breadth-first','topological-sort']
     @staticmethod
     def find_all_nodes(node, method="depth-first"):
         visited = []
@@ -53,8 +60,11 @@ class GNode(object):
 
         if method == "depth-first":
             GNode.traverse_nodes_depth_first(node, visit_method)
-        else:
+        elif method == "breadth-first":
             GNode.traverse_nodes_breadth_first(node, visit_method)
+        elif method == "topological-sort":
+            GNode.traverse_nodes_depth_first(node, visit_method, traversal_order='postorder')
+            visited.reverse()
 
         return visited
 
