@@ -21,22 +21,24 @@ random.seed(seed)
 np.random.seed(seed)
 
 
-level = TileWorldLevel()
-# level = PuzzleScriptLevel()
-level.map_title = "Brandon's Level"
-level.map_password = "    "
-level.time_limit = 100
-
+level_count = 5
 size = (30, 30)
+level_set = LevelSet()
 
-RandomMissionGenerator.generate(level, size)
+for i in range(level_count):
+    level = TileWorldLevel()
+    # level = PuzzleScriptLevel()
+    level.map_title = "Level {}".format(i + 1)
+    level.map_password = "    "
+    level.time_limit = 100
+
+    RandomMissionGenerator.generate(level, size)
+    level_set.levels.append(level)
     
 
 
 
 
-level_set = LevelSet()
-level_set.levels.append(level)
 
 def run_supercc():
     wd = "C:/Users/Ryan/Drive/BYU/2020_Winter/cs_673/supercc/"
