@@ -12,9 +12,9 @@ class Graph():
             n = self.grow_graph(n)
         
         # a = self.grow_graph(n)
-        # b = self.grow_graph(n)
+        b = self.grow_graph(n)
 
-        # n = b
+        n = b
         # for i in range(2):
         #     n = self.grow_graph(n, multi=False)
 

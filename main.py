@@ -11,7 +11,7 @@ import numpy as np
 import random
 import subprocess
 
-seed = 2
+seed = 3
 random.seed(seed)
 np.random.seed(seed)
 
@@ -22,7 +22,7 @@ level.map_title = "Brandon's Level"
 level.map_password = "    "
 level.time_limit = 100
 
-size = (15, 15)
+size = (30, 30)
 
 RandomMissionGenerator.generate(level, size)
     

@@ -42,5 +42,6 @@ class Level:
                     string += "l"
                 if tile == Tiles.collectable:
                     string += "c"
+                string += " "
             string += "\n"
         return string

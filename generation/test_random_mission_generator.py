@@ -11,7 +11,7 @@ l = Tiles.lock_red
 k = Tiles.key_red
 
 class TestRandomMissionGenerator(unittest.TestCase):
-    def test_find_rooms(self):
+    def test_find_rooms_components(self):
         layer = np.array([
             [e, e, w, w, e, w],
             [e, e, e, w, w, w],
@@ -20,7 +20,7 @@ class TestRandomMissionGenerator(unittest.TestCase):
             [w, w, w, e, e, w],
             [e, e, e, w, w, w]], dtype=object)
         
-        labels, count = RandomMissionGenerator.find_rooms(layer)
+        labels, count = RandomMissionGenerator.find_rooms_components(layer)
         expected_labels = np.array([
             [1, 1, 0, 0, 2, 0],
             [1, 1, 1, 0, 0, 0],
@@ -42,7 +42,7 @@ class TestRandomMissionGenerator(unittest.TestCase):
         
         np.random.seed(1)
         position = RandomMissionGenerator.get_random_positions_in_component(labeled_layer, 1)
-        self.assertTrue(np.array_equal(position, np.array([3, 2])))
+        self.assertTrue(np.array_equal(position[0], np.array([3, 2])))
 
         position = RandomMissionGenerator.get_random_positions_in_component(labeled_layer, 1, 6)
 
@@ -56,7 +56,7 @@ class TestRandomMissionGenerator(unittest.TestCase):
             ])))
 
         position = RandomMissionGenerator.get_random_positions_in_component(labeled_layer, 2)
-        self.assertTrue(np.array_equal(position, np.array([0, 4])))
+        self.assertTrue(np.array_equal(position[0], np.array([0, 4])))
 
         position = RandomMissionGenerator.get_random_positions_in_component(labeled_layer, 3, 3)
         self.assertTrue(np.array_equal(position, np.array([
@@ -64,6 +64,18 @@ class TestRandomMissionGenerator(unittest.TestCase):
             [2, 4],
             [2, 5],
             ])))
+
+    def test_find_potential_lock_mask_edges(self):
+        layer = np.array([
+            [w, w, w, w, w],
+            [w, e, e, e, w],
+            [w, e, e, e, w],
+            [w, e, e, e, w],
+            [w, w, w, w, w]], dtype=object)
+
+        expected_results = np.zeros([5,5])
+        results = RandomMissionGenerator.find_potential_lock_mask(layer)
+        self.assertTrue(np.array_equal(results, expected_results))
 
     def test_find_potential_lock_mask(self):
         layers = np.array([
