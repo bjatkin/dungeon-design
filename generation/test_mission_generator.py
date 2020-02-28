@@ -219,7 +219,7 @@ class TestMissionGenerator(unittest.TestCase):
         solution_node_order = GNode.find_all_nodes(start, method="topological-sort")
         is_solvable = False
         i = 0
-        MAX_LOOP_COUNT = 50
+        MAX_LOOP_COUNT = 10
         while not is_solvable:
             level.upper_layer = layer.copy()
             positions_map = MissionGenerator.generate_mission(level, level.upper_layer.shape, solution_node_order)

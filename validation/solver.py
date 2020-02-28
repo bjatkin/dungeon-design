@@ -1,6 +1,6 @@
 from validation.path_finder import PathFinder
 from validation.player_status import PlayerStatus
-from dungeon_level.dungeon_tiles import Tiles
+from dungeon_level.dungeon_tiles import Tiles, lock_tiles
 from dungeon_level.level import Level
 from graph_structure.graph_node import GNode, Start, End, Key, Lock
 
@@ -11,8 +11,9 @@ class Solver:
     def does_level_follow_mission(level, solution_node_order, positions_map, give_failure_reason=False):
         layer = np.array(level.upper_layer)
         visited_nodes = set()
-        player_status = PlayerStatus(level.required_collectable_count)
+        reached = set()
         unreached = set(solution_node_order)
+        player_status = PlayerStatus(level.required_collectable_count)
 
         for i, node in enumerate(solution_node_order):
             if i > 0: # We don't need to check if we can reach the first node, since we start there
@@ -21,26 +22,50 @@ class Solver:
 
             Solver.update_state(layer, player_status, node, positions_map, visited_nodes)
 
-            if not Solver.are_correct_nodes_reachable(node, unreached, solution_node_order, positions_map, layer, player_status):
+            new_reachable_nodes = Solver.update_reachability(node, unreached, reached, solution_node_order)
+
+            if not Solver.do_keys_open_correct_locks(node, reached, positions_map, layer, player_status):
+                return Solver.get_return_result(True, False, give_failure_reason)
+
+            if not Solver.are_correct_nodes_reachable(unreached, new_reachable_nodes, positions_map, layer, player_status):
                 return Solver.get_return_result(True, False, give_failure_reason)
             
         # We've made it to the final node, rejoice!
         return Solver.get_return_result(False, True, give_failure_reason)
 
 
+    # We should only be able to unlock a lock if we have reached its key
     @staticmethod
-    def are_correct_nodes_reachable(current_node, unreached, solution_node_order, positions_map, layer, player_status):
-        unreached -= set(current_node.child_s)
-        if current_node in unreached:
-            unreached.remove(current_node)
-        # unreached -= set([current_node])
-        # unreached -= visited_nodes.union(set(current_node.child_s))
-        can_reach_unreachables = [Solver.can_reach_node(n, positions_map, layer, player_status) for n in unreached]
-        if isinstance(current_node, Key):
-            can_reach_reachables = [True]
-        else:
+    def do_keys_open_correct_locks(node, reached, positions_map, layer, player_status):
+        for node in reached:
+            if isinstance(node, Lock) and node in positions_map:
+                tile = layer[tuple(positions_map[node])]
+                if tile in lock_tiles and player_status.get_key_count(tile) > 0:
+                    if node.key_s[0] not in reached:
+                        return False
+        return True
+
+
+
+    @staticmethod
+    def update_reachability(current_node, unreached, reached, solution_node_order):
+        reached.add(current_node)
+        if not isinstance(current_node, Key):
             new_reachable_nodes = set(current_node.child_s).intersection(solution_node_order)
-            can_reach_reachables = [Solver.can_reach_node(n, positions_map, layer, player_status) for n in new_reachable_nodes]
+            reached.update(new_reachable_nodes)
+        else:
+            new_reachable_nodes = set()
+
+        unreached -= reached
+
+        return new_reachable_nodes
+
+
+    @staticmethod
+    def are_correct_nodes_reachable(unreached, new_reachable_nodes, positions_map, layer, player_status):
+        can_reach_unreachables = [Solver.can_reach_node(n, positions_map, layer, player_status) for n in unreached]
+
+        can_reach_reachables = [Solver.can_reach_node(n, positions_map, layer, player_status) for n in new_reachable_nodes]
 
         are_correct_nodes_reachable = all(can_reach_reachables) and not any(can_reach_unreachables)
         return are_correct_nodes_reachable

@@ -159,7 +159,7 @@ class MissionGenerator:
         graph = Graph()
         graph.convert_graph_to_mission_format()
 
-        return graph.start, GNode.find_all_nodes(graph.start, method="topological-sort")
+        return GNode.find_all_nodes(graph.start, method="topological-sort")
 
 
         # start = Start()

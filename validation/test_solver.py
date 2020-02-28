@@ -32,6 +32,7 @@ class TestSolver(unittest.TestCase):
         end = End()
         start.add_child_s([key, lock])
         key.add_child_s(lock)
+        key.add_lock_s(lock)
         lock.add_child_s(end)
 
         positions_map = {
@@ -70,9 +71,13 @@ class TestSolver(unittest.TestCase):
         lock_blue.add_child_s([lock_yellow, key_green])
         lock_yellow.add_child_s(end)
         key_red.add_child_s(lock_red)
+        key_red.add_lock_s(lock_red)
         key_blue.add_child_s(lock_blue)
+        key_blue.add_lock_s(lock_blue)
         key_green.add_child_s(lock_green)
+        key_green.add_lock_s(lock_green)
         key_yellow.add_child_s(lock_yellow)
+        key_yellow.add_lock_s(lock_yellow)
         
 
 
@@ -105,6 +110,7 @@ class TestSolver(unittest.TestCase):
         end = End()
         start.add_child_s(key)
         key.add_child_s(lock)
+        key.add_lock_s(lock)
         lock.add_child_s(end)
 
         positions_map = {
@@ -131,6 +137,7 @@ class TestSolver(unittest.TestCase):
         end = End()
         start.add_child_s(key)
         key.add_child_s(lock1)
+        key.add_lock_s(lock1)
         lock1.add_child_s(lock2)
         lock2.add_child_s(end)
 
@@ -160,6 +167,7 @@ class TestSolver(unittest.TestCase):
         end = End()
         start.add_child_s(key)
         key.add_child_s(lock)
+        key.add_lock_s(lock)
         lock.add_child_s(end)
 
         positions_map = {
@@ -196,7 +204,9 @@ class TestSolver(unittest.TestCase):
         lock1.add_child_s(lock2)
         lock2.add_child_s(end)
         key1.add_child_s(lock1)
+        key1.add_lock_s(lock1)
         key2.add_child_s(lock2)
+        key2.add_lock_s(lock2)
 
         positions_map = {
             start:  np.array([0,0]),
@@ -209,6 +219,9 @@ class TestSolver(unittest.TestCase):
 
         does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, True)
+
+
+
         
 
     def test_solver_branch_trivial1(self):
@@ -228,8 +241,10 @@ class TestSolver(unittest.TestCase):
         end = End()
         start.add_child_s([key1, key2])
         key1.add_child_s(lock1)
+        key1.add_lock_s(lock1)
         lock1.add_child_s(lock2)
         key2.add_child_s(lock2)
+        key2.add_lock_s(lock2)
         lock2.add_child_s(end)
 
         positions_map = {
@@ -263,8 +278,10 @@ class TestSolver(unittest.TestCase):
         end = End()
         start.add_child_s([key1, key2])
         key1.add_child_s(lock1)
+        key1.add_lock_s(lock1)
         lock1.add_child_s(lock2)
         key2.add_child_s(lock2)
+        key2.add_lock_s(lock2)
         lock2.add_child_s(end)
 
         positions_map = {
@@ -307,8 +324,10 @@ class TestSolver(unittest.TestCase):
         end = End()
         start.add_child_s([key1, lock1])
         key1.add_child_s(lock1)
+        key1.add_lock_s(lock1)
         lock1.add_child_s([key2, lock2])
         key2.add_child_s(lock2)
+        key2.add_lock_s(lock2)
         lock2.add_child_s(end)
 
         positions_map = {
@@ -343,7 +362,9 @@ class TestSolver(unittest.TestCase):
         end = End()
         start.add_child_s([lock1, lock2, key1])
         key1.add_child_s(lock1)
+        key1.add_lock_s(lock1)
         key2.add_child_s(lock2)
+        key2.add_lock_s(lock2)
         lock1.add_child_s(key2)
         lock2.add_child_s(end)
 
@@ -378,7 +399,9 @@ class TestSolver(unittest.TestCase):
         end = End()
         start.add_child_s([lock1, lock2, key1])
         key1.add_child_s(lock1)
+        key1.add_lock_s(lock1)
         key2.add_child_s(lock2)
+        key2.add_lock_s(lock2)
         lock1.add_child_s(key2)
         lock2.add_child_s(end)
 
@@ -391,6 +414,248 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,4]),
         }
 
-        # does_level_follow_mission, reason = Solver.does_level_follow_mission(level, start, end, positions_map, give_failure_reason=True)
-        # self.assertEqual(does_level_follow_mission, False)
-        # self.assertTrue(reason, "toosoon")
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        self.assertEqual(does_level_follow_mission, False)
+
+
+    def test_node_seen_too_soon_correct_layout2(self):
+        level = Level()
+        level.upper_layer = np.array([
+            [ s,lR, e,lB, f],
+            [kR, w,kB, w, w]], dtype=object)
+        
+        # S----
+        # |   |
+        # L1  K1
+        # |----
+        # |   |
+        # L2  K2
+        # |
+        # F
+        start = Start()
+        key1 = Key("key1")
+        lock1 = Lock("lock1")
+        key2 = Key("key2")
+        lock2 = Lock("lock2")
+        end = End()
+        start.add_child_s([key1, lock1])
+        key1.add_child_s(lock1)
+        key1.add_lock_s(lock1)
+        key2.add_child_s(lock2)
+        key2.add_lock_s(lock2)
+        lock1.add_child_s([key2, lock2])
+        lock2.add_child_s(end)
+
+        positions_map = {
+            start:  np.array([0,0]),
+            key1:   np.array([1,0]),
+            lock1:  np.array([0,1]),
+            key2:   np.array([1,2]),
+            lock2:  np.array([0,3]),
+            end:    np.array([0,4]),
+        }
+
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        self.assertEqual(does_level_follow_mission, True)
+
+
+    def test_node_seen_too_soon_incorrect_layout2(self):
+        level = Level()
+        level.upper_layer = np.array([
+            [ s, e,lR,kB],
+            [kR, e, w, w],
+            [ e, e,lB, f]], dtype=object)
+        
+        # S----
+        # |   |
+        # L1  K1
+        # |----
+        # |   |
+        # L2  K2
+        # |
+        # F
+        start = Start()
+        key1 = Key("key1")
+        lock1 = Lock("lock1")
+        key2 = Key("key2")
+        lock2 = Lock("lock2")
+        end = End()
+        start.add_child_s([key1, lock1])
+        key1.add_child_s(lock1)
+        key1.add_lock_s(lock1)
+        key2.add_child_s(lock2)
+        key2.add_lock_s(lock2)
+        lock1.add_child_s([key2, lock2])
+        lock2.add_child_s(end)
+
+        positions_map = {
+            start:  np.array([0,0]),
+            key1:   np.array([1,0]),
+            lock1:  np.array([0,2]),
+            key2:   np.array([0,3]),
+            lock2:  np.array([2,2]),
+            end:    np.array([2,3]),
+        }
+
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        self.assertEqual(does_level_follow_mission, False)
+
+    def test_degenerate_loop_layout(self):
+        level = Level()
+        level.upper_layer = np.array([
+            [w, w, w, w, w, w, w, w, w],
+            [w, s, w, e, e, e, e, f, w],
+            [w,kR, w, w, w, w,lG, w, w],
+            [w,kG,lR, e, e, e, e, e, w],
+            [w, e, w, e, e, e, e,kR, w],
+            [w, e, w, w,lR, w, e, w, w],
+            [w, e, w, e, e, e, e, e, w],
+            [w, w, w, w, w, w, w, w, w]], dtype=object)
+
+        start = Start()
+        key0 = Key("key0")
+        lock0 = Lock("lock0")
+        key1 = Key("key1")
+        lock1 = Lock("lock1")
+        key2 = Key("key2")
+        lock2 = Lock("lock2")
+        end = End()
+        start.add_child_s([lock0, key0, key2])
+        lock0.add_child_s([lock1, key1])
+        lock1.add_child_s(lock2)
+        lock2.add_child_s(end)
+        key0.add_child_s(lock0)
+        key0.add_lock_s(lock0)
+        key1.add_child_s(lock1)
+        key1.add_lock_s(lock1)
+        key2.add_child_s(lock2)
+        key2.add_lock_s(lock2)
+
+        positions_map = {
+            start:  np.array([1,1]),
+            key0:   np.array([2,1]),
+            key2:   np.array([3,1]),
+            lock0:  np.array([3,2]),
+            key1:   np.array([4,7]),
+            lock1:  np.array([5,4]),
+            lock2:  np.array([2,6]),
+            end:    np.array([1,7]),
+        }
+
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        self.assertEqual(does_level_follow_mission, False)
+
+    def test_wrong_key_color(self):
+        level = Level()
+        level.upper_layer = np.array([
+            [ s, e,lR,kR],
+            [kR, e, w, w],
+            [ e, e,lR, f]], dtype=object)
+
+        start = Start()
+        key1 = Key("key1")
+        lock1 = Lock("lock1")
+        key2 = Key("key2")
+        lock2 = Lock("lock2")
+        end = End()
+        start.add_child_s([key1, lock1, lock2])
+        lock1.add_child_s(key2)
+        lock2.add_child_s(end)
+        key1.add_child_s(lock1)
+        key1.add_lock_s(lock1)
+        key2.add_child_s(lock2)
+        key2.add_lock_s(lock2)
+
+        positions_map = {
+            start:  np.array([0,0]),
+            key1:   np.array([1,0]),
+            lock1:  np.array([0,2]),
+            key2:   np.array([0,3]),
+            lock2:  np.array([2,2]),
+            end:    np.array([2,3]),
+        }
+        
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        self.assertEqual(does_level_follow_mission, False)
+
+
+
+
+    def test_two_keys_soon(self):
+        level = Level()
+        level.upper_layer = np.array([
+            [s,kR,lR,lR, e, f],
+            [e,kR, w, w, e, e]], dtype=object)
+        
+        # S----------
+        # |    |    |
+        # lR   kR   kB
+        # |
+        # lB
+        # |
+        # E
+        start = Start()
+        key1 = Key("key1")
+        lock1 = Lock("lock1")
+        key2 = Key("key2")
+        lock2 = Lock("lock2")
+        end = End()
+        start.add_child_s([lock1, key1, key2])
+        lock1.add_child_s(lock2)
+        lock2.add_child_s(end)
+        key1.add_child_s(lock1)
+        key1.add_lock_s(lock1)
+        key2.add_child_s(lock2)
+        key2.add_lock_s(lock2)
+
+        positions_map = {
+            start:  np.array([0,0]),
+            key1:   np.array([1,1]),
+            lock1:  np.array([0,2]),
+            key2:   np.array([0,1]),
+            lock2:  np.array([0,3]),
+            end:    np.array([0,5]),
+        }
+
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        self.assertEqual(does_level_follow_mission, True)
+
+
+    def test_two_keys_soon_unneeded(self):
+        level = Level()
+        level.upper_layer = np.array([
+            [s,kR,lR, e, e, f],
+            [e,kR,lR, e, e, e]], dtype=object)
+        
+        # S----------
+        # |    |    |
+        # lR   kR   kB
+        # |
+        # lB
+        # |
+        # E
+        start = Start()
+        key1 = Key("key1")
+        lock1 = Lock("lock1")
+        key2 = Key("key2")
+        lock2 = Lock("lock2")
+        end = End()
+        start.add_child_s([lock1, key1, key2])
+        lock1.add_child_s(lock2)
+        lock2.add_child_s(end)
+        key1.add_child_s(lock1)
+        key1.add_lock_s(lock1)
+        key2.add_child_s(lock2)
+        key2.add_lock_s(lock2)
+
+        positions_map = {
+            start:  np.array([0,0]),
+            key1:   np.array([1,1]),
+            lock1:  np.array([0,2]),
+            key2:   np.array([0,1]),
+            lock2:  np.array([0,3]),
+            end:    np.array([0,5]),
+        }
+
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        self.assertEqual(does_level_follow_mission, False)
