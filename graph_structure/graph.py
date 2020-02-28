@@ -74,13 +74,3 @@ class Graph():
             base += self.recurse_string(c)
         
         return base
-
-    def convert_graph_to_mission_format(self):
-        self.add_doors_as_children_to_locks()
-
-    def add_doors_as_children_to_locks(self):
-        nodes = GNode.find_all_nodes(self.start, method="breadth-first")
-        for key_node in nodes:
-            if isinstance(key_node, Key):
-                key_node.add_child_s(key_node.lock_s)
-

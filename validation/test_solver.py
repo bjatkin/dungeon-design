@@ -31,7 +31,6 @@ class TestSolver(unittest.TestCase):
         lock = Lock()
         end = End()
         start.add_child_s([key, lock])
-        key.add_child_s(lock)
         key.add_lock_s(lock)
         lock.add_child_s(end)
 
@@ -109,7 +108,6 @@ class TestSolver(unittest.TestCase):
         lock = Lock()
         end = End()
         start.add_child_s(key)
-        key.add_child_s(lock)
         key.add_lock_s(lock)
         lock.add_child_s(end)
 
@@ -136,7 +134,6 @@ class TestSolver(unittest.TestCase):
         lock2 = Lock("lock2")
         end = End()
         start.add_child_s(key)
-        key.add_child_s(lock1)
         key.add_lock_s(lock1)
         lock1.add_child_s(lock2)
         lock2.add_child_s(end)
@@ -166,7 +163,6 @@ class TestSolver(unittest.TestCase):
         lock = Lock()
         end = End()
         start.add_child_s(key)
-        key.add_child_s(lock)
         key.add_lock_s(lock)
         lock.add_child_s(end)
 
@@ -203,9 +199,7 @@ class TestSolver(unittest.TestCase):
         start.add_child_s([lock1, key1, key2])
         lock1.add_child_s(lock2)
         lock2.add_child_s(end)
-        key1.add_child_s(lock1)
         key1.add_lock_s(lock1)
-        key2.add_child_s(lock2)
         key2.add_lock_s(lock2)
 
         positions_map = {
@@ -243,7 +237,6 @@ class TestSolver(unittest.TestCase):
         key1.add_child_s(lock1)
         key1.add_lock_s(lock1)
         lock1.add_child_s(lock2)
-        key2.add_child_s(lock2)
         key2.add_lock_s(lock2)
         lock2.add_child_s(end)
 
@@ -280,7 +273,6 @@ class TestSolver(unittest.TestCase):
         key1.add_child_s(lock1)
         key1.add_lock_s(lock1)
         lock1.add_child_s(lock2)
-        key2.add_child_s(lock2)
         key2.add_lock_s(lock2)
         lock2.add_child_s(end)
 
@@ -323,10 +315,8 @@ class TestSolver(unittest.TestCase):
         lock2 = Lock("lock2")
         end = End()
         start.add_child_s([key1, lock1])
-        key1.add_child_s(lock1)
         key1.add_lock_s(lock1)
         lock1.add_child_s([key2, lock2])
-        key2.add_child_s(lock2)
         key2.add_lock_s(lock2)
         lock2.add_child_s(end)
 
@@ -361,9 +351,7 @@ class TestSolver(unittest.TestCase):
         lock2 = Lock("lock2")
         end = End()
         start.add_child_s([lock1, lock2, key1])
-        key1.add_child_s(lock1)
         key1.add_lock_s(lock1)
-        key2.add_child_s(lock2)
         key2.add_lock_s(lock2)
         lock1.add_child_s(key2)
         lock2.add_child_s(end)
@@ -398,9 +386,7 @@ class TestSolver(unittest.TestCase):
         lock2 = Lock("lock2")
         end = End()
         start.add_child_s([lock1, lock2, key1])
-        key1.add_child_s(lock1)
         key1.add_lock_s(lock1)
-        key2.add_child_s(lock2)
         key2.add_lock_s(lock2)
         lock1.add_child_s(key2)
         lock2.add_child_s(end)
@@ -439,9 +425,7 @@ class TestSolver(unittest.TestCase):
         lock2 = Lock("lock2")
         end = End()
         start.add_child_s([key1, lock1])
-        key1.add_child_s(lock1)
         key1.add_lock_s(lock1)
-        key2.add_child_s(lock2)
         key2.add_lock_s(lock2)
         lock1.add_child_s([key2, lock2])
         lock2.add_child_s(end)
@@ -481,9 +465,7 @@ class TestSolver(unittest.TestCase):
         lock2 = Lock("lock2")
         end = End()
         start.add_child_s([key1, lock1])
-        key1.add_child_s(lock1)
         key1.add_lock_s(lock1)
-        key2.add_child_s(lock2)
         key2.add_lock_s(lock2)
         lock1.add_child_s([key2, lock2])
         lock2.add_child_s(end)
@@ -524,11 +506,8 @@ class TestSolver(unittest.TestCase):
         lock0.add_child_s([lock1, key1])
         lock1.add_child_s(lock2)
         lock2.add_child_s(end)
-        key0.add_child_s(lock0)
         key0.add_lock_s(lock0)
-        key1.add_child_s(lock1)
         key1.add_lock_s(lock1)
-        key2.add_child_s(lock2)
         key2.add_lock_s(lock2)
 
         positions_map = {
@@ -561,9 +540,7 @@ class TestSolver(unittest.TestCase):
         start.add_child_s([key1, lock1, lock2])
         lock1.add_child_s(key2)
         lock2.add_child_s(end)
-        key1.add_child_s(lock1)
         key1.add_lock_s(lock1)
-        key2.add_child_s(lock2)
         key2.add_lock_s(lock2)
 
         positions_map = {
@@ -603,9 +580,7 @@ class TestSolver(unittest.TestCase):
         start.add_child_s([lock1, key1, key2])
         lock1.add_child_s(lock2)
         lock2.add_child_s(end)
-        key1.add_child_s(lock1)
         key1.add_lock_s(lock1)
-        key2.add_child_s(lock2)
         key2.add_lock_s(lock2)
 
         positions_map = {
@@ -643,9 +618,7 @@ class TestSolver(unittest.TestCase):
         start.add_child_s([lock1, key1, key2])
         lock1.add_child_s(lock2)
         lock2.add_child_s(end)
-        key1.add_child_s(lock1)
         key1.add_lock_s(lock1)
-        key2.add_child_s(lock2)
         key2.add_lock_s(lock2)
 
         positions_map = {

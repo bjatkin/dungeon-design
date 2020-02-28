@@ -157,7 +157,6 @@ class MissionGenerator:
     @staticmethod
     def generate_mission_graph():
         graph = Graph()
-        graph.convert_graph_to_mission_format()
 
         return GNode.find_all_nodes(graph.start, method="topological-sort")
 

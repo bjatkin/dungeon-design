@@ -140,15 +140,16 @@ class Start(GNode):
 
 class Key(GNode):
     def __init__(self, name="", parent_s=None, child_s=None, lock_s=None):
+        super(Key, self).__init__(name, parent_s, child_s)
+
         self.lock_s = []
         if lock_s is not None:
             self.add_lock_s(lock_s)
-
-        super(Key, self).__init__(name, parent_s, child_s)
     
 
     def add_lock_s(self, lock_s):
         GNode._add(self, lock_s, lambda x: x.lock_s, lambda x: x.key_s)
+        self.add_child_s(lock_s)
     
 
     def remove_lock_s(self, lock_name_s):
@@ -157,14 +158,16 @@ class Key(GNode):
 
 class Lock(GNode):
     def __init__(self, name="", parent_s=None, child_s=None, key_s=None):
+        super(Lock, self).__init__(name, parent_s, child_s)
+
         self.key_s = []
         if key_s is not None:
             self.add_key_s(key_s)
 
-        super(Lock, self).__init__(name, parent_s, child_s)
     
     def add_key_s(self, key_s):
         GNode._add(self, key_s, lambda x: x.key_s, lambda x: x.lock_s)
+        self.add_parent_s(key_s)
     
     def remove_key_s(self, key_name_s):
         GNode._remove(self, key_name_s, lambda x: x.key_s, lambda x: x.lock_s)
@@ -172,7 +175,4 @@ class Lock(GNode):
 
 class End(GNode):
     def __init__(self, parent_s=None):
-        if parent_s == None:
-            parent_s = []
-
         super(End, self).__init__("End", parent_s, [])
