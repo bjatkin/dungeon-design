@@ -9,10 +9,10 @@ import numpy as np
 
 class MissionGenerator:
     @staticmethod
-    def generate_mission(level, size, mission_graph_nodes):
+    def generate_mission(level, size, solution_node_order):
         positions_map = dict()
         node_to_key_color = dict()
-        for node in mission_graph_nodes:
+        for node_index, node in enumerate(solution_node_order):
             Log.print("Adding {}".format(node))
             if isinstance(node, Lock):
                 random_positions = MissionGenerator.find_random_positions_for_lock(level.upper_layer)
@@ -39,7 +39,7 @@ class MissionGenerator:
                 Log.print("\n\n")
                 Log.print(level)
 
-                does_level_follow_mission = Solver.does_level_follow_mission(level, mission_graph_nodes[0], node, positions_map)
+                does_level_follow_mission = Solver.does_level_follow_mission(level, solution_node_order[:node_index + 1], positions_map)
 
         return positions_map
 

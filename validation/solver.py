@@ -8,13 +8,11 @@ import numpy as np
 
 class Solver:
     @staticmethod
-    def does_level_follow_mission(level, mission_start_node, mission_final_node, positions_map, give_failure_reason=False):
+    def does_level_follow_mission(level, solution_node_order, positions_map, give_failure_reason=False):
         layer = np.array(level.upper_layer)
         visited_nodes = set()
-        unreached = set(GNode.find_all_nodes(mission_start_node))
         player_status = PlayerStatus(level.required_collectable_count)
-
-        solution_node_order = GNode.find_all_nodes(mission_start_node, method="topological-sort")
+        unreached = set(solution_node_order)
 
         for i, node in enumerate(solution_node_order):
             if i > 0: # We don't need to check if we can reach the first node, since we start there
@@ -23,19 +21,30 @@ class Solver:
 
             Solver.update_state(layer, player_status, node, positions_map, visited_nodes)
 
-            if Solver.has_trivial_solutions(node, visited_nodes, unreached, positions_map, layer, player_status):
+            if not Solver.are_correct_nodes_reachable(node, unreached, solution_node_order, positions_map, layer, player_status):
                 return Solver.get_return_result(True, False, give_failure_reason)
             
-            if node == mission_final_node:
-                return Solver.get_return_result(False, True, give_failure_reason)
+        # We've made it to the final node, rejoice!
+        return Solver.get_return_result(False, True, give_failure_reason)
 
 
     @staticmethod
-    def has_trivial_solutions(current_node, visited_nodes, unreached, positions_map, layer, player_status):
-        unreached -= visited_nodes.union(set(current_node.child_s))
-        has_trivial_solutions = [Solver.can_reach_node(n, positions_map, layer, player_status) for n in unreached]
-        return any(has_trivial_solutions)
-            
+    def are_correct_nodes_reachable(current_node, unreached, solution_node_order, positions_map, layer, player_status):
+        unreached -= set(current_node.child_s)
+        if current_node in unreached:
+            unreached.remove(current_node)
+        # unreached -= set([current_node])
+        # unreached -= visited_nodes.union(set(current_node.child_s))
+        can_reach_unreachables = [Solver.can_reach_node(n, positions_map, layer, player_status) for n in unreached]
+        if isinstance(current_node, Key):
+            can_reach_reachables = [True]
+        else:
+            new_reachable_nodes = set(current_node.child_s).intersection(solution_node_order)
+            can_reach_reachables = [Solver.can_reach_node(n, positions_map, layer, player_status) for n in new_reachable_nodes]
+
+        are_correct_nodes_reachable = all(can_reach_reachables) and not any(can_reach_unreachables)
+        return are_correct_nodes_reachable
+
 
     @staticmethod
     def get_return_result(reached_node_too_soon, reached_final_node, give_failure_reason):

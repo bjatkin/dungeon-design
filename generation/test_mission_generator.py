@@ -185,23 +185,23 @@ class TestMissionGenerator(unittest.TestCase):
         # L1   K2    L2
         # |          |
         # E          K1
-        n0 = Start()
-        n1 = Lock("1")
-        n2 = Key("2")
-        n3 = Lock("2")
-        n4 = Key("1")
-        n5 = End()
+        start = Start()
+        key1 = Key("1")
+        key2 = Key("2")
+        lock1 = Lock("1")
+        lock2 = Lock("2")
+        end = End()
 
-        n0.add_child_s([n1, n2, n3])
-        n1.add_child_s(n5)
-        n2.add_child_s(n3)
-        n2.add_lock_s(n3)
-        n3.add_child_s(n4)
-        n4.add_child_s(n1)
-        n4.add_lock_s(n1)
+        start.add_child_s([lock1, key2, lock2])
+        lock1.add_child_s(end)
+        lock2.add_child_s(key1)
+        key1.add_child_s(lock1)
+        key2.add_child_s(lock2)
+        key1.add_lock_s(lock1)
+        key2.add_lock_s(lock2)
 
-        # Seed 2 incorrectly places lock1 in a different room
-        np.random.seed(2)
+        # Seed 2 incorrectly places 2 yellow locks, so the yellow key can go through either one.
+        np.random.seed(4)
         
         level = Level()
         w = Tiles.wall
@@ -216,14 +216,14 @@ class TestMissionGenerator(unittest.TestCase):
             [w, e, e, w, e, e, e, w],
             [w, w, w, w, w, w, w, w]], dtype=object)
 
-        solution_node_order = GNode.find_all_nodes(n0, method="topological-sort")
+        solution_node_order = GNode.find_all_nodes(start, method="topological-sort")
         is_solvable = False
         i = 0
         MAX_LOOP_COUNT = 50
         while not is_solvable:
             level.upper_layer = layer.copy()
             positions_map = MissionGenerator.generate_mission(level, level.upper_layer.shape, solution_node_order)
-            is_solvable = Solver.does_level_follow_mission(level, solution_node_order[0], solution_node_order[-1], positions_map)
+            is_solvable = Solver.does_level_follow_mission(level, solution_node_order, positions_map)
             i += 1
             self.assertTrue(i < MAX_LOOP_COUNT) # We're checking to make sure we haven't gotten stuck in a loop
         Log.print(level)

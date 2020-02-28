@@ -62,8 +62,12 @@ class PlayerStatus:
             return False
 
         for lock_tile in lock_tiles:
-            key_count = self.get_key_count(lock_tile)
-            if (neighbor_tile == lock_tile and key_count == 0) or (neighbor_tile == lock_tile and not is_final_step): # We can only step on a lock if we have a key for it and it is destination. If we don't impose the destination rule, then A* becomes much more complicated as we have to try the key with every potential door.
+            if neighbor_tile == lock_tile and not is_final_step: # We can't go through any locks, but we can see if we can make it to them.
                 return False
+
+        # for lock_tile in lock_tiles:
+        #     key_count = self.get_key_count(lock_tile)
+        #     if (neighbor_tile == lock_tile and key_count == 0) or (neighbor_tile == lock_tile and not is_final_step): # We can only step on a lock if we have a key for it and it is destination. If we don't impose the destination rule, then A* becomes much more complicated as we have to try the key with every potential door.
+        #         return False
 
         return True
