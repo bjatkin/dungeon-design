@@ -4,7 +4,7 @@ import numpy as np
 
 class LevelSpaceGenerator:
     @staticmethod
-    def generate_level_space(level, size):
+    def generate(level, size):
         level.upper_layer = np.full(size, Tiles.empty)
         level.lower_layer = np.full(size, Tiles.empty)
 
