@@ -4,6 +4,8 @@ class GNode(object):
     def __init__(self, name="", parent_s=None, child_s=None):
         self.child_s = []
         self.parent_s = []
+        self.x = 0
+        self.y = 0
 
         if child_s is not None:
             self.add_child_s(child_s)

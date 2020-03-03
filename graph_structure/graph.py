@@ -1,5 +1,7 @@
 from graph_structure.graph_node import GNode, Start, Key, Lock, End
+from PIL import Image, ImageDraw, ImageFont
 from random import randint
+import numpy as np
 
 class Graph():
     def __init__(self, difficulty=1):
@@ -20,6 +22,7 @@ class Graph():
 
         n.add_child_s(end)
         self.start = start
+        self.end = end
     
     def grow_graph(self, start, multi=False):
         # Add a door
@@ -74,3 +77,52 @@ class Graph():
             base += self.recurse_string(c)
         
         return base
+    
+    def draw(self):
+        im = Image.new('RGB', (800, 1500), (255, 255, 255)) 
+        draw = ImageDraw.Draw(im) 
+        
+        rows = np.full((1000, 1), 0)
+        def visit_method_connect(node, visited_nodes):
+            if len(node.parent_s) > 0:
+                node.x = node.parent_s[0].x + 2
+                # find the size of this row
+                node.y = rows[node.x] + 2
+                rows[node.x] += 2
+                self.connect_node(draw, (node.parent_s[0].y, node.parent_s[0].x, node.y, node.x))
+            
+        def visit_method_nodes(node, visited_nodes):
+            if len(node.parent_s) > 0:
+                if isinstance(node, Lock):
+                    self.draw_node(draw, (node.y, node.x), node.name, n_type="lock")
+                elif isinstance(node, End):
+                    self.draw_node(draw, (node.y, node.x), node.name, n_type="lock")
+                else:
+                    self.draw_node(draw, (node.y, node.x), node.name, n_type="key")
+        
+        GNode.traverse_nodes_depth_first(self.start, visit_method_connect)
+        GNode.traverse_nodes_depth_first(self.start, visit_method_nodes)
+
+        self.draw_node(draw, (0, 0), "Start", n_type="lock")
+
+        im.show()
+    
+    def draw_node(self, draw, xy, text, n_type="lock"):
+        if n_type == "lock":
+            color = (128, 128, 255)
+            draw.rectangle((xy[0]*50+15, xy[1]*50+15, xy[0]*50+60, xy[1]*50+60), fill=color)
+            draw.text((xy[0]*50+23, xy[1]*50+33), text, fill=(255, 255, 255))
+
+        if n_type == "key":
+            color = (128, 0, 255)
+            draw.ellipse((xy[0]*50+15, xy[1]*50+15, xy[0]*50+60, xy[1]*50+60), fill=color)
+            draw.text((xy[0]*50+23, xy[1]*50+33), text, fill=(255, 255, 255))
+    
+    def connect_node(self, draw, xy):
+        black = (0, 0, 0)
+        if (xy[0] == xy[2] or xy[1] == xy[3]):
+            draw.line((xy[0]*50+38, xy[1]*50+38, xy[2]*50+38, xy[3]*50+38), fill=black)
+        else:
+            draw.line((xy[0]*50+38, xy[1]*50+38, xy[0]*50+38, xy[3]*50-10), fill=black)
+            draw.line((xy[0]*50+38, xy[3]*50-10, xy[2]*50+38, xy[3]*50-10), fill=black)
+            draw.line((xy[2]*50+38, xy[3]*50-10, xy[2]*50+38, xy[3]*50+38), fill=black)
