@@ -83,15 +83,21 @@ class Graph():
         draw = ImageDraw.Draw(im) 
         
         rows = np.full((1000, 1), 0)
-        def visit_method_connect(node, visited_nodes):
+
+        sorted_nodes = GNode.find_all_nodes(self.start, method="topological-sort")
+
+        # Draw Connections
+        for node in sorted_nodes:
             if len(node.parent_s) > 0:
-                node.x = node.parent_s[0].x + 2
+                parent_node = [node for node in node.parent_s if not isinstance(node, Key)][0]
+                node.x = parent_node.x + 2
                 # find the size of this row
                 node.y = rows[node.x] + 2
                 rows[node.x] += 2
-                self.connect_node(draw, (node.parent_s[0].y, node.parent_s[0].x, node.y, node.x))
-            
-        def visit_method_nodes(node, visited_nodes):
+                self.connect_node(draw, (parent_node.y, parent_node.x, node.y, node.x))
+        
+        # Draw Nodes
+        for node in sorted_nodes:
             if len(node.parent_s) > 0:
                 if isinstance(node, Lock):
                     self.draw_node(draw, (node.y, node.x), node.name, n_type="lock")
@@ -100,11 +106,10 @@ class Graph():
                 else:
                     self.draw_node(draw, (node.y, node.x), node.name, n_type="key")
         
-        GNode.traverse_nodes_depth_first(self.start, visit_method_connect)
-        GNode.traverse_nodes_depth_first(self.start, visit_method_nodes)
 
         self.draw_node(draw, (0, 0), "Start", n_type="lock")
 
+        im.save("graph.png")
         im.show()
     
     def draw_node(self, draw, xy, text, n_type="lock"):

@@ -11,11 +11,6 @@ import numpy as np
 import random
 import subprocess
 
-from graph_structure.graph import Graph
-test = Graph()
-test.draw()
-exit()
-
 Log.verbose = True
 # We randomly choose our random seed.... why?
 # So that if we want to reproduce the level, we know what seed to use,
