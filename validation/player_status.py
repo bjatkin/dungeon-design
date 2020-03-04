@@ -1,43 +1,70 @@
-from dungeon_level.dungeon_tiles import Tiles, lock_tiles, key_tiles
+from dungeon_level.dungeon_tiles import Tiles, lock_tiles, key_tiles, item_tiles, hazard_tiles
 import numpy as np
 
 class PlayerStatus:
     def __init__(self, required_collectable_count):
-        self.can_swim = False
-        self.key_counts = [0] * len(lock_tiles)
+        self.key_counts = [0] * len(key_tiles)
+        self.item_counts = [0] * len(item_tiles)
         self.collectable_count = 0
         self.required_collectable_count = required_collectable_count
         self.player_position = np.array([0,0])
 
 
     @staticmethod
-    def _key_index_of_tile(tile):
-        if tile in key_tiles:
-            index = key_tiles.index(tile)
-        elif tile in lock_tiles:
-            index = lock_tiles.index(tile)
+    def _index_of_tile(tile, tile_list, inverse_tile_list):
+        if tile in tile_list:
+            index = tile_list.index(tile)
+        elif tile in inverse_tile_list:
+            index = inverse_tile_list.index(tile)
         else:
             index = None
         return index
 
-    def get_key_count(self, tile):
-        index = PlayerStatus._key_index_of_tile(tile)
+    @staticmethod
+    def _perform_indexed_operation(tile, tile_list, inverse_tile_list, operation):
+        index = PlayerStatus._index_of_tile(tile, tile_list, inverse_tile_list)
         if index is not None:
-            return self.key_counts[index]
+            return operation(index)
         return None
 
+
+    def get_key_count(self, tile):
+        def op(index):
+            return self.key_counts[index]
+        return PlayerStatus._perform_indexed_operation(tile, key_tiles, lock_tiles, op)
+
+
     def add_to_key_count(self, tile, add_count=1):
-        index = PlayerStatus._key_index_of_tile(tile)
-        if index is not None:
+        def op(index):
             self.key_counts[index] += add_count
+        return PlayerStatus._perform_indexed_operation(tile, key_tiles, lock_tiles, op)
+
 
     def remove_from_key_count(self, tile, remove_count=1):
-        index = PlayerStatus._key_index_of_tile(tile)
-        if index is not None:
+        def op(index):
             self.key_counts[index] -= remove_count
+        return PlayerStatus._perform_indexed_operation(tile, key_tiles, lock_tiles, op)
 
     
-    def can_traverse(self, layer, current_position, neighbor_position, is_final_step):
+    def get_item_count(self, tile):
+        def op(index):
+            return self.item_counts[index]
+        return PlayerStatus._perform_indexed_operation(tile, item_tiles, hazard_tiles, op)
+
+
+    def add_to_item_count(self, tile, add_count=1):
+        def op(index):
+            self.item_counts[index] += add_count
+        return PlayerStatus._perform_indexed_operation(tile, item_tiles, hazard_tiles, op)
+
+
+    def remove_from_item_count(self, tile, remove_count=1):
+        def op(index):
+            self.item_counts[index] -= remove_count
+        return PlayerStatus._perform_indexed_operation(tile, item_tiles, hazard_tiles, op)
+
+
+    def can_traverse(self, layer, current_position, neighbor_position):
         h, w = layer.shape
         is_within_bounds = neighbor_position[0] >= 0 and neighbor_position[1] >= 0 and neighbor_position[0] < h and neighbor_position[1] < w
         if not is_within_bounds:
@@ -52,22 +79,25 @@ class PlayerStatus:
         if current_tile == Tiles.finish: # We can walk to the finish, but we can't walk through it since the level will have completed.
             return False
 
-        if neighbor_tile == Tiles.water and not self.can_swim: # You can only go on water tiles if you can swim.
-            return False
-
         if neighbor_tile == Tiles.required_collectable_barrier and self.collectable_count < self.required_collectable_count: # To pass through the collectable barrier, you need to have all the collectables first.
             return False
 
         if neighbor_tile == Tiles.movable_block: # TODO: We can't path find with blocks yet.
             return False
 
+        # We can't have the player go past a lock because we can't have the level change as we
+        # are performing A* and if we go past a lock, then we have to change our key count and
+        # that changes which locks we could open.
+        # However, we can see if we end up on a lock to tell if it is reachable.
         for lock_tile in lock_tiles:
-            if neighbor_tile == lock_tile and not is_final_step: # We can't go through any locks, but we can see if we can make it to them.
+            if current_tile == lock_tile:
                 return False
 
-        # for lock_tile in lock_tiles:
-        #     key_count = self.get_key_count(lock_tile)
-        #     if (neighbor_tile == lock_tile and key_count == 0) or (neighbor_tile == lock_tile and not is_final_step): # We can only step on a lock if we have a key for it and it is destination. If we don't impose the destination rule, then A* becomes much more complicated as we have to try the key with every potential door.
-        #         return False
+        # Similarly, we want to see if hazards are reachable without making them passable.
+        # So we allow the player to traverse onto a hazard but not off of it.
+        # The player can only traverse off of a hazard if they have the item to do so.
+        for hazard_tile in hazard_tiles:
+            if current_tile == hazard_tile and neighbor_tile != hazard_tile: # and self.get_item_count(hazard_tile) == 0:
+                return False
 
         return True

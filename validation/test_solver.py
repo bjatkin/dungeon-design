@@ -17,6 +17,10 @@ lY = Tiles.lock_yellow
 w = Tiles.wall
 f = Tiles.finish
 e = Tiles.empty
+F = Tiles.fire
+Fb= Tiles.fire_boots
+W = Tiles.water
+fl= Tiles.flippers
 
 class TestSolver(unittest.TestCase):
     def test_solver_linear_solvable(self):
@@ -628,6 +632,77 @@ class TestSolver(unittest.TestCase):
             key2:   np.array([0,1]),
             lock2:  np.array([0,3]),
             end:    np.array([0,5]),
+        }
+
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        self.assertEqual(does_level_follow_mission, False)
+
+
+
+    def test_solver_hazard_solvable(self):
+        level = Level()
+        level.upper_layer = np.array([
+            [s, e, fl, W, W, W, e, Fb, e, F, F, e, F, F, e, f]], dtype=object)
+        
+
+        # S--K--L--E
+        start = Start()
+        key1 = Key("flippers")
+        lock1 = Lock("water")
+        key2 = Key("fireboots")
+        lock2 = Lock("fire1")
+        lock3 = Lock("fire2")
+        end = End()
+        start.add_child_s([key1, lock1])
+        key1.add_lock_s(lock1)
+        lock1.add_child_s([key2, lock2])
+        key2.add_lock_s([lock2, lock3])
+        lock2.add_child_s(lock3)
+        lock3.add_child_s(end)
+
+        positions_map = {
+            start:  np.array([0,0]),
+            key1:   np.array([0,2]),
+            lock1:  np.array([0,4]),
+            key2:   np.array([0,7]),
+            lock2:  np.array([0,10]),
+            lock3:  np.array([0,13]),
+            end:    np.array([0,15]),
+        }
+
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        self.assertEqual(does_level_follow_mission, True)
+
+
+    def test_solver_hazard_unsolvable(self):
+        level = Level()
+        level.upper_layer = np.array([
+            [s, e, Fb, W, W, W, e, fl, e, F, F, e, F, F, e, f]], dtype=object)
+        
+
+        # S--K--L--E
+        start = Start()
+        key1 = Key("flippers")
+        lock1 = Lock("water")
+        key2 = Key("fireboots")
+        lock2 = Lock("fire1")
+        lock3 = Lock("fire2")
+        end = End()
+        start.add_child_s([key1, lock1])
+        key1.add_lock_s(lock1)
+        lock1.add_child_s([key2, lock2])
+        key2.add_lock_s([lock2, lock3])
+        lock2.add_child_s(lock3)
+        lock3.add_child_s(end)
+
+        positions_map = {
+            start:  np.array([0,0]),
+            key1:   np.array([0,7]),
+            lock1:  np.array([0,4]),
+            key2:   np.array([0,2]),
+            lock2:  np.array([0,10]),
+            lock3:  np.array([0,13]),
+            end:    np.array([0,15]),
         }
 
         does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
