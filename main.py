@@ -16,7 +16,7 @@ Log.verbose = True
 # So that if we want to reproduce the level, we know what seed to use,
 # and so that we don't have to change the seed each time we run the program.
 seed = np.random.randint(1e5)
-# seed = 83863
+# seed = 15000
 print("Level seed: {}".format(seed))
 random.seed(seed)
 np.random.seed(seed)
@@ -33,7 +33,8 @@ for i in range(level_count):
     level.map_password = "    "
     level.time_limit = 100
 
-    Generator.generate(level, size)
+    was_successful = Generator.generate(level, size)
+    print("Was Generator Successful: {}".format(was_successful))
     level_set.levels.append(level)
     
 

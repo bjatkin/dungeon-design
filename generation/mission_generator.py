@@ -1,60 +1,92 @@
-from dungeon_level.dungeon_tiles import Tiles, key_to_lock, key_tiles, TileTypes, item_to_hazard, item_tiles
+from dungeon_level.dungeon_tiles import Tiles, key_to_lock, key_tiles, TileTypes, item_to_hazard, item_tiles, lock_tiles, mission_tiles
 from validation.solver import Solver
 from graph_structure.graph_node import GNode, Start, End, Key, Lock
 from scipy.ndimage.measurements import label as label_connected_components
 from scipy.ndimage import convolve
+from skimage.morphology import binary_dilation
 from graph_structure.graph import Graph
 from log import Log
 import numpy as np
 
 class MissionGenerator:
     @staticmethod
-    def generate_mission(level, size, solution_node_order):
+    def generate_mission(level, solution_node_order):
+        Log.print(level)
         positions_map = dict()
         node_to_tile = dict()
+
+        start_position = MissionGenerator.get_start_position(level)
+
         for node_index, node in enumerate(solution_node_order):
-            Log.print("Adding {}".format(node))
-            if isinstance(node, Lock):
-                random_positions = MissionGenerator.find_random_positions_for_lock(level.upper_layer)
-            else:
-                random_positions = MissionGenerator.find_random_positions_for_key(level.upper_layer)
-
-            i = 0
-            previous_tile = None
-            previous_position = None
-            does_level_follow_mission = False
-            while not does_level_follow_mission:
-                if previous_tile is not None:
-                    level.upper_layer[tuple(previous_position)] = previous_tile
-
-                position = random_positions[i]
-
-                previous_tile = level.upper_layer[tuple(position)]
-                previous_position = position
-
-                MissionGenerator.add_mission_tile(level.upper_layer, node, position, positions_map, node_to_tile)
-                i += 1
-                if i >= random_positions.shape[0]:
-                    return positions_map
-                Log.print("\n\n")
-                Log.print(level)
-
-                does_level_follow_mission = Solver.does_level_follow_mission(level, solution_node_order[:node_index + 1], positions_map)
-
-        return positions_map
+            random_positions = MissionGenerator.get_random_positions(level.upper_layer, start_position, node, node_to_tile)
+            was_add_successful = MissionGenerator.add_mission_node(level, solution_node_order, node, node_index, positions_map, node_to_tile, random_positions)
+            if not was_add_successful:
+                return False, positions_map
+        return True, positions_map
 
 
     @staticmethod
-    def find_random_positions_for_key(layer):
-        rooms_mask, rooms_count = MissionGenerator.find_rooms_components(layer)
-        random_positions = MissionGenerator.get_random_positions_per_component(rooms_mask, rooms_count)
+    def add_mission_node(level, solution_node_order, node, node_index, positions_map, node_to_tile, random_positions):
+        original_layer = level.upper_layer.copy()
+        for position in random_positions:
+            level.upper_layer = original_layer.copy()
+            MissionGenerator.add_mission_tile(level.upper_layer, node, position, positions_map, node_to_tile)
+
+            Log.print("\n\n")
+            Log.print(level)
+
+            if Solver.does_level_follow_mission(level, solution_node_order[:node_index + 1], positions_map):
+                return True
+        return False
+
+
+    @staticmethod
+    def get_start_position(level):
+        components, component_count = MissionGenerator.get_rooms_components(level.upper_layer)
+        start_position = MissionGenerator.get_random_positions_per_component(components, component_count)[0]
+        return start_position
+
+    @staticmethod
+    def get_random_positions(layer, start_position, node, node_to_tile):
+        if isinstance(node, Lock):
+            return MissionGenerator.get_random_positions_for_lock(layer, start_position)
+        elif isinstance(node, Key) or isinstance(node, End):
+            return MissionGenerator.get_random_positions_for_key(layer, start_position)
+        elif isinstance(node, Start):
+            return np.array([start_position])
+
+
+    @staticmethod
+    def get_space_connected_to_position(layer, position):
+        empty_mask = (layer != Tiles.wall)
+        labeled_components, component_count = label_connected_components(empty_mask)
+        label = labeled_components[tuple(position)]
+        connected_space = (labeled_components == label)
+        return connected_space
+
+    @staticmethod
+    def get_walls_and_corridors_connected_to_space(layer, space):
+        space = binary_dilation(space)
+        wall_corridor_mask = MissionGenerator.get_wall_corridor_mask(layer)
+        connected_walls_and_corridors = np.logical_and(space, wall_corridor_mask)
+        return connected_walls_and_corridors
+
+
+    @staticmethod
+    def get_random_positions_for_key(layer, start_position):
+        connected_space = MissionGenerator.get_space_connected_to_position(layer, start_position).astype(int)
+        mission_mask = MissionGenerator.get_mission_mask(layer)
+        np.clip(connected_space - mission_mask, 0, 1, out=connected_space)
+        random_positions = MissionGenerator.get_random_positions_in_component(connected_space, 1, 10)
         return random_positions
         
 
     @staticmethod
-    def find_random_positions_for_lock(layer):
-        potential_lock_mask, potential_lock_count = MissionGenerator.find_potential_lock_components(layer)
-        random_positions = MissionGenerator.get_random_positions_per_component(potential_lock_mask, potential_lock_count)
+    def get_random_positions_for_lock(layer, start_position):
+        connected_space = MissionGenerator.get_space_connected_to_position(layer, start_position)
+        connected_walls_and_corridors = MissionGenerator.get_walls_and_corridors_connected_to_space(layer, connected_space)
+        connected_walls_and_corridors_components, component_count = label_connected_components(connected_walls_and_corridors)
+        random_positions = MissionGenerator.get_random_positions_per_component(connected_walls_and_corridors_components, component_count, 1)
         return random_positions
     
 
@@ -64,7 +96,10 @@ class MissionGenerator:
         for component_number in range(1, component_count + 1):
             random_positions = MissionGenerator.get_random_positions_in_component(components_mask, component_number, positions_per_component)
             random_position_list.extend(random_positions)
-        random_positions = np.vstack(random_position_list)
+        if len(random_position_list) > 0:
+            random_positions = np.vstack(random_position_list)
+        else:
+            random_positions = np.zeros((0,2))
         np.random.shuffle(random_positions)
         return random_positions
 
@@ -121,31 +156,44 @@ class MissionGenerator:
     @staticmethod
     def get_random_positions_in_mask(mask, position_count=1):
         positions_in_mask = np.argwhere(mask == 1)
-        indices = np.random.choice(positions_in_mask.shape[0], size=position_count, replace=False)
-        random_positions = positions_in_mask[indices,:]
+        if positions_in_mask.shape[0] > 0:
+            samples_count = np.minimum(position_count, positions_in_mask.shape[0])
+            indices = np.random.choice(positions_in_mask.shape[0], size=samples_count, replace=False)
+            random_positions = positions_in_mask[indices,:]
+        else:
+            random_positions = np.zeros((0,2))
 
         return random_positions
 
 
     # https://docs.scipy.org/doc/scipy-0.16.0/reference/generated/scipy.ndimage.measurements.label.html
     @staticmethod
-    def find_rooms_components(layer):
+    def get_rooms_components(layer):
         empty_mask = (layer == Tiles.empty)
         labeled_components, component_count = label_connected_components(empty_mask)
         return labeled_components, component_count
 
 
     @staticmethod
-    def find_potential_lock_components(layer):
-        potential_lock_mask = MissionGenerator.find_potential_lock_mask(layer)
+    def get_potential_lock_components(layer):
+        potential_lock_mask = MissionGenerator.get_wall_corridor_mask(layer)
         labeled_components, component_count = label_connected_components(potential_lock_mask)
         return labeled_components, component_count
+
+
+    @staticmethod
+    def get_mission_mask(layer):
+        mission_mask = np.zeros(layer.shape)
+        for mission_tile in mission_tiles:
+            mission_mask = np.logical_or(mission_mask, layer == mission_tile)
+
+        return mission_mask.astype(int)
 
 
     # Returns a mask representing all the possible locations for a lock
     # https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.ndimage.filters.convolve.html
     @staticmethod
-    def find_potential_lock_mask(layer):
+    def get_wall_corridor_mask(layer):
         convolutional_result1 = 2 # Based on the filter, a horizontal wall has a result == 2
         convolutional_result2 = 8 # Based on the filter, a vertical wall has a result == 8
         # We can't just use a symmetric kernel because we need to ignore corners.
@@ -155,15 +203,17 @@ class MissionGenerator:
             [0., 4., 0.],])
 
         wall_mask = (layer == Tiles.wall).astype(int)
+        mission_mask = MissionGenerator.get_mission_mask(layer)
+        np.clip(wall_mask - mission_mask, 0, 1, out=wall_mask)
         conv_result = convolve(wall_mask, wall_kernel, mode='constant', cval=1.0)
-        potential_lock_mask = (np.logical_or(conv_result == convolutional_result1, conv_result == convolutional_result2))
-        return potential_lock_mask
+        wall_corridor_mask = (np.logical_or(conv_result == convolutional_result1, conv_result == convolutional_result2)).astype(int)
+        np.clip(wall_corridor_mask - mission_mask, 0, 1, out=wall_corridor_mask)
+        return wall_corridor_mask
 
 
     @staticmethod
     def generate_mission_graph():
         # graph = Graph()
-
         # return GNode.find_all_nodes(graph.start, method="topological-sort")
 
 
@@ -194,7 +244,7 @@ class MissionGenerator:
         graph = Graph()
         graph.start = start
         graph.end = end
-        graph.draw()
+        # graph.draw()
 
         return GNode.find_all_nodes(start, method="topological-sort")
 

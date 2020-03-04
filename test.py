@@ -10,6 +10,6 @@ from generation.test_drawing import TestDrawing
 from generation.test_mission_generator import TestMissionGenerator
 from log import Log
 
-# Log.verbose = True
+Log.verbose = True
 
 unittest.main()

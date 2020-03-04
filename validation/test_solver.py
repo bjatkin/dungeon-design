@@ -746,3 +746,61 @@ class TestSolver(unittest.TestCase):
 
         does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, False)
+
+    def test_solver_difficult(self):
+        level = Level()
+        level.upper_layer = np.array([
+            [ s,lR, e, W, e, W,Fb, w],
+            [kR, w,fl, w, e, w, e, w],
+            [ F, w, w, w, w, w, F, w],
+            [lG, w, e, e, e, w,kG, w],
+            [ e, e, e, e, e, w, w, w],
+            [ f, e, e, e, e, e, e, e]], dtype=object)
+
+        start = Start()
+        key_red = Key("red")
+        lock_red = Lock("red")
+        flippers = Key("flippers")
+        water1 = Lock("water1")
+        water2 = Lock("water2")
+        key_green = Key("green")
+        lock_green = Lock("green")
+        fire_boots = Key("fireboots")
+        fire1 = Lock("fire1")
+        fire2 = Lock("fire2")
+        end = End()
+        start.add_child_s([fire2, key_red, lock_red])
+        key_red.add_lock_s(lock_red)
+        lock_red.add_child_s([flippers, water1])
+        flippers.add_lock_s([water1, water2])
+        water1.add_child_s(water2)
+        water2.add_child_s([fire_boots, fire1])
+        fire_boots.add_lock_s([fire1, fire2])
+        fire1.add_child_s(key_green)
+        key_green.add_lock_s(lock_green)
+        fire2.add_child_s(lock_green)
+        lock_green.add_child_s(end)
+
+            # [ s,lR, e, W, e, W,Fb, w],
+            # [kR, w,fl, w, e, w, e, w],
+            # [ F, w, w, w, w, w, F, w],
+            # [lG, w, e, e, e, w,kG, w],
+            # [ e, e, e, e, e, w, w, w],
+            # [ f, e, e, e, e, e, e, e]], dtype=object)
+        positions_map = {
+            start:      np.array([0,0]),
+            key_red:    np.array([1,0]),
+            lock_red:   np.array([0,1]),
+            flippers:   np.array([1,2]),
+            water1:     np.array([0,3]),
+            water2:     np.array([0,5]),
+            key_green:  np.array([3,6]),
+            lock_green: np.array([3,0]),
+            fire_boots: np.array([0,6]),
+            fire1:      np.array([2,6]),
+            fire2:      np.array([2,0]),
+            end:        np.array([5,0])
+        }
+
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        self.assertEqual(does_level_follow_mission, True)

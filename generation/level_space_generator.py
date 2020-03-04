@@ -26,12 +26,13 @@ class LevelSpaceGenerator:
     
     @staticmethod
     def add_random_noise(level, size):
+        return
         random_positions = LevelSpaceGenerator.get_random_positions(size)
-        percentage = 0.3
+        percentage = 0.2
         percentage_index = int(percentage * random_positions.shape[0])
         random_positions = random_positions[:percentage_index]
         for position in random_positions:
-            if np.random.randint(4) == 0:
+            if np.random.randint(2) == 0:
                 level.upper_layer[tuple(position)] = Tiles.empty
             else:
                 level.upper_layer[tuple(position)] = Tiles.wall

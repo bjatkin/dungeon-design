@@ -31,7 +31,7 @@ class Level:
                 if tile == Tiles.empty:
                     string += ". "
                 if tile == Tiles.wall:
-                    string += "w "
+                    string += "# "
                 if tile == Tiles.player:
                     string += "s "
                 if tile == Tiles.finish:
@@ -54,5 +54,13 @@ class Level:
                     string += "lY"
                 if tile == Tiles.collectable:
                     string += "c "
+                if tile == Tiles.water:
+                    string += "w "
+                if tile == Tiles.flippers:
+                    string += "fl"
+                if tile == Tiles.fire:
+                    string += "F "
+                if tile == Tiles.fire_boots:
+                    string += "Fb"
             string += "\n"
         return string
