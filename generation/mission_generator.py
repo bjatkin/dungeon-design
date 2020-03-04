@@ -1,4 +1,4 @@
-from dungeon_level.dungeon_tiles import Tiles, key_to_lock, key_tiles
+from dungeon_level.dungeon_tiles import Tiles, key_to_lock, key_tiles, TileTypes, item_to_hazard, item_tiles
 from validation.solver import Solver
 from graph_structure.graph_node import GNode, Start, End, Key, Lock
 from scipy.ndimage.measurements import label as label_connected_components
@@ -11,7 +11,7 @@ class MissionGenerator:
     @staticmethod
     def generate_mission(level, size, solution_node_order):
         positions_map = dict()
-        node_to_key_color = dict()
+        node_to_tile = dict()
         for node_index, node in enumerate(solution_node_order):
             Log.print("Adding {}".format(node))
             if isinstance(node, Lock):
@@ -32,7 +32,7 @@ class MissionGenerator:
                 previous_tile = level.upper_layer[tuple(position)]
                 previous_position = position
 
-                MissionGenerator.add_mission_tile(level.upper_layer, node, position, positions_map, node_to_key_color)
+                MissionGenerator.add_mission_tile(level.upper_layer, node, position, positions_map, node_to_tile)
                 i += 1
                 if i >= random_positions.shape[0]:
                     return positions_map
@@ -69,7 +69,7 @@ class MissionGenerator:
         return random_positions
 
     @staticmethod
-    def get_matching_color(node_to_key_color, node, get='key'):
+    def get_matching_tile(node_to_tile, node, get='key'):
         if isinstance(node, Key):
             key_node = node
         elif isinstance(node, Lock):
@@ -77,19 +77,25 @@ class MissionGenerator:
         else:
             return None
         
-        if key_node not in node_to_key_color:
-            node_to_key_color[key_node] = np.random.choice(key_tiles)
+        if key_node not in node_to_tile:
+            if len(key_node.lock_s) == 1:
+                node_to_tile[key_node] = np.random.choice(key_tiles)
+            else:
+                node_to_tile[key_node] = np.random.choice(item_tiles)
 
-        key_color = node_to_key_color[key_node]
+        tile = node_to_tile[key_node]
 
         if get == 'key':
-            return key_color
+            return tile
         elif get == 'lock':
-            return key_to_lock[key_color]
+            if tile.get_tile_type() == TileTypes.key_lock:
+                return key_to_lock[tile]
+            elif tile.get_tile_type() == TileTypes.item_hazard:
+                return item_to_hazard[tile]
 
 
     @staticmethod
-    def add_mission_tile(layer, node, position, positions_map, node_to_key_color):
+    def add_mission_tile(layer, node, position, positions_map, node_to_tile):
             positions_map[node] = position
             position = tuple(position)
             if isinstance(node, Start):
@@ -97,10 +103,10 @@ class MissionGenerator:
             elif isinstance(node, End):
                 layer[position] = Tiles.finish
             elif isinstance(node, Key):
-                key_tile = MissionGenerator.get_matching_color(node_to_key_color, node, get='key')
+                key_tile = MissionGenerator.get_matching_tile(node_to_tile, node, get='key')
                 layer[position] = key_tile
             elif isinstance(node, Lock):
-                lock_tile = MissionGenerator.get_matching_color(node_to_key_color, node, get='lock')
+                lock_tile = MissionGenerator.get_matching_tile(node_to_tile, node, get='lock')
                 layer[position] = lock_tile
             elif isinstance(node, GNode):
                 layer[position] = Tiles.collectable
@@ -156,33 +162,35 @@ class MissionGenerator:
 
     @staticmethod
     def generate_mission_graph():
-        graph = Graph()
+        # graph = Graph()
 
-        return GNode.find_all_nodes(graph.start, method="topological-sort")
+        # return GNode.find_all_nodes(graph.start, method="topological-sort")
 
 
-        # start = Start()
-        # key1 = Key("red")
-        # lock1 = Lock("red")
-        # key2 = Key("blue")
-        # lock2 = Lock("blue")
-        # key3 = Key("green")
-        # lock3 = Lock("green")
-        # key4 = Key("yellow")
-        # lock4 = Lock("yellow")
-        # end = End()
-        # start.add_child_s(key1)
-        # key1.add_child_s(lock1)
-        # key1.add_lock_s(lock1)
-        # lock1.add_child_s(key2)
-        # key2.add_child_s(lock2)
-        # key2.add_lock_s(lock2)
-        # lock2.add_child_s(key3)
-        # key3.add_child_s(lock3)
-        # key3.add_lock_s(lock3)
-        # lock3.add_child_s(key4)
-        # key4.add_child_s(lock4)
-        # key4.add_lock_s(lock4)
-        # lock4.add_child_s(end)
+        start = Start()
+        key1 = Key("red")
+        lock1 = Lock("red")
+        key2 = Key("flippers")
+        lock2a = Lock("water 1")
+        lock2b = Lock("water 2")
+        key4 = Key("green")
+        lock4 = Lock("green")
+        key3 = Key("flippers")
+        lock3a = Lock("fire 1")
+        lock3b = Lock("fire 2")
+        end = End()
+        start.add_child_s([key1, lock1, lock3b])
+        key1.add_lock_s(lock1)
+        lock1.add_child_s([key2, lock2a])
+        key2.add_lock_s([lock2a, lock2b])
+        lock2a.add_child_s(lock2b)
+        lock2b.add_child_s([key3, lock3a])
+        key3.add_lock_s([lock3a, lock3b])
+        lock3a.add_child_s(key4)
+        key4.add_lock_s(lock4)
+        lock3b.add_child_s(lock4)
+        lock4.add_child_s(end)
+
+        return GNode.find_all_nodes(start, method="topological-sort")
 
         # return start, [start, key1, lock1, key2, lock2, key3, lock3, key4, lock4, end]

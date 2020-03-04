@@ -15,11 +15,11 @@ class Generator:
         is_solvable = False
         while not is_solvable:
             # Comment this out and uncomment the code below to go back to normal random generation...
-            ImageLevelGenerator.generate(level, size)
-            is_solvable = True
+            # ImageLevelGenerator.generate(level, size)
+            # is_solvable = True
 
-            # LevelSpaceGenerator.generate(level, size)
-            # solution_node_order = MissionGenerator.generate_mission_graph()
-            # positions_map = MissionGenerator.generate_mission(level, size, solution_node_order)
-            # is_solvable = Solver.does_level_follow_mission(level, solution_node_order, positions_map)
+            LevelSpaceGenerator.generate(level, size)
+            solution_node_order = MissionGenerator.generate_mission_graph()
+            positions_map = MissionGenerator.generate_mission(level, size, solution_node_order)
+            is_solvable = Solver.does_level_follow_mission(level, solution_node_order, positions_map)
         pass

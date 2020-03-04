@@ -1,6 +1,6 @@
 from validation.path_finder import PathFinder
 from validation.player_status import PlayerStatus
-from dungeon_level.dungeon_tiles import Tiles, lock_tiles, TileTypes
+from dungeon_level.dungeon_tiles import Tiles, lock_tiles, TileTypes, hazard_tiles
 from dungeon_level.level import Level
 from graph_structure.graph_node import GNode, Start, End, Key, Lock
 from scipy.ndimage.measurements import label as label_connected_components
@@ -41,8 +41,10 @@ class Solver:
         for node in reached:
             if isinstance(node, Lock) and node in positions_map:
                 tile = layer[tuple(positions_map[node])]
-                if tile in lock_tiles and player_status.get_key_count(tile) > 0:
-                    if node.key_s[0] not in reached:
+                if node.key_s[0] not in reached:
+                    if tile.get_tile_type() == TileTypes.key_lock and player_status.get_key_count(tile) > 0:
+                        return False
+                    elif tile.get_tile_type() == TileTypes.item_hazard and player_status.get_item_count(tile) > 0:
                         return False
         return True
 

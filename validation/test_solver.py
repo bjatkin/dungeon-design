@@ -707,3 +707,42 @@ class TestSolver(unittest.TestCase):
 
         does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, False)
+
+
+    def test_solver_hazard_too_soon(self):
+        level = Level()
+        level.upper_layer = np.array([
+            [ s, e, W, e,fl],
+            [ e,fl, w, w, w],
+            [ e, e, W, e, f]], dtype=object)
+        
+
+        # S--K--L--E
+        start = Start()
+        flippers1 = Key("flippers 1")
+        water1 = Lock("water 1")
+        flippers2 = Key("flippers 2")
+        water2 = Lock("water 2")
+        end = End()
+
+        start.add_child_s([flippers1, water1, water2])
+        flippers1.add_lock_s(water1)
+        water1.add_child_s(flippers2)
+        flippers2.add_lock_s(water2)
+        water2.add_child_s(end)
+
+            # [ s, e, W, e,fl],
+            # [ e,fl, w, w, w],
+            # [ e, e, W, e, f]], dtype=object)
+
+        positions_map = {
+            start:      np.array([0,0]),
+            flippers1:  np.array([1,1]),
+            water1:     np.array([0,2]),
+            flippers2:  np.array([0,4]),
+            water2:     np.array([2,2]),
+            end:        np.array([2,4]),
+        }
+
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        self.assertEqual(does_level_follow_mission, False)
