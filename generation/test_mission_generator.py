@@ -6,6 +6,7 @@ from dungeon_level.dungeon_tiles import Tiles
 from dungeon_level.level import Level
 from validation.solver import Solver
 from log import Log
+import time
 
 import numpy as np
 
@@ -184,7 +185,7 @@ class TestMissionGenerator(unittest.TestCase):
 
         
     def test_works_with_branched_graphs(self):
-        return
+        # return
         # S
         # |-----------
         # |    |     |
@@ -326,6 +327,12 @@ class TestMissionGenerator(unittest.TestCase):
 
 
     def test_works_with_difficult_graph(self):
+        # return
+
+            # [ e, e,lG, e, e, w, e,lR, e, e, w, e, e, W,Fb, e, w, e, e],
+            # [ e, e, w, e, e, w, e, w,fl, e, w, e, e, w, e, e, w,kG, e],
+            # [ e, e, w, e, e, w,kR, w, en e, w, e, e, w, e, e, w, e, e],
+            # [ e, e, w, e, e, F, s, w, e, e, W, e, e, w, e, e, F, e, e],
         start = Start()
         key_red = Key("red")
         lock_red = Lock("red")
@@ -350,28 +357,36 @@ class TestMissionGenerator(unittest.TestCase):
         fire2.add_child_s(lock_green)
         lock_green.add_child_s(end)
 
-        np.random.seed(8)
+        # np.random.seed(8)
         
         level = Level()
         w = Tiles.wall
         e = Tiles.empty
 
         layer = np.array([
-            [ e, e, e, w, e, e, e, w],
-            [ e, w, e, w, e, w, e, w],
-            [ e, w, e, w, e, w, e, w],
-            [ e, w, e, w, e, w, e, w],
-            [ e, w, e, w, e, w, e, w],
-            [ e, w, e, e, e, w, e, w]], dtype=object)
+            [w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w],
+            [w, e, e, w, e, e, w, e, e, w, e, e, w, e, e, w, e, e, w],
+            [w, e, e, w, e, e, w, e, e, w, e, e, w, e, e, w, e, e, w],
+            [w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w],
+            [w, e, e, w, e, e, w, e, e, w, e, e, w, e, e, w, e, e, w],
+            [w, e, e, w, e, e, w, e, e, w, e, e, w, e, e, w, e, e, w],
+            [w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w],
+            [w, e, e, w, e, e, w, e, e, w, e, e, w, e, e, w, e, e, w],
+            [w, e, e, w, e, e, w, e, e, w, e, e, w, e, e, w, e, e, w],
+            [w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w]], dtype=object)
+            
 
         solution_node_order = GNode.find_all_nodes(start, method="topological-sort")
 
+        start_time = time.time()
         was_successful = Generator.generate(
             level=level, 
             size=layer.shape, 
-            max_retry_count=10, 
+            max_retry_count=10,
             pregenerated_level_layer=layer, 
             pregenerated_solution_node_order=solution_node_order)
+        end_time = time.time()
         self.assertTrue(was_successful)
 
         Log.print(level)
+        Log.print(end_time - start_time)

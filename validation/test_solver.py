@@ -750,12 +750,12 @@ class TestSolver(unittest.TestCase):
     def test_solver_difficult(self):
         level = Level()
         level.upper_layer = np.array([
-            [ s,lR, e, W, e, W,Fb, w],
-            [kR, w,fl, w, e, w, e, w],
-            [ F, w, w, w, w, w, F, w],
-            [lG, w, e, e, e, w,kG, w],
-            [ e, e, e, e, e, w, w, w],
-            [ f, e, e, e, e, e, e, e]], dtype=object)
+            [ f, e, e, w, e, W, e, w],
+            [ e, w,lG, w, e, w,Fb, w],
+            [ e, w, F, w, W, w, e, w],
+            [ e, w, s, w, e, w, F, w],
+            [ e, w,kR, w,fl, w, e, w],
+            [ e, w, e,lR, e, w,kG, w]], dtype=object)
 
         start = Start()
         key_red = Key("red")
@@ -781,25 +781,25 @@ class TestSolver(unittest.TestCase):
         fire2.add_child_s(lock_green)
         lock_green.add_child_s(end)
 
-            # [ s,lR, e, W, e, W,Fb, w],
-            # [kR, w,fl, w, e, w, e, w],
-            # [ F, w, w, w, w, w, F, w],
-            # [lG, w, e, e, e, w,kG, w],
-            # [ e, e, e, e, e, w, w, w],
-            # [ f, e, e, e, e, e, e, e]], dtype=object)
+            # [ f, e, e, w, e, W, e, w],
+            # [ e, w,lG, w, e, w,Fb, w],
+            # [ e, w, F, w, W, w, e, w],
+            # [ e, w, s, w, e, w, F, w],
+            # [ e, w,kR, w,fl, w, e, w],
+            # [ e, w, e,lR, e, w,kG, w]], dtype=object)
         positions_map = {
-            start:      np.array([0,0]),
-            key_red:    np.array([1,0]),
-            lock_red:   np.array([0,1]),
-            flippers:   np.array([1,2]),
-            water1:     np.array([0,3]),
+            start:      np.array([3,2]),
+            key_red:    np.array([4,2]),
+            lock_red:   np.array([5,3]),
+            flippers:   np.array([4,4]),
+            water1:     np.array([2,4]),
             water2:     np.array([0,5]),
-            key_green:  np.array([3,6]),
-            lock_green: np.array([3,0]),
-            fire_boots: np.array([0,6]),
-            fire1:      np.array([2,6]),
-            fire2:      np.array([2,0]),
-            end:        np.array([5,0])
+            key_green:  np.array([5,6]),
+            lock_green: np.array([1,2]),
+            fire_boots: np.array([1,6]),
+            fire1:      np.array([3,6]),
+            fire2:      np.array([2,2]),
+            end:        np.array([0,0])
         }
 
         does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)

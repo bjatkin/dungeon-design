@@ -7,6 +7,7 @@ from skimage.morphology import binary_dilation
 from graph_structure.graph import Graph
 from log import Log
 import numpy as np
+import copy
 
 class MissionGenerator:
     @staticmethod
@@ -17,16 +18,33 @@ class MissionGenerator:
 
         start_position = MissionGenerator.get_start_position(level)
 
-        for node_index, node in enumerate(solution_node_order):
-            random_positions = MissionGenerator.get_random_positions(level.upper_layer, start_position, node, node_to_tile)
-            was_add_successful = MissionGenerator.add_mission_node(level, solution_node_order, node, node_index, positions_map, node_to_tile, random_positions)
-            if not was_add_successful:
-                return False, positions_map
-        return True, positions_map
+        was_successful, level_with_mission = MissionGenerator._generate_mission(level, 0, solution_node_order, positions_map, node_to_tile, start_position)
+        level.upper_layer = level_with_mission.upper_layer
+        Log.print(level)
+        return was_successful
 
 
     @staticmethod
-    def add_mission_node(level, solution_node_order, node, node_index, positions_map, node_to_tile, random_positions):
+    def _generate_mission(level, node_index, solution_node_order, positions_map, node_to_tile, start_position):
+        if node_index >= len(solution_node_order):
+            return True, level
+
+        level = copy.deepcopy(level)
+        positions_map = copy.deepcopy(positions_map)
+        node_to_tile = copy.deepcopy(node_to_tile)
+
+        node = solution_node_order[node_index]
+        random_positions = MissionGenerator.get_random_positions(level.upper_layer, start_position, node, node_to_tile)
+        was_add_successful, level = MissionGenerator.add_mission_node(level, solution_node_order, node, node_index, positions_map, node_to_tile, random_positions, start_position)
+        if not was_add_successful:
+            return False, level
+
+        return True, level
+
+
+
+    @staticmethod
+    def add_mission_node(level, solution_node_order, node, node_index, positions_map, node_to_tile, random_positions, start_position):
         original_layer = level.upper_layer.copy()
         for position in random_positions:
             level.upper_layer = original_layer.copy()
@@ -36,8 +54,10 @@ class MissionGenerator:
             Log.print(level)
 
             if Solver.does_level_follow_mission(level, solution_node_order[:node_index + 1], positions_map):
-                return True
-        return False
+                was_successful, level = MissionGenerator._generate_mission(level, node_index + 1, solution_node_order, positions_map, node_to_tile, start_position)
+                if was_successful:
+                    return was_successful, level
+        return False, level
 
 
     @staticmethod
@@ -77,7 +97,7 @@ class MissionGenerator:
         connected_space = MissionGenerator.get_space_connected_to_position(layer, start_position).astype(int)
         mission_mask = MissionGenerator.get_mission_mask(layer)
         np.clip(connected_space - mission_mask, 0, 1, out=connected_space)
-        random_positions = MissionGenerator.get_random_positions_in_component(connected_space, 1, 10)
+        random_positions = MissionGenerator.get_random_positions_in_component(connected_space, 1, 3)
         return random_positions
         
 
