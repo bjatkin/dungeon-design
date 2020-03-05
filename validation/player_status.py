@@ -1,4 +1,5 @@
 from dungeon_level.dungeon_tiles import Tiles, lock_tiles, key_tiles, item_tiles, hazard_tiles
+from dungeon_level.level import Level
 import numpy as np
 
 class PlayerStatus:
@@ -65,11 +66,9 @@ class PlayerStatus:
 
 
     def can_traverse(self, layer, current_position, neighbor_position):
-        h, w = layer.shape
-        is_within_bounds = neighbor_position[0] >= 0 and neighbor_position[1] >= 0 and neighbor_position[0] < h and neighbor_position[1] < w
-        if not is_within_bounds:
+        if not Level.is_position_within_layer_bounds(layer, neighbor_position):
             return False
-        
+
         current_tile = layer[tuple(current_position)]
         neighbor_tile = layer[tuple(neighbor_position)]
 

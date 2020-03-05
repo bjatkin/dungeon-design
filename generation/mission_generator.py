@@ -1,6 +1,7 @@
 from dungeon_level.dungeon_tiles import Tiles, key_to_lock, key_tiles, TileTypes, item_to_hazard, item_tiles, lock_tiles, mission_tiles
 from validation.solver import Solver
 from graph_structure.graph_node import GNode, Start, End, Key, Lock
+from dungeon_level.level import Level
 from scipy.ndimage.measurements import label as label_connected_components
 from scipy.ndimage import convolve
 from skimage.morphology import binary_dilation
@@ -153,6 +154,7 @@ class MissionGenerator:
     def add_mission_tile(layer, node, position, positions_map, node_to_tile):
             positions_map[node] = position
             position = tuple(position)
+
             if isinstance(node, Start):
                 layer[position] = Tiles.player
             elif isinstance(node, End):
@@ -162,9 +164,32 @@ class MissionGenerator:
                 layer[position] = key_tile
             elif isinstance(node, Lock):
                 lock_tile = MissionGenerator.get_matching_tile(node_to_tile, node, get='lock')
-                layer[position] = lock_tile
+                if lock_tile.get_tile_type() == TileTypes.item_hazard:
+                    MissionGenerator.spread_hazard(layer, lock_tile, position)
+                else:
+                    layer[position] = lock_tile
             elif isinstance(node, GNode):
                 layer[position] = Tiles.collectable
+
+    @staticmethod
+    def spread_hazard(layer, hazard_tile, position):
+        offsets = [np.array([-1, 0]), np.array([1, 0]), np.array([0, -1]), np.array([0, 1])]
+        spread_probability = [0.9, 0.3]
+        hazard_tile_positions = [position]
+        spread_probability_index = 0
+        while len(hazard_tile_positions) > 0:
+            hazard_tile_position = hazard_tile_positions.pop()
+
+            layer[tuple(hazard_tile_position)] = hazard_tile
+            for offset in offsets:
+                if np.random.random() < spread_probability[spread_probability_index]:
+                    neighbor_hazard_tile_position = tuple(hazard_tile_position + offset)
+                    if Level.is_position_within_layer_bounds(layer, neighbor_hazard_tile_position) and layer[neighbor_hazard_tile_position] == Tiles.empty:
+                        hazard_tile_positions.append(neighbor_hazard_tile_position)
+            spread_probability_index += 1
+            spread_probability_index = np.clip(spread_probability_index, 0, len(spread_probability) - 1)
+
+
 
 
     @staticmethod

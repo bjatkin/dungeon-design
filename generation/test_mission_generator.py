@@ -329,10 +329,6 @@ class TestMissionGenerator(unittest.TestCase):
     def test_works_with_difficult_graph(self):
         # return
 
-            # [ e, e,lG, e, e, w, e,lR, e, e, w, e, e, W,Fb, e, w, e, e],
-            # [ e, e, w, e, e, w, e, w,fl, e, w, e, e, w, e, e, w,kG, e],
-            # [ e, e, w, e, e, w,kR, w, en e, w, e, e, w, e, e, w, e, e],
-            # [ e, e, w, e, e, F, s, w, e, e, W, e, e, w, e, e, F, e, e],
         start = Start()
         key_red = Key("red")
         lock_red = Lock("red")
@@ -357,7 +353,7 @@ class TestMissionGenerator(unittest.TestCase):
         fire2.add_child_s(lock_green)
         lock_green.add_child_s(end)
 
-        # np.random.seed(8)
+        np.random.seed(12)
         
         level = Level()
         w = Tiles.wall

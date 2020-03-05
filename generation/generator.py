@@ -6,6 +6,7 @@ import numpy as np
 from generation.mission_generator import MissionGenerator
 from generation.level_space_generator import LevelSpaceGenerator
 from generation.image_level_generator import ImageLevelGenerator
+from log import Log
 import time
 
 class Generator:
