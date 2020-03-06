@@ -4,8 +4,8 @@ import numpy as np
 
 class LevelTweaker:
     @staticmethod
-    def tweak_level(level, tweaker_aesthetics):
-        if tweaker_aesthetics.should_fill_unused_space:
+    def tweak_level(level, tweaker_aesthetic):
+        if tweaker_aesthetic.should_fill_unused_space:
             LevelTweaker.fill_unused_space(level)
 
     @staticmethod

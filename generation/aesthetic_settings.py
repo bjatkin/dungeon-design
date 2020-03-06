@@ -15,12 +15,18 @@ class AestheticSettings:
             self.hazard_spread_probability = {Tiles.water: 0.8, Tiles.fire: 0.3}
             self.single_lock_is_hazard_probability = 0.1
 
-    class TweakerAesthetics:
+    class TweakerAesthetic:
         def __init__(self):
             self.should_fill_unused_space = True
+
+    class MissionGraphAesthetic:
+        def __init__(self):
+            self.mission_graph_max_width = 4
+            self.mission_graph_max_height = 4
             
 
     def __init__(self):
         self.level_space_aesthetic = AestheticSettings.LevelSpaceAesthetic()
         self.mission_aesthetic = AestheticSettings.MissionAesthetic()
-        self.tweaker_aesthetics = AestheticSettings.TweakerAesthetics()
+        self.tweaker_aesthetic = AestheticSettings.TweakerAesthetic()
+        self.mission_graph_aesthetic = AestheticSettings.MissionGraphAesthetic()

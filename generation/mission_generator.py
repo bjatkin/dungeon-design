@@ -256,8 +256,8 @@ class MissionGenerator:
 
 
     @staticmethod
-    def generate_mission_graph():
-        # graph = Graph()
+    def generate_mission_graph(mission_graph_aesthetic):
+        # graph = Graph(mission_graph_aesthetic)
         # return GNode.find_all_nodes(graph.start, method="topological-sort")
         return MissionGenerator.get_water_lock_graph()
 

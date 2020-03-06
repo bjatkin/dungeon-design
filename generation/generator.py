@@ -17,27 +17,27 @@ class Generator:
 
         start_time = time.time()
         for retry_count in range(max_retry_count):
-            Generator._set_level_space(level, size, pregenerated_level_layer, aesthetic_settings)
-            solution_node_order = Generator._get_mission_graph(pregenerated_solution_node_order, aesthetic_settings)
+            Generator._set_level_space(level, size, pregenerated_level_layer, aesthetic_settings.level_space_aesthetic)
+            solution_node_order = Generator._get_mission_graph(pregenerated_solution_node_order, aesthetic_settings.mission_graph_aesthetic)
             is_solvable = MissionGenerator.generate_mission(level, solution_node_order, aesthetic_settings.mission_aesthetic)
             if is_solvable:
-                LevelTweaker.tweak_level(level, aesthetic_settings.tweaker_aesthetics)
+                LevelTweaker.tweak_level(level, aesthetic_settings.tweaker_aesthetic)
                 break
         end_time = time.time()
         Log.print("Level generated in {} seconds".format(end_time - start_time))
         return is_solvable
 
     @staticmethod
-    def _set_level_space(level, size, pregenerated_level_layer, aesthetic_settings):
+    def _set_level_space(level, size, pregenerated_level_layer, level_space_aesthetic):
         if pregenerated_level_layer is None:
-            LevelSpaceGenerator.generate(level, size, aesthetic_settings.level_space_aesthetic)
+            LevelSpaceGenerator.generate(level, size, level_space_aesthetic)
         else:
             level.upper_layer = pregenerated_level_layer
 
 
     @staticmethod
-    def _get_mission_graph(pregenerated_solution_node_order, aesthetic_settings):
+    def _get_mission_graph(pregenerated_solution_node_order, mission_graph_aesthetic):
         if pregenerated_solution_node_order is None:
-            return MissionGenerator.generate_mission_graph()
+            return MissionGenerator.generate_mission_graph(mission_graph_aesthetic)
         else:
             return pregenerated_solution_node_order
