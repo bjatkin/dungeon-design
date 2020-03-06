@@ -12,21 +12,21 @@ import copy
 
 class MissionGenerator:
     @staticmethod
-    def generate_mission(level, solution_node_order):
+    def generate_mission(level, solution_node_order, mission_aesthetic):
         Log.print(level)
         positions_map = dict()
         node_to_tile = dict()
 
         start_position = MissionGenerator.get_start_position(level)
 
-        was_successful, level_with_mission = MissionGenerator._generate_mission(level, 0, solution_node_order, positions_map, node_to_tile, start_position)
+        was_successful, level_with_mission = MissionGenerator._generate_mission(level, 0, solution_node_order, positions_map, node_to_tile, start_position, mission_aesthetic)
         level.upper_layer = level_with_mission.upper_layer
         Log.print(level)
         return was_successful
 
 
     @staticmethod
-    def _generate_mission(level, node_index, solution_node_order, positions_map, node_to_tile, start_position):
+    def _generate_mission(level, node_index, solution_node_order, positions_map, node_to_tile, start_position, mission_aesthetic):
         if node_index >= len(solution_node_order):
             return True, level
 
@@ -36,28 +36,30 @@ class MissionGenerator:
 
         node = solution_node_order[node_index]
         random_positions = MissionGenerator.get_random_positions(level.upper_layer, start_position, node, node_to_tile)
-        was_add_successful, level = MissionGenerator.add_mission_node(level, solution_node_order, node, node_index, positions_map, node_to_tile, random_positions, start_position)
+        was_add_successful, level = MissionGenerator.add_mission_node(level, solution_node_order, node, node_index, positions_map, node_to_tile, random_positions, start_position, mission_aesthetic)
         if not was_add_successful:
             return False, level
 
         return True, level
 
 
-
+    is_generator_recursive = False
     @staticmethod
-    def add_mission_node(level, solution_node_order, node, node_index, positions_map, node_to_tile, random_positions, start_position):
+    def add_mission_node(level, solution_node_order, node, node_index, positions_map, node_to_tile, random_positions, start_position, mission_aesthetic):
         original_layer = level.upper_layer.copy()
         for position in random_positions:
             level.upper_layer = original_layer.copy()
-            MissionGenerator.add_mission_tile(level.upper_layer, node, position, positions_map, node_to_tile)
+            MissionGenerator.add_mission_tile(level.upper_layer, node, position, positions_map, node_to_tile, mission_aesthetic)
 
             Log.print("\n\n")
             Log.print(level)
 
             if Solver.does_level_follow_mission(level, solution_node_order[:node_index + 1], positions_map):
-                was_successful, level = MissionGenerator._generate_mission(level, node_index + 1, solution_node_order, positions_map, node_to_tile, start_position)
+                was_successful, level = MissionGenerator._generate_mission(level, node_index + 1, solution_node_order, positions_map, node_to_tile, start_position, mission_aesthetic)
                 if was_successful:
                     return was_successful, level
+                elif not MissionGenerator.is_generator_recursive:
+                    return False, level
         return False, level
 
 
@@ -125,7 +127,7 @@ class MissionGenerator:
         return random_positions
 
     @staticmethod
-    def get_matching_tile(node_to_tile, node, get='key'):
+    def get_matching_tile(node_to_tile, node, mission_aesthetic, get='key'):
         if isinstance(node, Key):
             key_node = node
         elif isinstance(node, Lock):
@@ -134,10 +136,10 @@ class MissionGenerator:
             return None
         
         if key_node not in node_to_tile:
-            if len(key_node.lock_s) == 1:
-                node_to_tile[key_node] = np.random.choice(key_tiles)
-            else:
+            if len(key_node.lock_s) > 1 or np.random.random() < mission_aesthetic.single_lock_is_hazard_probability:
                 node_to_tile[key_node] = np.random.choice(item_tiles)
+            else:
+                node_to_tile[key_node] = np.random.choice(key_tiles)
 
         tile = node_to_tile[key_node]
 
@@ -151,7 +153,7 @@ class MissionGenerator:
 
 
     @staticmethod
-    def add_mission_tile(layer, node, position, positions_map, node_to_tile):
+    def add_mission_tile(layer, node, position, positions_map, node_to_tile, mission_aesthetic):
             positions_map[node] = position
             position = tuple(position)
 
@@ -160,21 +162,21 @@ class MissionGenerator:
             elif isinstance(node, End):
                 layer[position] = Tiles.finish
             elif isinstance(node, Key):
-                key_tile = MissionGenerator.get_matching_tile(node_to_tile, node, get='key')
+                key_tile = MissionGenerator.get_matching_tile(node_to_tile, node, mission_aesthetic, get='key')
                 layer[position] = key_tile
             elif isinstance(node, Lock):
-                lock_tile = MissionGenerator.get_matching_tile(node_to_tile, node, get='lock')
+                lock_tile = MissionGenerator.get_matching_tile(node_to_tile, node, mission_aesthetic, get='lock')
                 if lock_tile.get_tile_type() == TileTypes.item_hazard:
-                    MissionGenerator.spread_hazard(layer, lock_tile, position)
+                    MissionGenerator.spread_hazard(layer, lock_tile, position, mission_aesthetic)
                 else:
                     layer[position] = lock_tile
             elif isinstance(node, GNode):
                 layer[position] = Tiles.collectable
 
     @staticmethod
-    def spread_hazard(layer, hazard_tile, position):
+    def spread_hazard(layer, hazard_tile, position, aesthetic_settings):
         offsets = [np.array([-1, 0]), np.array([1, 0]), np.array([0, -1]), np.array([0, 1])]
-        spread_probability = [0.9, 0.3]
+        spread_probability = aesthetic_settings.hazard_spread_probability
         hazard_tile_positions = [position]
         spread_probability_index = 0
         while len(hazard_tile_positions) > 0:
@@ -260,8 +262,27 @@ class MissionGenerator:
     def generate_mission_graph():
         # graph = Graph()
         # return GNode.find_all_nodes(graph.start, method="topological-sort")
+        return MissionGenerator.get_water_lock_graph()
 
+    @staticmethod
+    def get_water_lock_graph():
+        start = Start()
+        key_red = Key("red")
+        lock_red = Lock("red")
+        flippers = Key("flippers")
+        water = Lock("water")
+        end = End()
 
+        start.add_child_s([flippers, water, lock_red])
+        flippers.add_lock_s(water)
+        water.add_child_s(key_red)
+        key_red.add_lock_s(lock_red)
+        lock_red.add_child_s(end)
+
+        return GNode.find_all_nodes(start, method="topological-sort")
+
+    @staticmethod
+    def get_lock_water_fire_lock_graph():
         start = Start()
         key_red = Key("red")
         lock_red = Lock("red")
@@ -292,5 +313,3 @@ class MissionGenerator:
         # graph.draw()
 
         return GNode.find_all_nodes(start, method="topological-sort")
-
-        # return start, [start, key1, lock1, key2, lock2, key3, lock3, key4, lock4, end]
