@@ -176,20 +176,17 @@ class MissionGenerator:
     @staticmethod
     def spread_hazard(layer, hazard_tile, position, aesthetic_settings):
         offsets = [np.array([-1, 0]), np.array([1, 0]), np.array([0, -1]), np.array([0, 1])]
-        spread_probability = aesthetic_settings.hazard_spread_probability
+        spread_probability = aesthetic_settings.hazard_spread_probability[hazard_tile]
         hazard_tile_positions = [position]
-        spread_probability_index = 0
         while len(hazard_tile_positions) > 0:
             hazard_tile_position = hazard_tile_positions.pop()
 
             layer[tuple(hazard_tile_position)] = hazard_tile
             for offset in offsets:
-                if np.random.random() < spread_probability[spread_probability_index]:
+                if np.random.random() < spread_probability:
                     neighbor_hazard_tile_position = tuple(hazard_tile_position + offset)
                     if Level.is_position_within_layer_bounds(layer, neighbor_hazard_tile_position) and layer[neighbor_hazard_tile_position] == Tiles.empty:
                         hazard_tile_positions.append(neighbor_hazard_tile_position)
-            spread_probability_index += 1
-            spread_probability_index = np.clip(spread_probability_index, 0, len(spread_probability) - 1)
 
 
 
