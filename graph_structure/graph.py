@@ -4,7 +4,7 @@ from random import randint
 import numpy as np
 
 class Graph():
-    def __init__(self, difficulty=1):
+    def __init__(self, mission_graph_aesthetic):
         # Generate starting and ending nodes
         start = Start()
         end = End()

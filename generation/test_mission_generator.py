@@ -1,5 +1,6 @@
 import unittest
 from graph_structure.graph_node import GNode, Start, End, Key, Lock
+from generation.aesthetic_settings import AestheticSettings
 from generation.mission_generator import MissionGenerator
 from generation.generator import Generator
 from dungeon_level.dungeon_tiles import Tiles
@@ -224,9 +225,11 @@ class TestMissionGenerator(unittest.TestCase):
 
         solution_node_order = GNode.find_all_nodes(start, method="topological-sort")
 
+        aesthetic_settings = AestheticSettings()
         was_successful = Generator.generate(
             level=level, 
             size=layer.shape, 
+            aesthetic_settings=aesthetic_settings,
             max_retry_count=10, 
             pregenerated_level_layer=layer, 
             pregenerated_solution_node_order=solution_node_order)
@@ -375,9 +378,14 @@ class TestMissionGenerator(unittest.TestCase):
         solution_node_order = GNode.find_all_nodes(start, method="topological-sort")
 
         start_time = time.time()
+        aesthetic_settings = AestheticSettings()
+        aesthetic_settings.mission_aesthetic.single_lock_is_hazard_probability = 0
+        aesthetic_settings.mission_aesthetic.hazard_spread_probability[Tiles.water] = 0
+        aesthetic_settings.mission_aesthetic.hazard_spread_probability[Tiles.fire] = 0
         was_successful = Generator.generate(
             level=level, 
             size=layer.shape, 
+            aesthetic_settings=aesthetic_settings,
             max_retry_count=10,
             pregenerated_level_layer=layer, 
             pregenerated_solution_node_order=solution_node_order)
@@ -385,4 +393,4 @@ class TestMissionGenerator(unittest.TestCase):
         self.assertTrue(was_successful)
 
         Log.print(level)
-        Log.print(end_time - start_time)
+        Log.print("Generated in {} seconds".format(end_time - start_time))
