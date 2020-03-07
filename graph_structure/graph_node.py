@@ -1,6 +1,7 @@
 import numpy as np
 
 class GNode(object):
+    id = 0
     def __init__(self, name="", parent_s=None, child_s=None):
         self.child_s = []
         self.parent_s = []
@@ -178,3 +179,8 @@ class Lock(GNode):
 class End(GNode):
     def __init__(self, parent_s=None):
         super(End, self).__init__("End", parent_s, [])
+
+class Collectable(GNode):
+    id = 0
+    def __init__(self, name="", parent_s=None):
+        super(Collectable, self).__init__(name=name, parent_s=parent_s)
