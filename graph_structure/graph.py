@@ -140,7 +140,8 @@ class Graph():
         rows = np.full((1000, 1), -2)
         def visit_method_connect(node, visited_nodes):
             if len(node.parent_s) > 0:
-                node.x = node.parent_s[0].x + 2
+                parent_node = [node for node in node.parent_s if not isinstance(node, Key)][0]
+                node.x = parent_node.x + 2
                 # find the size of this row
                 new_y = rows[node.x] + 2
                 node.y = new_y
@@ -148,9 +149,10 @@ class Graph():
                     node.y = node.parent_s[0].y
                     rows[node.x] = node.parent_s[0].y - 2
                 rows[node.x] += 2
-                self.connect_node(draw, (node.parent_s[0].y, node.parent_s[0].x, node.y, node.x))
-            
-        def visit_method_nodes(node, visited_nodes):
+                self.connect_node(draw, (parent_node.y, parent_node.x, node.y, node.x))
+        
+        # Draw Nodes
+        for node in sorted_nodes:
             if len(node.parent_s) > 0:
                 if isinstance(node, Lock):
                     self.draw_node(draw, (node.y, node.x), node.name, n_type="lock")
@@ -164,6 +166,7 @@ class Graph():
 
         self.draw_node(draw, (0, 0), "Start", n_type="lock")
 
+        im.save("graph.png")
         im.show()
     
     def draw_node(self, draw, xy, text, n_type="lock"):

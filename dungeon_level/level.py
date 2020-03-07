@@ -20,6 +20,12 @@ class Level:
     def find_tiles(layer, tile):
         positions = np.argwhere(layer == tile)
         return positions
+
+    @staticmethod
+    def is_position_within_layer_bounds(layer, position):
+        h, w = layer.shape
+        is_within_bounds = position[0] >= 0 and position[1] >= 0 and position[0] < h and position[1] < w
+        return is_within_bounds
     
 
     def __repr__(self):
@@ -31,7 +37,7 @@ class Level:
                 if tile == Tiles.empty:
                     string += ". "
                 if tile == Tiles.wall:
-                    string += "w "
+                    string += "# "
                 if tile == Tiles.player:
                     string += "s "
                 if tile == Tiles.finish:
@@ -54,5 +60,13 @@ class Level:
                     string += "lY"
                 if tile == Tiles.collectable:
                     string += "c "
+                if tile == Tiles.water:
+                    string += "w "
+                if tile == Tiles.flippers:
+                    string += "fl"
+                if tile == Tiles.fire:
+                    string += "F "
+                if tile == Tiles.fire_boots:
+                    string += "Fb"
             string += "\n"
         return string

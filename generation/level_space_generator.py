@@ -4,34 +4,34 @@ import numpy as np
 
 class LevelSpaceGenerator:
     @staticmethod
-    def generate(level, size):
+    def generate(level, size, level_space_aesthetic):
         level.upper_layer = np.full(size, Tiles.empty)
         level.lower_layer = np.full(size, Tiles.empty)
 
-        LevelSpaceGenerator.add_random_rectangles(level, size)
-        LevelSpaceGenerator.add_random_noise(level, size)
+        LevelSpaceGenerator.add_random_rectangles(level, size, level_space_aesthetic)
+        LevelSpaceGenerator.add_random_noise(level, size, level_space_aesthetic)
 
         Drawing.draw_rectangle(level.upper_layer, (0,0), size - 1, Tiles.wall)
 
 
     @staticmethod
-    def add_random_rectangles(level, size):
-        for _ in range(20):
+    def add_random_rectangles(level, size, level_space_aesthetic):
+        for _ in range(level_space_aesthetic.rectangle_count):
             p0 = LevelSpaceGenerator.get_random_positions(size, 1)[0]
-            p1 = p0 + LevelSpaceGenerator.get_random_positions(np.array([10, 10]), 1)[0] + 4
+            rect_max = level_space_aesthetic.rectangle_max - level_space_aesthetic.rectangle_min
+            p1 = p0 + LevelSpaceGenerator.get_random_positions(np.array([rect_max, rect_max]), 1)[0] + level_space_aesthetic.rectangle_min
 
             Drawing.fill_rectangle(level.upper_layer, p0 + 1, p1 - 1, Tiles.empty)
             Drawing.draw_rectangle(level.upper_layer, p0, p1, Tiles.wall)
 
     
     @staticmethod
-    def add_random_noise(level, size):
+    def add_random_noise(level, size, level_space_aesthetic):
         random_positions = LevelSpaceGenerator.get_random_positions(size)
-        percentage = 0.3
-        percentage_index = int(percentage * random_positions.shape[0])
+        percentage_index = int(level_space_aesthetic.noise_percentage * random_positions.shape[0])
         random_positions = random_positions[:percentage_index]
         for position in random_positions:
-            if np.random.randint(4) == 0:
+            if np.random.random() < level_space_aesthetic.noise_empty_percentage:
                 level.upper_layer[tuple(position)] = Tiles.empty
             else:
                 level.upper_layer[tuple(position)] = Tiles.wall

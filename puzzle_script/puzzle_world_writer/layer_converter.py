@@ -13,6 +13,8 @@ class LayerConverter:
         DungeonTiles.required_collectable_barrier   : PWTiles.socket,
         DungeonTiles.water                          : PWTiles.water,
         DungeonTiles.flippers                       : PWTiles.flippers,
+        DungeonTiles.fire                           : PWTiles.empty,    # PW doesn't have fire/fireboots yet
+        DungeonTiles.fire_boots                     : PWTiles.empty,    # PW doesn't have fire/fireboots yet
         DungeonTiles.monster                        : PWTiles.empty,
         DungeonTiles.key_blue                       : PWTiles.blue_key,
         DungeonTiles.lock_blue                      : PWTiles.blue_door,

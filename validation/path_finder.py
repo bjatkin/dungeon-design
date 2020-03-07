@@ -81,7 +81,7 @@ class PathFinder:
                 neighbor_position = current_position + neighbor_offset
 
                 if (neighbor_position in closed_tiles or
-                    not player_status.can_traverse(layer, current_position, neighbor_position, neighbor_position == position_b)):
+                    not player_status.can_traverse(layer, current_position, neighbor_position)):
                     continue
 
                 old_f = f_costs[tuple(neighbor_position)]

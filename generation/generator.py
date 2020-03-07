@@ -6,20 +6,38 @@ import numpy as np
 from generation.mission_generator import MissionGenerator
 from generation.level_space_generator import LevelSpaceGenerator
 from generation.image_level_generator import ImageLevelGenerator
+from generation.level_tweaker import LevelTweaker
+from log import Log
+import time
 
 class Generator:
     @staticmethod
-    def generate(level, size):
+    def generate(level, size, aesthetic_settings, max_retry_count=500, pregenerated_solution_node_order=None, pregenerated_level_layer=None):
         size = np.array(size)
 
-        is_solvable = False
-        while not is_solvable:
-            # Comment this out and uncomment the code below to go back to normal random generation...
-            ImageLevelGenerator.generate(level, size)
-            is_solvable = True
+        start_time = time.time()
+        for retry_count in range(max_retry_count):
+            Generator._set_level_space(level, size, pregenerated_level_layer, aesthetic_settings.level_space_aesthetic)
+            solution_node_order = Generator._get_mission_graph(pregenerated_solution_node_order, aesthetic_settings.mission_graph_aesthetic)
+            is_solvable = MissionGenerator.generate_mission(level, solution_node_order, aesthetic_settings.mission_aesthetic)
+            if is_solvable:
+                LevelTweaker.tweak_level(level, aesthetic_settings.tweaker_aesthetic)
+                break
+        end_time = time.time()
+        Log.print("Level generated in {} seconds".format(end_time - start_time))
+        return is_solvable
 
-            # LevelSpaceGenerator.generate(level, size)
-            # solution_node_order = MissionGenerator.generate_mission_graph()
-            # positions_map = MissionGenerator.generate_mission(level, size, solution_node_order)
-            # is_solvable = Solver.does_level_follow_mission(level, solution_node_order, positions_map)
-        pass
+    @staticmethod
+    def _set_level_space(level, size, pregenerated_level_layer, level_space_aesthetic):
+        if pregenerated_level_layer is None:
+            LevelSpaceGenerator.generate(level, size, level_space_aesthetic)
+        else:
+            level.upper_layer = pregenerated_level_layer
+
+
+    @staticmethod
+    def _get_mission_graph(pregenerated_solution_node_order, mission_graph_aesthetic):
+        if pregenerated_solution_node_order is None:
+            return MissionGenerator.generate_mission_graph(mission_graph_aesthetic)
+        else:
+            return pregenerated_solution_node_order

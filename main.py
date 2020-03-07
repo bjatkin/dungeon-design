@@ -5,23 +5,19 @@ from tile_world.tile_world_level import TileWorldLevel
 # from puzzle_script.puzzle_world_writer.level_set_writer import LevelSetWriter
 from tile_world.tile_world_writer.level_set_writer import LevelSetWriter
 from validation.solver import Solver
+from generation.aesthetic_settings import AestheticSettings
 from log import Log
 
 import numpy as np
 import random
 import subprocess
 
-from graph_structure.graph import Graph
-test = Graph()
-test.draw()
-exit()
-
 Log.verbose = True
 # We randomly choose our random seed.... why?
 # So that if we want to reproduce the level, we know what seed to use,
 # and so that we don't have to change the seed each time we run the program.
 seed = np.random.randint(1e5)
-# seed = 83863
+# seed = 1377
 print("Level seed: {}".format(seed))
 random.seed(seed)
 np.random.seed(seed)
@@ -30,6 +26,9 @@ np.random.seed(seed)
 level_count = 1
 size = (30, 30)
 level_set = LevelSet()
+aesthetic_settings = AestheticSettings()
+aesthetic_settings.mission_aesthetic.single_lock_is_hazard_probability = 1.0
+aesthetic_settings.tweaker_aesthetic.should_fill_unused_space = False
 
 for i in range(level_count):
     level = TileWorldLevel()
@@ -38,9 +37,11 @@ for i in range(level_count):
     level.map_password = "    "
     level.time_limit = 100
 
-    Generator.generate(level, size)
+    was_successful = Generator.generate(level, size, aesthetic_settings)
+    print("Was Generator Successful: {}".format(was_successful))
     level_set.levels.append(level)
     
+print("Level seed: {}".format(seed))
 
 
 
@@ -61,5 +62,3 @@ save_file = "test.dat"
 LevelSetWriter.write(level_set, "{}/sets/{}".format(working_dir, save_file))
 
 run_supercc()
-
-print("Level seed: {}".format(seed))
