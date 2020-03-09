@@ -1,6 +1,6 @@
 from dungeon_level.dungeon_tiles import Tiles, key_to_lock, key_tiles, TileTypes, item_to_hazard, item_tiles, lock_tiles, mission_tiles
 from validation.solver import Solver
-from graph_structure.graph_node import GNode, Start, End, Key, Lock
+from graph_structure.graph_node import Node, GNode, Start, End, Key, Lock
 from dungeon_level.level import Level
 from scipy.ndimage.measurements import label as label_connected_components
 from scipy.ndimage import convolve
@@ -258,7 +258,7 @@ class MissionGenerator:
     @staticmethod
     def generate_mission_graph(mission_graph_aesthetic):
         # graph = Graph(mission_graph_aesthetic)
-        # return GNode.find_all_nodes(graph.start, method="topological-sort")
+        # return Node.find_all_nodes(graph.start, method="topological-sort")
         return MissionGenerator.get_water_lock_graph()
 
     @staticmethod
@@ -276,7 +276,7 @@ class MissionGenerator:
         key_red.add_lock_s(lock_red)
         lock_red.add_child_s(end)
 
-        return GNode.find_all_nodes(start, method="topological-sort")
+        return Node.find_all_nodes(start, method="topological-sort")
 
     @staticmethod
     def get_lock_water_fire_lock_graph():
@@ -309,4 +309,4 @@ class MissionGenerator:
         graph.end = end
         # graph.draw()
 
-        return GNode.find_all_nodes(start, method="topological-sort")
+        return Node.find_all_nodes(start, method="topological-sort")

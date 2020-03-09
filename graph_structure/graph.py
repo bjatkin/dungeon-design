@@ -84,7 +84,7 @@ class Graph():
         
         rows = np.full((1000, 1), 0)
 
-        sorted_nodes = GNode.find_all_nodes(self.start, method="topological-sort")
+        sorted_nodes = Node.find_all_nodes(self.start, method="topological-sort")
 
         # Draw Connections
         for node in sorted_nodes:

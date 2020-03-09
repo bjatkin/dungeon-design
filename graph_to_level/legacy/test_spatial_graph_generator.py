@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from graph_to_level.spatial_graph_generator import SpatialGraphGenerator
+from graph_to_level.legacy.spatial_graph_generator import SpatialGraphGenerator
 from graph_to_level.test_graphs import TestGraphs
 
 class TestSpatialGraphGenerator(unittest.TestCase):

@@ -1,5 +1,5 @@
 import unittest
-from graph_structure.graph_node import GNode, Start, End, Key, Lock
+from graph_structure.graph_node import Node, GNode, Start, End, Key, Lock
 from graph_to_level.test_graphs import TestGraphs
 
 
@@ -13,11 +13,12 @@ class TestGraphNode(unittest.TestCase):
         e = Lock("e")
         start.add_child_s(a)
         start.add_child_s(d)
-        self.assertEqual(str(start), "Start(\'Start\', parents=[], children=[\'a\', \'key\'])")
+        d.add_lock_s(e)
+        self.assertEqual(str(start), "Start(\'Start\', children=[\'a\', \'key\'])")
         c.add_parent_s([e, d])
-        self.assertEqual(str(c), "End(\'End\', parents=[\'e\', \'key\'], children=[])")
-        self.assertEqual(str(d), "Key(\'key\', parents=[\'Start\'], children=[\'End\'])")
-        self.assertEqual(str(e), "Lock(\'e\', parents=[], children=[\'End\'])")
+        self.assertEqual(str(c), "End(\'End\', parents=[\'e\', \'key\'])")
+        self.assertEqual(str(d), "Key(\'key\', parents=[\'Start\'], children=[\'e\', \'End\'], locks=[\'e\'])")
+        self.assertEqual(str(e), "Lock(\'e\', parents=[\'key\'], children=[\'End\'], keys=[\'key\'])")
         self.assertEqual(str(a), "GNode(\'a\', parents=[\'Start\'], children=[])")
 
     def test_add(self):
@@ -27,10 +28,10 @@ class TestGraphNode(unittest.TestCase):
         n3 = GNode("3")
         n4 = GNode("4")
         n5 = GNode("5")
-        GNode._add(n0, [n1], lambda x: x.child_s, lambda x: x.parent_s)
+        Node._add(n0, [n1], lambda x: x.child_s, lambda x: x.parent_s)
         self.assertEqual(n0.child_s, [n1])
         self.assertEqual(n1.parent_s, [n0])
-        GNode._add(n0, [n2, n3, n4, n5], lambda x: x.child_s, lambda x: x.parent_s)
+        Node._add(n0, [n2, n3, n4, n5], lambda x: x.child_s, lambda x: x.parent_s)
         self.assertEqual(n0.child_s, [n1, n2, n3, n4, n5])
         self.assertEqual(n1.parent_s, [n0])
         self.assertEqual(n2.parent_s, [n0])
@@ -38,7 +39,7 @@ class TestGraphNode(unittest.TestCase):
         self.assertEqual(n4.parent_s, [n0])
         self.assertEqual(n5.parent_s, [n0])
 
-    def test_remove(self):
+    def test_remove_by_name(self):
         n1 = GNode("1")
         n2 = GNode("2")
         n3 = GNode("3")
@@ -53,7 +54,7 @@ class TestGraphNode(unittest.TestCase):
         n3.parent_s.append(n0)
         n4.parent_s.append(n0)
         n5.parent_s.append(n0)
-        GNode._remove(n0, n2.name, lambda x: x.child_s, lambda x: x.parent_s)
+        Node._remove_by_name(n0, n2.name, lambda x: x.child_s, lambda x: x.parent_s)
         self.assertEqual(n0.child_s, [n1, n3, n4, n5])
         self.assertEqual(n1.parent_s, [n0])
         self.assertEqual(n2.parent_s, [])
@@ -62,7 +63,7 @@ class TestGraphNode(unittest.TestCase):
         self.assertEqual(n5.parent_s, [n0])
         
 
-    def add_remove_item_test(self, node, add_method, remove_method, get_method, get_inverse_method, constructor_method):
+    def add_remove_item_test(self, node, add_method, remove_method, get_method, get_inverse_method, constructor_method, should_remove_by_name):
         b = constructor_method("b")
         c = constructor_method("c")
         d = constructor_method("d")
@@ -98,7 +99,12 @@ class TestGraphNode(unittest.TestCase):
         self.assertEqual(get_method(node), [b, c, d, e, f])
 
         # Remove name not in children
-        remove_method(node, "g")
+        if should_remove_by_name:
+            remove_method(node, "g")
+        else:
+            g = constructor_method("g")
+            remove_method(node, g)
+
         self.assertEqual(get_method(node), [b, c, d, e, f])
         self.assertEqual(get_inverse_method(b), [node])
         self.assertEqual(get_inverse_method(c), [node])
@@ -107,7 +113,11 @@ class TestGraphNode(unittest.TestCase):
         self.assertEqual(get_inverse_method(f), [node])
 
         # Remove multiple, remove middle
-        remove_method(node, ["c", "d"])
+        if should_remove_by_name:
+            remove_method(node, ["c", "d"])
+        else:
+            remove_method(node, [c, d])
+
         self.assertEqual(get_method(node), [b, e, f])
         self.assertEqual(get_inverse_method(b), [node])
         self.assertEqual(get_inverse_method(c), [])
@@ -116,7 +126,11 @@ class TestGraphNode(unittest.TestCase):
         self.assertEqual(get_inverse_method(f), [node])
 
         # Remove end child
-        remove_method(node, "f")
+        if should_remove_by_name:
+            remove_method(node, "f")
+        else:
+            remove_method(node, f)
+
         self.assertEqual(get_method(node), [b, e])
         self.assertEqual(get_inverse_method(b), [node])
         self.assertEqual(get_inverse_method(c), [])
@@ -125,7 +139,11 @@ class TestGraphNode(unittest.TestCase):
         self.assertEqual(get_inverse_method(f), [])
 
         # Remove first child, remove single in array
-        remove_method(node, ["b"])
+        if should_remove_by_name:
+            remove_method(node, ["b"])
+        else:
+            remove_method(node, [b])
+
         self.assertEqual(get_method(node), [e])
         self.assertEqual(get_inverse_method(b), [])
         self.assertEqual(get_inverse_method(c), [])
@@ -134,7 +152,11 @@ class TestGraphNode(unittest.TestCase):
         self.assertEqual(get_inverse_method(f), [])
 
         # Remove final child
-        remove_method(node, "e")
+        if should_remove_by_name:
+            remove_method(node, "e")
+        else:
+            remove_method(node, e)
+
         self.assertEqual(get_method(node), [])
         self.assertEqual(get_inverse_method(b), [])
         self.assertEqual(get_inverse_method(c), [])
@@ -147,43 +169,51 @@ class TestGraphNode(unittest.TestCase):
 
     def test_add_remove_child(self):
         add_method = lambda n, c: n.add_child_s(c)
+        remove_method_by_name = lambda n, c: n.remove_child_s_by_name(c)
         remove_method = lambda n, c: n.remove_child_s(c)
         get_method = lambda n: n.child_s
         get_inverse_method = lambda n: n.parent_s
         constructor_method = lambda x: GNode(x)
         node = GNode("node")
 
-        self.add_remove_item_test(node, add_method, remove_method, get_method, get_inverse_method, constructor_method)
+        self.add_remove_item_test(node, add_method, remove_method_by_name, get_method, get_inverse_method, constructor_method, True)
+        self.add_remove_item_test(node, add_method, remove_method, get_method, get_inverse_method, constructor_method, False)
 
     def test_add_remove_parent(self):
         add_method = lambda n, c: n.add_parent_s(c)
+        remove_method_by_name = lambda n, c: n.remove_parent_s_by_name(c)
         remove_method = lambda n, c: n.remove_parent_s(c)
         get_method = lambda n: n.parent_s
         get_inverse_method = lambda n: n.child_s
         constructor_method = lambda x: GNode(x)
         node = GNode("node")
 
-        self.add_remove_item_test(node, add_method, remove_method, get_method, get_inverse_method, constructor_method)
+        self.add_remove_item_test(node, add_method, remove_method_by_name, get_method, get_inverse_method, constructor_method, True)
+        self.add_remove_item_test(node, add_method, remove_method, get_method, get_inverse_method, constructor_method, False)
 
     def test_add_remove_key(self):
         add_method = lambda n, c: n.add_key_s(c)
+        remove_method_by_name = lambda n, c: n.remove_key_s_by_name(c)
         remove_method = lambda n, c: n.remove_key_s(c)
         get_method = lambda n: n.key_s
         get_inverse_method = lambda n: n.lock_s
         constructor_method = lambda x: Key(x)
         node = Lock("lock")
 
-        self.add_remove_item_test(node, add_method, remove_method, get_method, get_inverse_method, constructor_method)
+        self.add_remove_item_test(node, add_method, remove_method_by_name, get_method, get_inverse_method, constructor_method, True)
+        self.add_remove_item_test(node, add_method, remove_method, get_method, get_inverse_method, constructor_method, False)
 
     def test_add_remove_lock(self):
         add_method = lambda n, c: n.add_lock_s(c)
+        remove_method_by_name = lambda n, c: n.remove_lock_s_by_name(c)
         remove_method = lambda n, c: n.remove_lock_s(c)
         get_method = lambda n: n.lock_s
         get_inverse_method = lambda n: n.key_s
         constructor_method = lambda x: Lock(x)
         node = Key("key")
 
-        self.add_remove_item_test(node, add_method, remove_method, get_method, get_inverse_method, constructor_method)
+        self.add_remove_item_test(node, add_method, remove_method_by_name, get_method, get_inverse_method, constructor_method, True)
+        self.add_remove_item_test(node, add_method, remove_method, get_method, get_inverse_method, constructor_method, False)
 
 
     def test_traverse_depth_first(self):
@@ -198,13 +228,13 @@ class TestGraphNode(unittest.TestCase):
 
         # Traverse with no will_traverse_method specified
         visited = []
-        GNode.traverse_nodes_depth_first(node, visit_method)
+        Node.traverse_nodes_depth_first(node, visit_method)
         visited_names = [x.name for x in visited]
         self.assertEqual(visited_names, visited_expected)
 
         # Traverse with will_traverse_method that allows all nodes
         visited = []
-        GNode.traverse_nodes_depth_first(node, visit_method, will_traverse_method)
+        Node.traverse_nodes_depth_first(node, visit_method, will_traverse_method)
         visited_names = [x.name for x in visited]
         self.assertEqual(visited_names, visited_expected)
     
@@ -212,7 +242,7 @@ class TestGraphNode(unittest.TestCase):
         def will_traverse_method2(node, child, visited_nodes):
             return child.name != "c"
         visited = []
-        GNode.traverse_nodes_depth_first(node, visit_method, will_traverse_method2)
+        Node.traverse_nodes_depth_first(node, visit_method, will_traverse_method2)
         visited_names = [x.name for x in visited]
         visited_expected = ["Start", "b", "e", "d"]
         self.assertEqual(visited_names, visited_expected)
@@ -235,13 +265,13 @@ class TestGraphNode(unittest.TestCase):
 
         # Traverse with no will_traverse_method specified
         visited = []
-        GNode.traverse_nodes_breadth_first(node, visit_method)
+        Node.traverse_nodes_breadth_first(node, visit_method)
         visited_names = [x.name for x in visited]
         self.assertEqual(visited_names, visited_expected)
 
         # Traverse with will_traverse_method that allows all nodes
         visited = []
-        GNode.traverse_nodes_breadth_first(node, visit_method, will_traverse_method)
+        Node.traverse_nodes_breadth_first(node, visit_method, will_traverse_method)
         visited_names = [x.name for x in visited]
         self.assertEqual(visited_names, visited_expected)
     
@@ -249,7 +279,7 @@ class TestGraphNode(unittest.TestCase):
         def will_traverse_method2(node, visited_nodes):
             return node.name != "c"
         visited = []
-        GNode.traverse_nodes_breadth_first(node, visit_method, will_traverse_method2)
+        Node.traverse_nodes_breadth_first(node, visit_method, will_traverse_method2)
         visited_names = [x.name for x in visited]
         visited_expected = ["Start", "b", "d", "e"]
         self.assertEqual(visited_names, visited_expected)
@@ -258,23 +288,23 @@ class TestGraphNode(unittest.TestCase):
 
     def test_find_all_nodes(self):
         a, all_nodes = TestGraphs.get_man_graph()
-        nodes = GNode.find_all_nodes(a)
+        nodes = Node.find_all_nodes(a)
         self.assertEqual(set(nodes), all_nodes)
 
         a, all_nodes = TestGraphs.get_house_graph()
-        nodes = GNode.find_all_nodes(a)
+        nodes = Node.find_all_nodes(a)
         self.assertEqual(set(nodes), all_nodes)
 
         a, all_nodes = TestGraphs.get_graph_b()
-        nodes = GNode.find_all_nodes(a)
+        nodes = Node.find_all_nodes(a)
         self.assertEqual(set(nodes), all_nodes)
 
         a, all_nodes = TestGraphs.get_graph_a()
-        nodes = GNode.find_all_nodes(a)
+        nodes = Node.find_all_nodes(a)
         self.assertEqual(set(nodes), all_nodes)
 
         a, all_nodes = TestGraphs.get_triangle_graph()
-        nodes = GNode.find_all_nodes(a)
+        nodes = Node.find_all_nodes(a)
         self.assertEqual(set(nodes), all_nodes)
 
     def test_find_all_nodes_topological_sort(self):
@@ -293,7 +323,7 @@ class TestGraphNode(unittest.TestCase):
         n4.add_child_s(n1)
         n2.add_child_s(n3)
         n3.add_child_s(n1)
-        nodes = GNode.find_all_nodes(n5, method=top_sort)
+        nodes = Node.find_all_nodes(n5, method=top_sort)
         self.assertEqual(nodes, [n5, n4, n2, n3, n1, n0])
 
         n0 = GNode("0")
@@ -309,7 +339,7 @@ class TestGraphNode(unittest.TestCase):
         n2.add_child_s(n5)
         n3.add_child_s(n1)
         n4.add_child_s(n2)
-        nodes = GNode.find_all_nodes(n0, method=top_sort)
+        nodes = Node.find_all_nodes(n0, method=top_sort)
         self.assertEqual(nodes, [n0, n3, n1, n4, n2, n5])
 
 

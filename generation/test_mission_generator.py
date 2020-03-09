@@ -1,5 +1,5 @@
 import unittest
-from graph_structure.graph_node import GNode, Start, End, Key, Lock
+from graph_structure.graph_node import Node, GNode, Start, End, Key, Lock
 from generation.aesthetic_settings import AestheticSettings
 from generation.mission_generator import MissionGenerator
 from generation.generator import Generator
@@ -223,7 +223,7 @@ class TestMissionGenerator(unittest.TestCase):
             [w, e, e, w, e, e, e, w],
             [w, w, w, w, w, w, w, w]], dtype=object)
 
-        solution_node_order = GNode.find_all_nodes(start, method="topological-sort")
+        solution_node_order = Node.find_all_nodes(start, method="topological-sort")
 
         aesthetic_settings = AestheticSettings()
         was_successful = Generator.generate(
@@ -375,7 +375,7 @@ class TestMissionGenerator(unittest.TestCase):
             [w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w]], dtype=object)
             
 
-        solution_node_order = GNode.find_all_nodes(start, method="topological-sort")
+        solution_node_order = Node.find_all_nodes(start, method="topological-sort")
 
         start_time = time.time()
         aesthetic_settings = AestheticSettings()

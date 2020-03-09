@@ -1,5 +1,5 @@
-from graph_to_level.unraveler import Unraveler
-from graph_structure.graph_node import GNode
+from graph_to_level.legacy.unraveler import Unraveler
+from graph_structure.graph_node import GNode, Node
 # from graph_to_level.test_unraveler_debug_method import debug_method
 import numpy as np
 
@@ -42,7 +42,7 @@ class SpatialGraphGenerator:
 
     @staticmethod
     def init_spatial_graph(mission_graph_start_node, random_initial_positions=True):
-        nodes = GNode.find_all_nodes(mission_graph_start_node)
+        nodes = Node.find_all_nodes(mission_graph_start_node)
         nodes = sorted(nodes, key=lambda x: x.name)
         if random_initial_positions:
             node_positions = np.random.random([len(nodes), 2]) * 10
