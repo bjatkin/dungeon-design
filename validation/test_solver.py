@@ -108,8 +108,8 @@ class TestSolver(unittest.TestCase):
         
         # S--K--L--E
         start = Start()
-        key = Key()
-        lock = Lock()
+        key = Key("key")
+        lock = Lock("lock")
         end = End()
         start.add_child_s(key)
         key.add_lock_s(lock)
@@ -163,8 +163,8 @@ class TestSolver(unittest.TestCase):
 
         # S--K--L--E
         start = Start()
-        key = Key()
-        lock = Lock()
+        key = Key("key")
+        lock = Lock("lock")
         end = End()
         start.add_child_s(key)
         key.add_lock_s(lock)

@@ -34,7 +34,7 @@ class Graph():
         l.add_parent_s(n)
         for i in range(randint(0, 2)):
             if len(n.parent_s) > 0:
-                n = n.parent_s[0]
+                n = next(iter(n.parent_s))
     
         tmp_n = n
         keys = 1

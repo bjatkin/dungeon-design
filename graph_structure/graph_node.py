@@ -1,9 +1,53 @@
 import numpy as np
+import uuid
 
 class Node(object):
-    def __init__(self, name=""):
-        self.name = name
-        self.adjacent_nodes = []
+    def __init__(self, name=None):
+        if name is None:
+            self.name = str(uuid.uuid4())
+        else:
+            self.name = name
+
+        self.adjacent_nodes = set()
+
+
+    def add_adjacent_nodes(self, nodes):
+        Node._add(self, nodes, lambda x: x.adjacent_nodes, lambda x: x.adjacent_nodes)
+
+
+    def remove_adjacent_nodes(self, nodes):
+        Node._remove(self, nodes, lambda x: x.adjacent_nodes, lambda x: x.adjacent_nodes)
+
+
+    def _get_to_string_properties(self):
+        return { 
+                "adjacents": [n.name for n in self.adjacent_nodes],
+            }
+
+
+    def __repr__(self):
+        properties = self._get_to_string_properties()
+        class_name = type(self).__name__
+        string = "{}(\'{}\'".format(class_name, self.name)
+        for prop_name, prop_value in properties.items():
+            string += ", {}={}".format(prop_name, prop_value)
+        string += ")"
+        return string
+
+
+    def __eq__(self, other): 
+        self_class_name = type(self).__name__
+        other_class_name = type(other).__name__
+
+        return (self_class_name == other_class_name and self.name == other.name)
+
+
+    def __hash__(self):
+        self_class_name = type(self).__name__
+        if hasattr(self, 'name'):
+            return hash(self.name + self_class_name)
+        else:
+            return hash(id(self))
 
 
     # traversal_order=['preorder','postorder']
@@ -68,65 +112,49 @@ class Node(object):
 
 
     @staticmethod
-    def _listify(items):
-        if not isinstance(items, list):
-            items = [items]
+    def _setify(items):
+        if isinstance(items, list):
+            items = set(items)
+        elif not isinstance(items, set):
+            items = set([items])
         return items
 
 
     @staticmethod
     def _add(_self, items, get_self_list_method, get_items_list_method):
-        items = Node._listify(items)
-        get_self_list_method(_self).extend(items)
+        items = Node._setify(items)
+        if _self in items:
+            items.remove(_self)
+        
+        get_self_list_method(_self).update(items)
         for item in items:
-            get_items_list_method(item).append(_self)
+            get_items_list_method(item).add(_self)
 
 
     @staticmethod
     def _remove_by_name(_self, item_names, get_self_list_method, get_items_list_method):
-        item_names = Node._listify(item_names)
+        item_names = Node._setify(item_names)
         items = [item for item in get_self_list_method(_self) if item.name in item_names]
         Node._remove(_self, items, get_self_list_method, get_items_list_method)
 
     @staticmethod
     def _remove(_self, items, get_self_list_method, get_items_list_method):
-        items = Node._listify(items)
-        get_self_list_method(_self)[:] = [item for item in get_self_list_method(_self) if item not in items]
+        items = Node._setify(items)
         for item in items:
-            get_items_list_method(item)[:] = [item for item in get_items_list_method(item) if item != _self]
-        
+            items_list = get_items_list_method(item)
+            if _self in items_list:
+                items_list.remove(_self)
 
-
-    def _get_to_string_properties(self):
-        return { 
-                "adjacents": [n.name for n in self.adjacent_nodes],
-            }
-
-
-    def __repr__(self):
-        properties = self._get_to_string_properties()
-        class_name = type(self).__name__
-        string = "{}(\'{}\'".format(class_name, self.name)
-        for prop_name, prop_value in properties.items():
-            string += ", {}={}".format(prop_name, prop_value)
-        string += ")"
-        return string
-
-
-    def __eq__(self, other): 
-        return str(self) == str(other)
-
-
-    def __hash__(self):
-        return hash(str(self))
+        self_list = get_self_list_method(_self)
+        self_list -= items
 
 
 
 class GNode(Node):
-    def __init__(self, name="", parent_s=None, child_s=None):
+    def __init__(self, name=None, parent_s=None, child_s=None):
         super(GNode, self).__init__(name)
         self.child_s = self.adjacent_nodes
-        self.parent_s = []
+        self.parent_s = set()
         self.x = 0
         self.y = 0
 
@@ -171,7 +199,7 @@ class GNode(Node):
 
 class Start(GNode):
     def __init__(self, child_s=None):
-        super(Start, self).__init__("Start", [], child_s)
+        super(Start, self).__init__("Start", None, child_s)
 
     def _get_to_string_properties(self):
         return { 
@@ -180,10 +208,10 @@ class Start(GNode):
 
 
 class Key(GNode):
-    def __init__(self, name="", parent_s=None, child_s=None, lock_s=None):
+    def __init__(self, name=None, parent_s=None, child_s=None, lock_s=None):
         super(Key, self).__init__(name, parent_s, child_s)
 
-        self.lock_s = []
+        self.lock_s = set()
         if lock_s is not None:
             self.add_lock_s(lock_s)
     
@@ -210,10 +238,10 @@ class Key(GNode):
         
 
 class Lock(GNode):
-    def __init__(self, name="", parent_s=None, child_s=None, key_s=None):
+    def __init__(self, name=None, parent_s=None, child_s=None, key_s=None):
         super(Lock, self).__init__(name, parent_s, child_s)
 
-        self.key_s = []
+        self.key_s = set()
         if key_s is not None:
             self.add_key_s(key_s)
 
@@ -242,7 +270,7 @@ class Lock(GNode):
 
 class End(GNode):
     def __init__(self, parent_s=None):
-        super(End, self).__init__("End", parent_s, [])
+        super(End, self).__init__("End", parent_s, None)
 
     def _get_to_string_properties(self):
         return { 

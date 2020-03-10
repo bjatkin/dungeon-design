@@ -18,14 +18,9 @@ class TestGraphs:
         h = GNode("h")
         i = GNode("i")
 
-        a.add_child_s(b)
-        a.add_child_s(c)
-        a.add_child_s(d)
+        a.add_child_s([b, c, d])
         b.add_child_s(e)
-        c.add_child_s(f)
-        c.add_child_s(g)
-        c.add_child_s(h)
-        c.add_child_s(i)
+        c.add_child_s([f, g, h, i])
         h.add_child_s(i)
 
         return a, {a, b, c, d, e, f, g, h, i}

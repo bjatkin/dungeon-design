@@ -27,7 +27,8 @@ level_count = 1
 size = (30, 30)
 level_set = LevelSet()
 aesthetic_settings = AestheticSettings()
-aesthetic_settings.mission_aesthetic.single_lock_is_hazard_probability = 1.0
+aesthetic_settings.level_space_aesthetic.noise_percentage = 0
+aesthetic_settings.mission_aesthetic.single_lock_is_hazard_probability = 0.1
 aesthetic_settings.tweaker_aesthetic.should_fill_unused_space = False
 
 for i in range(level_count):
