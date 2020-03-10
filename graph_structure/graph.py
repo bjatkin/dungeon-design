@@ -38,7 +38,7 @@ class Graph():
         r = randint(0, 3)
         for i in range(r):
             if len(n.parent_s) > 0:
-                n = n.parent_s[0]
+                n = next(iter(n.parent_s))
     
         tmp_n = n
         r = randint(0, 3)
@@ -137,8 +137,12 @@ class Graph():
         im = Image.new('RGB', (1500, 800), (255, 255, 255)) 
         draw = ImageDraw.Draw(im) 
         
-        rows = np.full((1000, 1), -2)
-        def visit_method_connect(node, visited_nodes):
+        rows = np.full((1000, 1), 0)
+
+        sorted_nodes = Node.find_all_nodes(self.start, method="topological-sort")
+
+        # Draw Connections
+        for node in sorted_nodes:
             if len(node.parent_s) > 0:
                 parent_node = [node for node in node.parent_s if not isinstance(node, Key)][0]
                 node.x = parent_node.x + 2

@@ -1,14 +1,11 @@
-from dungeon_level.dungeon_tiles import Tiles, key_to_lock, key_tiles, TileTypes, item_to_hazard, item_tiles, lock_tiles, mission_tiles
-from validation.solver import Solver
-from graph_structure.graph_node import GNode, Start, End, Key, Lock
-from dungeon_level.level import Level
-from scipy.ndimage.measurements import label as label_connected_components
-from scipy.ndimage import convolve
-from skimage.morphology import binary_dilation
-from graph_structure.graph import Graph
-from log import Log
 import numpy as np
-import copy
+from graph_to_level.spatial_graph import SpatialGraph, SpatialGraphNode
+from graph_to_level.subgraph_finder import SubgraphFinder
+from dungeon_level.dungeon_tiles import Tiles, mission_tiles, TileTypes, key_tiles, item_tiles, item_to_hazard, key_to_lock
+from dungeon_level.level import Level
+from validation.solver import Solver
+from graph_structure.graph_node import GNode, Node, Key, Lock, Start, End
+from log import Log
 
 class MissionGenerator:
     @staticmethod
@@ -17,139 +14,42 @@ class MissionGenerator:
         positions_map = dict()
         node_to_tile = dict()
 
-        start_position = MissionGenerator.get_start_position(level)
-
-        was_successful, level_with_mission = MissionGenerator._generate_mission(level, 0, solution_node_order, positions_map, node_to_tile, start_position, mission_aesthetic)
-        level.upper_layer = level_with_mission.upper_layer
-        Log.print(level)
-        return was_successful
-
-
-    @staticmethod
-    def _generate_mission(level, node_index, solution_node_order, positions_map, node_to_tile, start_position, mission_aesthetic):
-        if node_index >= len(solution_node_order):
-            return True, level
-
-        level = copy.deepcopy(level)
-        positions_map = copy.deepcopy(positions_map)
-        node_to_tile = copy.deepcopy(node_to_tile)
-
-        node = solution_node_order[node_index]
-        random_positions = MissionGenerator.get_random_positions(level.upper_layer, start_position, node, node_to_tile)
-        was_add_successful, level = MissionGenerator.add_mission_node(level, solution_node_order, node, node_index, positions_map, node_to_tile, random_positions, start_position, mission_aesthetic)
-        if not was_add_successful:
-            return False, level
-
-        return True, level
-
-
-    is_generator_recursive = False
-    @staticmethod
-    def add_mission_node(level, solution_node_order, node, node_index, positions_map, node_to_tile, random_positions, start_position, mission_aesthetic):
-        original_layer = level.upper_layer.copy()
-        for position in random_positions:
-            level.upper_layer = original_layer.copy()
-            MissionGenerator.add_mission_tile(level.upper_layer, node, position, positions_map, node_to_tile, mission_aesthetic)
-
-            Log.print("\n\n")
-            Log.print(level)
-
-            if Solver.does_level_follow_mission(level, solution_node_order[:node_index + 1], positions_map):
-                was_successful, level = MissionGenerator._generate_mission(level, node_index + 1, solution_node_order, positions_map, node_to_tile, start_position, mission_aesthetic)
-                if was_successful:
-                    return was_successful, level
-                elif not MissionGenerator.is_generator_recursive:
-                    return False, level
-        return False, level
-
-
-    @staticmethod
-    def get_start_position(level):
-        components, component_count = MissionGenerator.get_rooms_components(level.upper_layer)
-        start_position = MissionGenerator.get_random_positions_per_component(components, component_count)[0]
-        return start_position
-
-    @staticmethod
-    def get_random_positions(layer, start_position, node, node_to_tile):
-        if isinstance(node, Lock):
-            return MissionGenerator.get_random_positions_for_lock(layer, start_position)
-        elif isinstance(node, Key) or isinstance(node, End):
-            return MissionGenerator.get_random_positions_for_key(layer, start_position)
-        elif isinstance(node, Start):
-            return np.array([start_position])
-
-
-    @staticmethod
-    def get_space_connected_to_position(layer, position):
-        empty_mask = (layer != Tiles.wall)
-        labeled_components, component_count = label_connected_components(empty_mask)
-        label = labeled_components[tuple(position)]
-        connected_space = (labeled_components == label)
-        return connected_space
-
-    @staticmethod
-    def get_walls_and_corridors_connected_to_space(layer, space):
-        space = binary_dilation(space)
-        wall_corridor_mask = MissionGenerator.get_wall_corridor_mask(layer)
-        connected_walls_and_corridors = np.logical_and(space, wall_corridor_mask)
-        return connected_walls_and_corridors
-
-
-    @staticmethod
-    def get_random_positions_for_key(layer, start_position):
-        connected_space = MissionGenerator.get_space_connected_to_position(layer, start_position).astype(int)
-        mission_mask = MissionGenerator.get_mission_mask(layer)
-        np.clip(connected_space - mission_mask, 0, 1, out=connected_space)
-        random_positions = MissionGenerator.get_random_positions_in_component(connected_space, 1, 3)
-        return random_positions
+        spatial_graph = SpatialGraph(level.upper_layer)
+        mission_spatial_nodes, mission_to_mission_spatial = MissionGenerator.convert_mission_graph_to_spatial_subgraph_form(solution_node_order)
+        mission_to_spaces_mapping = SubgraphFinder.get_subgraph_mapping(spatial_graph.nodes, mission_spatial_nodes)
+        if mission_to_spaces_mapping is not None:
+            MissionGenerator.apply_mission_mapping_to_level(level, solution_node_order, mission_to_mission_spatial, mission_to_spaces_mapping, positions_map, node_to_tile, mission_aesthetic)
+            return Solver.does_level_follow_mission(level, solution_node_order, positions_map)
+        return False
         
 
     @staticmethod
-    def get_random_positions_for_lock(layer, start_position):
-        connected_space = MissionGenerator.get_space_connected_to_position(layer, start_position)
-        connected_walls_and_corridors = MissionGenerator.get_walls_and_corridors_connected_to_space(layer, connected_space)
-        connected_walls_and_corridors_components, component_count = label_connected_components(connected_walls_and_corridors)
-        random_positions = MissionGenerator.get_random_positions_per_component(connected_walls_and_corridors_components, component_count, 1)
-        return random_positions
-    
+    def apply_mission_mapping_to_level(level, solution_node_order, mission_to_mission_spatial, mission_to_spaces_mapping, positions_map, node_to_tile, mission_aesthetic):
+        for mission_node in solution_node_order:
+            space_node = mission_to_spaces_mapping[mission_to_mission_spatial[mission_node]]
 
-    @staticmethod
-    def get_random_positions_per_component(components_mask, component_count, positions_per_component=1):
-        random_position_list = []
-        for component_number in range(1, component_count + 1):
-            random_positions = MissionGenerator.get_random_positions_in_component(components_mask, component_number, positions_per_component)
-            random_position_list.extend(random_positions)
-        if len(random_position_list) > 0:
-            random_positions = np.vstack(random_position_list)
-        else:
-            random_positions = np.zeros((0,2))
-        np.random.shuffle(random_positions)
-        return random_positions
-
-    @staticmethod
-    def get_matching_tile(node_to_tile, node, mission_aesthetic, get='key'):
-        if isinstance(node, Key):
-            key_node = node
-        elif isinstance(node, Lock):
-            key_node = node.key_s[0]
-        else:
-            return None
-        
-        if key_node not in node_to_tile:
-            if len(key_node.lock_s) > 1 or np.random.random() < mission_aesthetic.single_lock_is_hazard_probability:
-                node_to_tile[key_node] = np.random.choice(item_tiles)
+            if isinstance(mission_node, Lock):
+                mission_node_parent = None
+                for parent in mission_node.parent_s:
+                    if not isinstance(parent, Key):
+                        mission_node_parent = parent
+                parent_space_node = mission_to_spaces_mapping[mission_to_mission_spatial[mission_node_parent]]
+                mask = SpatialGraph.get_shared_edge_mask_between_nodes(space_node, parent_space_node)
             else:
-                node_to_tile[key_node] = np.random.choice(key_tiles)
+                mask = space_node.mask
 
-        tile = node_to_tile[key_node]
+            MissionGenerator.add_mission_tile_in_mask(level.upper_layer, mission_node, mask, positions_map, node_to_tile, mission_aesthetic)
 
-        if get == 'key':
-            return tile
-        elif get == 'lock':
-            if tile.get_tile_type() == TileTypes.key_lock:
-                return key_to_lock[tile]
-            elif tile.get_tile_type() == TileTypes.item_hazard:
-                return item_to_hazard[tile]
+
+    @staticmethod
+    def add_mission_tile_in_mask(layer, mission_node, mask, positions_map, node_to_tile, mission_aesthetic):
+        available_space = np.clip(mask - MissionGenerator.get_mission_mask(layer), 0, 1)
+        random_position = MissionGenerator.get_random_positions_in_mask(available_space)
+        if len(random_position) > 0:
+            random_position = random_position[0]
+        else:
+            return
+        MissionGenerator.add_mission_tile(layer, mission_node, random_position, positions_map, node_to_tile, mission_aesthetic)
 
 
     @staticmethod
@@ -173,6 +73,7 @@ class MissionGenerator:
             elif isinstance(node, GNode):
                 layer[position] = Tiles.collectable
 
+
     @staticmethod
     def spread_hazard(layer, hazard_tile, position, aesthetic_settings):
         offsets = [np.array([-1, 0]), np.array([1, 0]), np.array([0, -1]), np.array([0, 1])]
@@ -189,12 +90,64 @@ class MissionGenerator:
                         hazard_tile_positions.append(neighbor_hazard_tile_position)
 
 
+    @staticmethod
+    def get_matching_tile(node_to_tile, node, mission_aesthetic, get='key'):
+        if isinstance(node, Key):
+            key_node = node
+        elif isinstance(node, Lock):
+            key_node = next(iter(node.key_s))
+        else:
+            return None
+        
+        if key_node not in node_to_tile:
+            if len(key_node.lock_s) > 1 or np.random.random() < mission_aesthetic.single_lock_is_hazard_probability:
+                node_to_tile[key_node] = np.random.choice(item_tiles)
+            else:
+                node_to_tile[key_node] = np.random.choice(key_tiles)
+
+        tile = node_to_tile[key_node]
+
+        if get == 'key':
+            return tile
+        elif get == 'lock':
+            if tile.get_tile_type() == TileTypes.key_lock:
+                return key_to_lock[tile]
+            elif tile.get_tile_type() == TileTypes.item_hazard:
+                return item_to_hazard[tile]
 
 
     @staticmethod
-    def get_random_positions_in_component(labeled_layer, component_number, position_count=1):
-        mask = (labeled_layer == component_number)
-        return MissionGenerator.get_random_positions_in_mask(mask, position_count)
+    def convert_mission_graph_to_spatial_subgraph_form(solution_node_order):
+        subgraph_nodes = set()
+        solution_nodes_to_subgraph_nodes = dict()
+        for node in solution_node_order:
+            if not isinstance(node, Key) and not isinstance(node, End):
+                subgraph_node = Node(node.name)
+                subgraph_nodes.add(subgraph_node)
+                solution_nodes_to_subgraph_nodes[node] = subgraph_node
+        
+        for node in solution_node_order:
+            if isinstance(node, Key) or isinstance(node, End):
+                solution_nodes_to_subgraph_nodes[node] = solution_nodes_to_subgraph_nodes[next(iter(node.parent_s))]
+                # solution_nodes_to_subgraph_nodes[next(iter(node.parent_s))] = node
+            else:
+                subgraph_node = solution_nodes_to_subgraph_nodes[node]
+                for child in node.child_s:
+                    if not isinstance(child, Key) and not isinstance(child, End):
+                        subgraph_adjacent_node = solution_nodes_to_subgraph_nodes[child]
+                        subgraph_node.add_adjacent_nodes(subgraph_adjacent_node)
+
+        return subgraph_nodes, solution_nodes_to_subgraph_nodes
+
+
+        
+
+    @staticmethod
+    def merge_spaces(layer, spatial_graph, mission_node_to_spatial_node, space_node_a, space_node_b):
+        shared_edge_mask = SpatialGraph.get_shared_edge_mask_between_nodes(space_node_a, space_node_b)
+        shared_edge_opening_position = MissionGenerator.get_random_positions_in_mask(shared_edge_mask)
+        layer[tuple(shared_edge_opening_position)] = Tiles.empty
+        spatial_graph.merge_node_b_into_a(space_node_a, space_node_b)
 
 
     @staticmethod
@@ -209,22 +162,6 @@ class MissionGenerator:
 
         return random_positions
 
-
-    # https://docs.scipy.org/doc/scipy-0.16.0/reference/generated/scipy.ndimage.measurements.label.html
-    @staticmethod
-    def get_rooms_components(layer):
-        empty_mask = (layer == Tiles.empty)
-        labeled_components, component_count = label_connected_components(empty_mask)
-        return labeled_components, component_count
-
-
-    @staticmethod
-    def get_potential_lock_components(layer):
-        potential_lock_mask = MissionGenerator.get_wall_corridor_mask(layer)
-        labeled_components, component_count = label_connected_components(potential_lock_mask)
-        return labeled_components, component_count
-
-
     @staticmethod
     def get_mission_mask(layer):
         mission_mask = np.zeros(layer.shape)
@@ -232,81 +169,3 @@ class MissionGenerator:
             mission_mask = np.logical_or(mission_mask, layer == mission_tile)
 
         return mission_mask.astype(int)
-
-
-    # Returns a mask representing all the possible locations for a lock
-    # https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.ndimage.filters.convolve.html
-    @staticmethod
-    def get_wall_corridor_mask(layer):
-        convolutional_result1 = 2 # Based on the filter, a horizontal wall has a result == 2
-        convolutional_result2 = 8 # Based on the filter, a vertical wall has a result == 8
-        # We can't just use a symmetric kernel because we need to ignore corners.
-        wall_kernel = np.array([
-            [0., 4., 0.],
-            [1., 0, 1.],
-            [0., 4., 0.],])
-
-        wall_mask = (layer == Tiles.wall).astype(int)
-        mission_mask = MissionGenerator.get_mission_mask(layer)
-        np.clip(wall_mask - mission_mask, 0, 1, out=wall_mask)
-        conv_result = convolve(wall_mask, wall_kernel, mode='constant', cval=1.0)
-        wall_corridor_mask = (np.logical_or(conv_result == convolutional_result1, conv_result == convolutional_result2)).astype(int)
-        np.clip(wall_corridor_mask - mission_mask, 0, 1, out=wall_corridor_mask)
-        return wall_corridor_mask
-
-
-    @staticmethod
-    def generate_mission_graph(mission_graph_aesthetic):
-        # graph = Graph(mission_graph_aesthetic)
-        # return GNode.find_all_nodes(graph.start, method="topological-sort")
-        return MissionGenerator.get_water_lock_graph()
-
-    @staticmethod
-    def get_water_lock_graph():
-        start = Start()
-        key_red = Key("red")
-        lock_red = Lock("red")
-        flippers = Key("flippers")
-        water = Lock("water")
-        end = End()
-
-        start.add_child_s([flippers, water, lock_red])
-        flippers.add_lock_s(water)
-        water.add_child_s(key_red)
-        key_red.add_lock_s(lock_red)
-        lock_red.add_child_s(end)
-
-        return GNode.find_all_nodes(start, method="topological-sort")
-
-    @staticmethod
-    def get_lock_water_fire_lock_graph():
-        start = Start()
-        key_red = Key("red")
-        lock_red = Lock("red")
-        flippers = Key("flippers")
-        water1 = Lock("water1")
-        water2 = Lock("water2")
-        key_green = Key("green")
-        lock_green = Lock("green")
-        fire_boots = Key("fireboots")
-        fire1 = Lock("fire1")
-        fire2 = Lock("fire2")
-        end = End()
-        start.add_child_s([fire2, key_red, lock_red])
-        key_red.add_lock_s(lock_red)
-        lock_red.add_child_s([flippers, water1])
-        flippers.add_lock_s([water1, water2])
-        water1.add_child_s(water2)
-        water2.add_child_s([fire_boots, fire1])
-        fire_boots.add_lock_s([fire1, fire2])
-        fire1.add_child_s(key_green)
-        key_green.add_lock_s(lock_green)
-        fire2.add_child_s(lock_green)
-        lock_green.add_child_s(end)
-
-        graph = Graph()
-        graph.start = start
-        graph.end = end
-        # graph.draw()
-
-        return GNode.find_all_nodes(start, method="topological-sort")

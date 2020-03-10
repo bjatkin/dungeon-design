@@ -1,4 +1,4 @@
-from graph_to_level.spatial_graph_visualizer import SpatialGraphVisualizer
+from graph_to_level.legacy.spatial_graph_visualizer import SpatialGraphVisualizer
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt

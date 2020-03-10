@@ -1,6 +1,6 @@
 import numpy as np
 from graph_structure.graph import Graph
-from graph_to_level.spatial_graph_visualizer import SpatialGraphVisualizer
+from graph_to_level.legacy.spatial_graph_visualizer import SpatialGraphVisualizer
 
 
 class Unraveler:
