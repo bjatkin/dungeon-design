@@ -1,10 +1,10 @@
 import unittest
 import numpy as np
-from graph_to_level.unraveler import Unraveler
-from graph_to_level.test_unraveler_debug_method import debug_method
+from graph_to_level.legacy.unraveler import Unraveler
+from graph_to_level.legacy.test_unraveler_debug_method import debug_method
 from graph_structure.graph_node import GNode
 from graph_to_level.test_graphs import TestGraphs
-from graph_to_level.spatial_graph_generator import SpatialGraphGenerator
+from graph_to_level.legacy.spatial_graph_generator import SpatialGraphGenerator
 
 
 class TestUnraveler(unittest.TestCase):

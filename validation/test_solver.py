@@ -1,7 +1,7 @@
 import unittest
 from dungeon_level.level import Level
 from dungeon_level.dungeon_tiles import Tiles
-from graph_structure.graph_node import GNode, Start, End, Lock, Key
+from graph_structure.graph_node import Node, GNode, Start, End, Lock, Key
 from validation.solver import Solver
 import numpy as np
 
@@ -45,7 +45,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,3]),
         }
 
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, True)
 
 
@@ -97,7 +97,7 @@ class TestSolver(unittest.TestCase):
             end:          np.array([0,9]),
         }
 
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, True)
 
 
@@ -108,8 +108,8 @@ class TestSolver(unittest.TestCase):
         
         # S--K--L--E
         start = Start()
-        key = Key()
-        lock = Lock()
+        key = Key("key")
+        lock = Lock("lock")
         end = End()
         start.add_child_s(key)
         key.add_lock_s(lock)
@@ -122,7 +122,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,3]),
         }
 
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, False)
         
 
@@ -150,7 +150,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,4]),
         }
 
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, False)
         
 
@@ -163,8 +163,8 @@ class TestSolver(unittest.TestCase):
 
         # S--K--L--E
         start = Start()
-        key = Key()
-        lock = Lock()
+        key = Key("key")
+        lock = Lock("lock")
         end = End()
         start.add_child_s(key)
         key.add_lock_s(lock)
@@ -177,7 +177,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,3]),
         }
 
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, False)
         
 
@@ -215,7 +215,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,5]),
         }
 
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, True)
 
 
@@ -253,7 +253,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,5]),
         }
         
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, False)
         self.assertEqual(failure_reason, "trivial")
 
@@ -298,7 +298,7 @@ class TestSolver(unittest.TestCase):
             # end:    np.array([2,2]),
         }
         
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, False)
         self.assertEqual(failure_reason, "trivial")
 
@@ -333,7 +333,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,4])
             }
 
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, True)
 
     def test_node_seen_too_soon_correct_layout(self):
@@ -369,7 +369,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([2,3]),
         }
 
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, True)
 
     def test_node_seen_too_soon_incorrect_layout(self):
@@ -404,7 +404,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,4]),
         }
 
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -443,7 +443,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,4]),
         }
 
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, True)
 
 
@@ -483,7 +483,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([2,3]),
         }
 
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, False)
 
     def test_degenerate_loop_layout(self):
@@ -525,7 +525,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([1,7]),
         }
 
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, False)
 
     def test_wrong_key_color(self):
@@ -556,7 +556,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([2,3]),
         }
         
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -596,7 +596,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,5]),
         }
 
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, True)
 
 
@@ -634,7 +634,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,5]),
         }
 
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -670,7 +670,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,15]),
         }
 
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, True)
 
 
@@ -705,7 +705,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,15]),
         }
 
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -744,7 +744,7 @@ class TestSolver(unittest.TestCase):
             end:        np.array([2,4]),
         }
 
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, False)
 
     def test_solver_difficult(self):
@@ -802,5 +802,5 @@ class TestSolver(unittest.TestCase):
             end:        np.array([0,0])
         }
 
-        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, GNode.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, True)

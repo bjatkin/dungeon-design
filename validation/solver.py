@@ -41,7 +41,7 @@ class Solver:
         for node in reached:
             if isinstance(node, Lock) and node in positions_map:
                 tile = layer[tuple(positions_map[node])]
-                if node.key_s[0] not in reached:
+                if next(iter(node.key_s)) not in reached:
                     if tile.get_tile_type() == TileTypes.key_lock and player_status.get_key_count(tile) > 0:
                         return False
                     elif tile.get_tile_type() == TileTypes.item_hazard and player_status.get_item_count(tile) > 0:
