@@ -10,6 +10,10 @@ class Graph():
         self.start = start
         self.end = end
 
+        self.lock_id = -1
+        self.key_id = -1
+        self.collect_id = -1
+
         node_to_grow = start
         tree_depth = np.random.randint(1, aesthetic.max_depth)
         for _ in range(tree_depth):
@@ -107,18 +111,16 @@ class Graph():
         GNode.traverse_nodes_breadth_first(self.start, visit_method)
 
 
-    lock_id = -1
     def get_lock_id(self):
         self.lock_id += 1
         return self.lock_id
     
 
-    key_id = -1
     def get_key_id(self):
         self.key_id += 1
         return self.key_id
     
-    collect_id = -1
+
     def get_collectable_id(self):
         self.collect_id += 1
         return self.collect_id
