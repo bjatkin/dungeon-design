@@ -61,12 +61,12 @@ class Graph():
         def is_node_multilock_candidate(node):
             is_candidate = (isinstance(node, Key) and
                             len(node.lock_s) == 1 and
-                            len(node.lock_s[0].key_s) == 1)
+                            len(next(iter(node.lock_s)).key_s) == 1)
             return is_candidate
 
         multilock_key_candidates = [node for node in Node.find_all_nodes(start) if is_node_multilock_candidate(node)]
         multilock_key = np.random.choice(multilock_key_candidates)
-        lock = multilock_key.lock_s[0]
+        lock = next(iter(multilock_key.lock_s))
 
         for _ in range(lock_count):
             current_node = self.get_random_descendant(lock)
