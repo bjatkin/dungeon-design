@@ -44,9 +44,9 @@ class Generator:
 
     @staticmethod
     def _generate_mission_graph(mission_graph_aesthetic):
-        # graph = Graph(mission_graph_aesthetic)
-        # return Node.find_all_nodes(graph.start, method="topological-sort")
-        return Generator._get_lock_water_fire_lock_graph()
+        graph = Graph(mission_graph_aesthetic)
+        return Node.find_all_nodes(graph.start, method="topological-sort")
+        # return Generator._get_lock_water_fire_lock_graph()
 
     @staticmethod
     def _get_water_lock_graph():

@@ -1,117 +1,118 @@
-from graph_structure.graph_node import GNode, Start, Key, Lock, End, Collectable
+from graph_structure.graph_node import Node, GNode, Start, Key, Lock, End, Collectable
 from PIL import Image, ImageDraw, ImageFont
-from random import randint
 import numpy as np
 
 class Graph():
-    def __init__(self, max_depth=3, branch_prob=[0.8, 0.2, 0.0, 0.0], multi_door_types=1, multi_door_count=[2]):
+    def __init__(self, aesthetic):
         # Generate starting and ending nodes
         start = Start()
         end = End()
         self.start = start
         self.end = end
 
-        n = start
-        a = randint(1, max_depth)
-        for i in range(a):
-            b = np.random.choice([1, 2, 3, 4], p=branch_prob)
-            for j in range(b):
-                f = self.grow_graph(n)
-            n = f
+        node_to_grow = start
+        tree_depth = np.random.randint(1, aesthetic.max_depth)
+        for _ in range(tree_depth):
+            branch_count = np.random.choice([1, 2, 3, 4], p=aesthetic.branch_probability)
+            for _ in range(branch_count):
+                f = self.grow_graph(node_to_grow)
+            node_to_grow = f
         
-        n.add_child_s(end)
+        node_to_grow.add_child_s(end)
 
-        for i in range(multi_door_types):
-            self.add_multi_door(start, door_count=multi_door_count[i])
+        for i in range(aesthetic.multi_lock_types):
+            self.add_multi_lock(start, lock_count=aesthetic.multi_lock_count[i])
 
         self.fill_dead_ends(start)
     
-    def grow_graph(self, start, multi="None"):
-        # Add a door
-        n = start
 
-        lid = self.get_lock_id()
-        name = "L"+str(lid)
-        l = Lock(name=name)
-        l.id = lid
-        l.add_parent_s(n)
-        r = randint(0, 3)
-        for i in range(r):
-            if len(n.parent_s) > 0:
-                n = next(iter(n.parent_s))
+    def grow_graph(self, lock_parent, multi="None"):
+        ancestor = self.get_random_ancestor(lock_parent)
+        key_parent = self.get_random_descendant(ancestor)
+
+        key = self.add_key(key_parent)
+        lock = self.add_lock(lock_parent, key)
+        return lock
+
+
+    def get_random_ancestor(self, node, max_depth=3):
+        go_up_count = np.random.randint(0, 3)
+        ancestor = node
+        for _ in range(go_up_count):
+            if len(ancestor.parent_s) > 0:
+                ancestor = [parent for parent in ancestor.parent_s if not isinstance(parent, Key)][0]
+        return ancestor
+
+
+    def get_random_descendant(self, node, max_depth=3):
+        def is_valid_descendant(child):
+            return not isinstance(child, Key) and not isinstance(child, End)
+
+        go_down_count = np.random.randint(0, max_depth)
+        descendant = node
+        for _ in range(go_down_count):
+            possible_descendant_nodes = [child for child in descendant.child_s if is_valid_descendant(child)]
+            if len(possible_descendant_nodes) > 0:
+                descendant = np.random.choice(possible_descendant_nodes)
+        return descendant
+
     
-        tmp_n = n
-        r = randint(0, 3)
-        for i in range(r):
-            c_len = len(n.child_s)
-            if c_len > 0:
-                new_c = np.random.choice(n.child_s)
-                if new_c.name != name and not isinstance(new_c, Key):
-                    n = new_c
+    def add_multi_lock(self, start, lock_count=2):
+        def is_node_multilock_candidate(node):
+            is_candidate = (isinstance(node, Key) and
+                            len(node.lock_s) == 1 and
+                            len(node.lock_s[0].key_s) == 1)
+            return is_candidate
 
-        kid = self.get_key_id()
-        k = Key(name="K{}({})".format(kid,lid))
-        k.id = kid
-        k.add_parent_s(n)
-        k.add_lock_s(l)
-        
-        return l
+        multilock_key_candidates = [node for node in Node.find_all_nodes(start) if is_node_multilock_candidate(node)]
+        multilock_key = np.random.choice(multilock_key_candidates)
+        lock = multilock_key.lock_s[0]
 
-    def add_multi_door(self, start, door_count=2):
-        search = True
-        n = start
-        while search:
-            if len(n.child_s) == 0:
-                n = start
-            n = np.random.choice(n.child_s)
-            if  isinstance(n, Key) and \
-                len(n.lock_s) == 1 and \
-                len(n.lock_s[0].key_s) == 1:
-                n = n.lock_s[0]
-                search = False
-        
-        lock = n
-        kid = n.key_s[0].id
-        for _ in range(door_count):
-            n = lock
-            r = randint(0, 3)
-            for i in range(r):
-                c_len = len(n.child_s)
-                if c_len > 0:
-                    new_n = np.random.choice(n.child_s)
-                    if not isinstance(new_n, Key) and not isinstance(new_n, End):
-                        n = new_n
-            
+        for _ in range(lock_count):
+            current_node = self.get_random_descendant(lock)
+
             child = None
-            print("Child Length:", len(n.child_s))
-            if len(n.child_s) > 0:
-                child = np.random.choice(n.child_s)
+            if len(current_node.child_s) > 0:
+                child = np.random.choice(list(current_node.child_s))
 
-            lid = self.get_lock_id()
-            lock = Lock(name="L{}({})".format(lid, kid))
-            lock.add_parent_s(n)
-            if child != None:
-                lock.add_child_s(child)
-                n.remove_child_s([child.name])
+            lock = self.add_lock(current_node, multilock_key, child)
 
-            print("New Child Length:", len(lock.child_s))
+    
+    def add_key(self, key_parent, lock=None):
+        key_id = self.get_key_id()
+        key = Key(name="K{}".format(key_id), parent_s=key_parent, lock_s=lock)
+        key.id = key_id
+        return key
+
+
+    def add_lock(self, lock_parent, key, lock_replace_child=None):
+        lock_id = self.get_lock_id()
+        lock = Lock(name="L{}".format(lock_id), parent_s=lock_parent, key_s=key)
+        lock.id = lock_id
+        if lock_replace_child != None:
+            lock.add_child_s(lock_replace_child)
+            lock_parent.remove_child_s(lock_replace_child)
+        return lock
+
 
     def fill_dead_ends(self, start):
         def visit_method(node, visited_nodes):
             if isinstance(node, Lock):
                 print(node.name, " Child Length: ", len(node.child_s))
             if len(node.child_s) == 0 and isinstance(node, Lock):
-                cid = self.get_collectable_id()
-                c = Collectable(name="C{}".format(cid), parent_s=[node])
-                node.add_child_s(c)
+                collectable_id = self.get_collectable_id()
+                collectable = Collectable(name="C{}".format(collectable_id), parent_s=[node])
+                node.add_child_s(collectable)
         
         GNode.traverse_nodes_breadth_first(self.start, visit_method)
+
 
     lock_id = -1
     def get_lock_id(self):
         self.lock_id += 1
         return self.lock_id
     
+
     key_id = -1
     def get_key_id(self):
         self.key_id += 1
@@ -122,9 +123,11 @@ class Graph():
         self.collect_id += 1
         return self.collect_id
 
+
     def string(self):
         return self.recurse_string(self.start)
     
+
     def recurse_string(self, node):
         base = node.name + "\n"
         for i, c in enumerate(node.child_s):
@@ -133,6 +136,7 @@ class Graph():
         
         return base
     
+
     def draw(self):
         im = Image.new('RGB', (1500, 800), (255, 255, 255)) 
         draw = ImageDraw.Draw(im) 
@@ -173,6 +177,7 @@ class Graph():
         im.save("graph.png")
         im.show()
     
+
     def draw_node(self, draw, xy, text, n_type="lock"):
         if n_type == "lock":
             color = (128, 128, 255)
@@ -184,6 +189,7 @@ class Graph():
             draw.ellipse((xy[0]*50+15, xy[1]*50+15, xy[0]*50+60, xy[1]*50+60), fill=color)
             draw.text((xy[0]*50+23, xy[1]*50+33), text, fill=(255, 255, 255))
     
+
     def connect_node(self, draw, xy, straight=True):
         black = (0, 0, 0)
         if (xy[0] == xy[2] or xy[1] == xy[3]) or straight:

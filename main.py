@@ -22,7 +22,6 @@ Log.verbose = True
 # So that if we want to reproduce the level, we know what seed to use,
 # and so that we don't have to change the seed each time we run the program.
 seed = np.random.randint(1e5)
-# seed = 1377
 print("Level seed: {}".format(seed))
 random.seed(seed)
 np.random.seed(seed)

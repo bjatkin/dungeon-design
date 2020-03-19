@@ -94,11 +94,9 @@ class Node(object):
     def find_all_nodes(node, method="depth-first"):
         visited = []
 
-
         def visit_method(node, visited_nodes):
             nonlocal visited
             visited.append(node)
-
 
         if method == "depth-first":
             Node.traverse_nodes_depth_first(node, visit_method)
@@ -280,7 +278,6 @@ class End(GNode):
 
 
 class Collectable(GNode):
-    id = 0
     def __init__(self, name=None, parent_s=None):
         super(Collectable, self).__init__(name=name, parent_s=parent_s)
 
