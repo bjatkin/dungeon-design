@@ -1,3 +1,4 @@
+import os
 from puzzle_script.puzzle_script_level import PuzzleScriptLevel
 from puzzle_script.puzzle_world_writer.level_writer import LevelWriter
 
@@ -5,7 +6,7 @@ from puzzle_script.puzzle_world_writer.level_writer import LevelWriter
 class LevelSetWriter:
     @staticmethod
     def write(level_set, filename):
-        template = open("/Users/brandon/go/src/Projects/School/dungeon-design/puzzle_script/puzzle_world_writer/TileWorldBase.html", "r")
+        template = open("{}/puzzle_script/puzzle_world_writer/TileWorldBase.html".format(os.getcwd()), "r")
         tmp = template.read()
 
         f = open(filename, "w")
