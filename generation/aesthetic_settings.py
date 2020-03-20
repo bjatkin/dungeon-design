@@ -22,6 +22,7 @@ class AestheticSettings:
     class MissionGraphAesthetic:
         def __init__(self):
             self.max_depth = 5
+            self.min_depth = 1
             self.branch_probability = [0.8, 0.2, 0.0, 0.0]
             self.max_multi_lock_count = 2
             self.max_locks_per_multi_lock = 4

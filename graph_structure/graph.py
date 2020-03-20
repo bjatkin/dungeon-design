@@ -14,7 +14,7 @@ class Graph():
         self.collect_id = -1
 
         node_to_grow = start
-        tree_depth = np.random.randint(1, aesthetic.max_depth)
+        tree_depth = np.random.randint(aesthetic.min_depth, aesthetic.max_depth)
         for _ in range(tree_depth):
             branch_count = np.random.choice([1, 2, 3, 4], p=aesthetic.branch_probability)
             for _ in range(branch_count):
@@ -49,7 +49,11 @@ class Graph():
             else:
                 current_node = None
 
-        ancestor = np.random.choice(ancestors)
+        if len(ancestors) > 0:
+            ancestor = np.random.choice(ancestors)
+        else:
+            ancestor = node
+
         return ancestor
 
 
