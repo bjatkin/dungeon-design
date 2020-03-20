@@ -153,8 +153,6 @@ class GNode(Node):
         super(GNode, self).__init__(name)
         self.child_s = self.adjacent_nodes
         self.parent_s = set()
-        self.x = 0
-        self.y = 0
 
         if child_s is not None:
             self.add_child_s(child_s)

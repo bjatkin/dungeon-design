@@ -1,6 +1,7 @@
 from dungeon_level.dungeon_tiles import Tiles, key_to_lock, key_tiles
 from graph_structure.graph_node import GNode, Start, End, Key, Lock, Node
 from graph_structure.graph import Graph
+from graph_structure.graph_visualizer import GraphVisualizer
 from validation.solver import Solver
 import numpy as np
 from generation.mission_generator import MissionGenerator
@@ -45,6 +46,7 @@ class Generator:
     @staticmethod
     def _generate_mission_graph(mission_graph_aesthetic):
         graph = Graph(mission_graph_aesthetic)
+        GraphVisualizer.show_graph(graph)
         return Node.find_all_nodes(graph.start, method="topological-sort")
         # return Generator._get_lock_water_fire_lock_graph()
 

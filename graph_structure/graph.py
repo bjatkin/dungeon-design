@@ -1,5 +1,4 @@
 from graph_structure.graph_node import Node, GNode, Start, Key, Lock, End, Collectable
-from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 
 class Graph():
@@ -137,66 +136,3 @@ class Graph():
             base += self.recurse_string(c)
         
         return base
-    
-
-    def draw(self):
-        im = Image.new('RGB', (1500, 800), (255, 255, 255)) 
-        draw = ImageDraw.Draw(im) 
-        
-        rows = np.full((1000, 1), 0)
-
-        sorted_nodes = Node.find_all_nodes(self.start, method="topological-sort")
-
-        # Draw Connections
-        for node in sorted_nodes:
-            if len(node.parent_s) > 0:
-                parent_node = [node for node in node.parent_s if not isinstance(node, Key)][0]
-                node.x = parent_node.x + 2
-                # find the size of this row
-                new_y = rows[node.x] + 2
-                node.y = new_y
-                if new_y < node.parent_s[0].y:
-                    node.y = node.parent_s[0].y
-                    rows[node.x] = node.parent_s[0].y - 2
-                rows[node.x] += 2
-                self.connect_node(draw, (parent_node.y, parent_node.x, node.y, node.x))
-        
-        # Draw Nodes
-        for node in sorted_nodes:
-            if len(node.parent_s) > 0:
-                if isinstance(node, Lock):
-                    self.draw_node(draw, (node.y, node.x), node.name, n_type="lock")
-                elif isinstance(node, End):
-                    self.draw_node(draw, (node.y, node.x), node.name, n_type="lock")
-                else:
-                    self.draw_node(draw, (node.y, node.x), node.name, n_type="key")
-        
-        GNode.traverse_nodes_breadth_first(self.start, visit_method_connect)
-        GNode.traverse_nodes_breadth_first(self.start, visit_method_nodes)
-
-        self.draw_node(draw, (0, 0), "Start", n_type="lock")
-
-        im.save("graph.png")
-        im.show()
-    
-
-    def draw_node(self, draw, xy, text, n_type="lock"):
-        if n_type == "lock":
-            color = (128, 128, 255)
-            draw.rectangle((xy[0]*50+15, xy[1]*50+15, xy[0]*50+60, xy[1]*50+60), fill=color)
-            draw.text((xy[0]*50+23, xy[1]*50+33), text, fill=(255, 255, 255))
-
-        if n_type == "key":
-            color = (128, 0, 255)
-            draw.ellipse((xy[0]*50+15, xy[1]*50+15, xy[0]*50+60, xy[1]*50+60), fill=color)
-            draw.text((xy[0]*50+23, xy[1]*50+33), text, fill=(255, 255, 255))
-    
-
-    def connect_node(self, draw, xy, straight=True):
-        black = (0, 0, 0)
-        if (xy[0] == xy[2] or xy[1] == xy[3]) or straight:
-            draw.line((xy[0]*50+38, xy[1]*50+38, xy[2]*50+38, xy[3]*50+38), fill=black)
-        else:
-            draw.line((xy[0]*50+38, xy[1]*50+38, xy[0]*50+38, xy[3]*50-10), fill=black)
-            draw.line((xy[0]*50+38, xy[3]*50-10, xy[2]*50+38, xy[3]*50-10), fill=black)
-            draw.line((xy[2]*50+38, xy[3]*50-10, xy[2]*50+38, xy[3]*50+38), fill=black)
