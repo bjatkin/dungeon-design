@@ -23,8 +23,8 @@ class Graph():
         
         node_to_grow.add_child_s(end)
 
-        for i in range(aesthetic.multi_lock_types):
-            self.add_multi_lock(start, lock_count=aesthetic.multi_lock_count[i])
+        for _ in range(np.random.randint(aesthetic.max_multi_lock_count)):
+            self.add_multi_lock(self.start, lock_count=np.random.randint(aesthetic.max_locks_per_multi_lock))
 
         self.fill_dead_ends(start)
     
