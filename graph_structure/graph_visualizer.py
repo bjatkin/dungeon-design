@@ -8,7 +8,8 @@ class GraphVisualizer:
     node_spacing = 50
     node_size = 45
     padding = np.array([15, 15])
-    line_color = (0, 0, 0)
+    connection_color = (0, 0, 0)
+    key_connection_color = (255, 0, 0)
     text_color = (255, 255, 255)
     background_color = (255, 255, 255)
     key_color = (128, 0, 255)
@@ -16,7 +17,7 @@ class GraphVisualizer:
 
 
     @staticmethod
-    def show_graph(graph, draw_straight_lines=True):
+    def show_graph(graph, draw_straight_lines=True, draw_key_connections=True):
         sorted_nodes = Node.find_all_nodes(graph.start, method="topological-sort")
         node_positions = GraphVisualizer.get_node_arrangement(sorted_nodes)
 
@@ -27,7 +28,10 @@ class GraphVisualizer:
         for node in sorted_nodes:
             parent_node = GraphVisualizer.get_not_key_parent(node)
             if parent_node is not None:
-                GraphVisualizer.draw_connection(draw, node_positions[parent_node], node_positions[node], straight=draw_straight_lines)
+                GraphVisualizer.draw_connection(draw, node_positions[parent_node], node_positions[node], straight=draw_straight_lines, is_key_connection=False)
+            if isinstance(node, Key):
+                for lock in node.lock_s:
+                    GraphVisualizer.draw_connection(draw, node_positions[node], node_positions[lock], straight=True, is_key_connection=True)
         
         # Draw Nodes
         for node in sorted_nodes:
@@ -98,15 +102,20 @@ class GraphVisualizer:
     
 
     @staticmethod
-    def draw_connection(draw, xy1, xy2, straight=True):
+    def draw_connection(draw, xy1, xy2, straight=True, is_key_connection=False):
         center1 = GraphVisualizer.get_node_position(xy1, True)
         center2 = GraphVisualizer.get_node_position(xy2, True)
 
+        if is_key_connection:
+            color = GraphVisualizer.key_connection_color
+        else:
+            color = GraphVisualizer.connection_color
+
         if (xy1[0] == xy2[0] or xy1[1] == xy2[1]) or straight:
             line = np.concatenate([center1, center2])
-            draw.line(tuple(line), fill=GraphVisualizer.line_color)
+            draw.line(tuple(line), fill=color)
         else:
             d = -(GraphVisualizer.node_size + GraphVisualizer.node_spacing) // 2
-            draw.line((center1[0], center1[1],     center1[0], center2[1] + d), fill=GraphVisualizer.line_color)
-            draw.line((center1[0], center2[1] + d, center2[0], center2[1] + d), fill=GraphVisualizer.line_color)
-            draw.line((center2[0], center2[1] + d, center2[0], center2[1]    ), fill=GraphVisualizer.line_color)
+            draw.line((center1[0], center1[1],     center1[0], center2[1] + d), fill=color)
+            draw.line((center1[0], center2[1] + d, center2[0], center2[1] + d), fill=color)
+            draw.line((center2[0], center2[1] + d, center2[0], center2[1]    ), fill=color)
