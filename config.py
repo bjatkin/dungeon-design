@@ -11,3 +11,15 @@ class ConfigReader():
             self.puzzle_script_save_file = data['puzzle_script_save_file']
             self.engine = data['engine']
             self.level_count = data['level_count']
+            self.play_or_generate = data['play_or_generate']
+            self.name = data['name']
+            self.ratings_file = data['ratings_file']
+
+            self.aesthetic = Aesthetic()
+            self.aesthetic.noise = data['aesthetic']['noise']
+            self.aesthetic.single_lock_is_hazard = data['aesthetic']['single_lock_is_hazard']
+            self.aesthetic.fill_space = data['aesthetic']['fill_space']
+
+class Aesthetic():
+    def __init__(self):
+        pass

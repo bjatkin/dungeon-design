@@ -13,19 +13,19 @@ import time
 
 class Generator:
     @staticmethod
-    def generate(level, size, aesthetic_settings, max_retry_count=500, pregenerated_solution_node_order=None, pregenerated_level_layer=None):
+    def generate(level, size, aesthetic_settings, max_retry_count=500, pregenerated_solution_node_order=None, pregenerated_level_layer=None, draw_graph=False):
         size = np.array(size)
 
         start_time = time.time()
         for retry_count in range(max_retry_count):
             Generator._set_level_space(level, size, pregenerated_level_layer, aesthetic_settings.level_space_aesthetic)
-            solution_node_order = Generator._get_mission_graph(pregenerated_solution_node_order, aesthetic_settings.mission_graph_aesthetic)
+            solution_node_order = Generator._get_mission_graph(pregenerated_solution_node_order, aesthetic_settings.mission_graph_aesthetic, draw_graph)
             is_solvable = MissionGenerator.generate_mission(level, solution_node_order, aesthetic_settings.mission_aesthetic)
             if is_solvable:
                 LevelTweaker.tweak_level(level, aesthetic_settings.tweaker_aesthetic)
                 break
         end_time = time.time()
-        Log.print("Level generated in {} seconds".format(end_time - start_time))
+        # Log.print("Level generated in {} seconds".format(end_time - start_time))
         return is_solvable
 
     @staticmethod
@@ -37,16 +37,18 @@ class Generator:
 
 
     @staticmethod
-    def _get_mission_graph(pregenerated_solution_node_order, mission_graph_aesthetic):
+    def _get_mission_graph(pregenerated_solution_node_order, mission_graph_aesthetic, draw=False):
         if pregenerated_solution_node_order is None:
-            return Generator._generate_mission_graph(mission_graph_aesthetic)
+            return Generator._generate_mission_graph(mission_graph_aesthetic, draw)
         else:
             return pregenerated_solution_node_order
 
     @staticmethod
-    def _generate_mission_graph(mission_graph_aesthetic):
+    def _generate_mission_graph(mission_graph_aesthetic, draw=False):
         graph = Graph(mission_graph_aesthetic)
-        GraphVisualizer.show_graph(graph)
+        if draw:
+            GraphVisualizer.show_graph(graph)
+
         return Node.find_all_nodes(graph.start, method="topological-sort")
         # return Generator._get_lock_water_fire_lock_graph()
 

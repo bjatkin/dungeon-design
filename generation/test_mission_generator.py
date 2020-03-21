@@ -64,4 +64,4 @@ class TestMissionGenerator(unittest.TestCase):
             pregenerated_solution_node_order=solution_node_order)
         self.assertTrue(was_successful)
 
-        Log.print(level)
+        # Log.print(level)

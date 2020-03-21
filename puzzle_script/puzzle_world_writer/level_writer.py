@@ -11,7 +11,6 @@ class LevelWriter:
         data += "message Level: {}\\n".format(level_number)
         converted_upper_layer = LayerConverter.convert_layer(level.upper_layer)
         converted_lower_layer = LayerConverter.convert_layer(level.lower_layer)
-        print(converted_lower_layer)
         for i, tile in enumerate(converted_upper_layer):
             data += tile.value
             if (i+1) % level.LAYER_WIDTH == 0:
