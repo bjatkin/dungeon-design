@@ -46,7 +46,7 @@ class GraphVisualizer:
 
     @staticmethod
     def get_image_size(node_positions):
-        positions = np.vstack(node_positions.values())
+        positions = np.vstack(list(node_positions.values()))
         max_positions = np.amax(positions, axis=0)
         image_size = GraphVisualizer.padding * 2 + GraphVisualizer.node_size + GraphVisualizer.node_spacing * max_positions
         return tuple(image_size)

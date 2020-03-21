@@ -14,7 +14,7 @@ class Graph():
         self.collect_id = -1
 
         node_to_grow = start
-        tree_depth = np.random.randint(1, aesthetic.max_depth)
+        tree_depth = np.random.randint(aesthetic.min_depth, aesthetic.max_depth)
         for _ in range(tree_depth):
             branch_count = np.random.choice([1, 2, 3, 4], p=aesthetic.branch_probability)
             for _ in range(branch_count):
@@ -23,8 +23,8 @@ class Graph():
         
         node_to_grow.add_child_s(end)
 
-        for i in range(aesthetic.multi_lock_types):
-            self.add_multi_lock(start, lock_count=aesthetic.multi_lock_count[i])
+        for _ in range(np.random.randint(aesthetic.max_multi_lock_count)):
+            self.add_multi_lock(self.start, lock_count=np.random.randint(aesthetic.max_locks_per_multi_lock))
 
         self.fill_dead_ends(start)
     
@@ -38,25 +38,31 @@ class Graph():
         return lock
 
 
-    def get_random_ancestor(self, node, max_depth=3):
-        go_up_count = np.random.randint(0, 3)
-        ancestor = node
-        for _ in range(go_up_count):
-            if len(ancestor.parent_s) > 0:
-                ancestor = [parent for parent in ancestor.parent_s if not isinstance(parent, Key)][0]
+    def get_random_ancestor(self, node):
+        ancestors = []
+        current_node = node
+        while current_node is not None:
+            possible_parents = [parent for parent in current_node.parent_s if not isinstance(parent, Key)]
+            if len(possible_parents) > 0:
+                ancestors.append(possible_parents[0])
+                current_node = possible_parents[0]
+            else:
+                current_node = None
+
+        if len(ancestors) > 0:
+            ancestor = np.random.choice(ancestors)
+        else:
+            ancestor = node
+
         return ancestor
 
 
-    def get_random_descendant(self, node, max_depth=3):
+    def get_random_descendant(self, node):
         def is_valid_descendant(child):
             return not isinstance(child, Key) and not isinstance(child, End)
 
-        go_down_count = np.random.randint(0, max_depth)
-        descendant = node
-        for _ in range(go_down_count):
-            possible_descendant_nodes = [child for child in descendant.child_s if is_valid_descendant(child)]
-            if len(possible_descendant_nodes) > 0:
-                descendant = np.random.choice(possible_descendant_nodes)
+        possible_descendants = [node for node in Node.find_all_nodes(node) if is_valid_descendant(node)]
+        descendant = np.random.choice(possible_descendants)
         return descendant
 
     
