@@ -17,7 +17,6 @@ def debug_method(node_positions, adjacency_matrix, debug_info, last_frame):
     im.set_data(img)
     plt.draw()
     plt.pause(0.0001)
-    # print(time.time() - now)
     now = time.time()
     if last_frame:
         plt.pause(1.0)

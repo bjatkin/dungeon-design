@@ -100,8 +100,6 @@ class Graph():
 
     def fill_dead_ends(self, start):
         def visit_method(node, visited_nodes):
-            if isinstance(node, Lock):
-                print(node.name, " Child Length: ", len(node.child_s))
             if len(node.child_s) == 0 and isinstance(node, Lock):
                 collectable_id = self.get_collectable_id()
                 collectable = Collectable(name="C{}".format(collectable_id), parent_s=[node])

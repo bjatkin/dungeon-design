@@ -34,7 +34,6 @@ class Unraveler:
             offsets_history.pop(0)
             offsets_history.append(np.average(np.linalg.norm(offsets, axis=1)))
             steps += 1
-            # print("steps {}".format(steps))
 
         if not frame_debug_method is None:
             frame_debug_method(node_positions, adjacency_matrix, debug_info, last_frame=True)
