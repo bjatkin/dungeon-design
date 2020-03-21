@@ -13,9 +13,8 @@ class LevelSetWriter:
 
         data = ""
         for i, level in enumerate(level_set.levels):
-            data = LevelWriter.write(level, i + i)
+            data += LevelWriter.write(level, i + i)
 
-        print(data)
         tmp = tmp.replace("{{Levels}}", data)
         f.write(tmp)
         f.close()

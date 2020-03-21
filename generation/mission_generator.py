@@ -10,7 +10,7 @@ from log import Log
 class MissionGenerator:
     @staticmethod
     def generate_mission(level, solution_node_order, mission_aesthetic):
-        Log.print(level)
+        # Log.print(level)
         positions_map = dict()
         node_to_tile = dict()
 

@@ -1,9 +1,17 @@
 {
-    "level_count":1,
-    "tile_world_loc":"C:\\Program Files\\Tile World",
-    "super_cc_loc":"",
-    "super_cc_save_file":"C:\\Program Files\\Tile World\\sets\\test.dat",
-    "tile_world_save_file":"C:\\Program Files\\Tile World\\sets\\test.dat",
-    "puzzle_script_save_file":"C:\\Program Files\\Puzzle Script\\game.html",
-    "engine":"PS"
+    "level_count":10,
+    "play_or_generate":"generate",
+    "name":"john",
+    "ratings_file":"/Users/projects/dungeon-design/ratings/ratings.csv",
+    "tile_world_loc":"",
+    "super_cc_loc":"/Users/projects/dungeon-design",
+    "super_cc_save_file":"/Users/projects/dungeon-design/test.dat",
+    "tile_world_save_file":"/Users/projects/dungeon-design/test.dat",
+    "puzzle_script_save_file":"/Users/projects/dungeon-design/test.html",
+    "engine":"CC",
+    "aesthetic":{
+        "noise":0.0,
+        "single_lock_is_hazard":0.1,
+        "fill_space":false
+    }
 }

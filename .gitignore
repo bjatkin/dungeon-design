@@ -132,3 +132,8 @@ dmypy.json
 
 # Project Config
 config.json
+
+# Super CC files
+SuperCC.jar
+settings.ini
+test.dat
