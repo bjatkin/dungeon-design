@@ -12,8 +12,10 @@ class ConfigReader():
             self.engine = data['engine']
             self.level_count = data['level_count']
             self.play_or_generate = data['play_or_generate']
+            self.ask_for_rating = data['ask_for_rating']
             self.name = data['name']
             self.ratings_file = data['ratings_file']
+            self.draw_graph = data['draw_graph']
 
             self.aesthetic = Aesthetic()
             self.aesthetic.noise = data['aesthetic']['noise']

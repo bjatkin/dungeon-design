@@ -4,7 +4,7 @@ from graph_to_level.subgraph_finder import SubgraphFinder
 from dungeon_level.dungeon_tiles import Tiles, mission_tiles, TileTypes, key_tiles, item_tiles, item_to_hazard, key_to_lock
 from dungeon_level.level import Level
 from validation.solver import Solver
-from graph_structure.graph_node import GNode, Node, Key, Lock, Start, End
+from graph_structure.graph_node import GNode, Node, Key, Lock, Start, End, Collectable
 from log import Log
 
 class MissionGenerator:
@@ -29,10 +29,7 @@ class MissionGenerator:
             space_node = mission_to_spaces_mapping[mission_to_mission_spatial[mission_node]]
 
             if isinstance(mission_node, Lock):
-                mission_node_parent = None
-                for parent in mission_node.parent_s:
-                    if not isinstance(parent, Key):
-                        mission_node_parent = parent
+                mission_node_parent = [parent for parent in mission_node.parent_s if not isinstance(parent, Key)][0]
                 parent_space_node = mission_to_spaces_mapping[mission_to_mission_spatial[mission_node_parent]]
                 mask = SpatialGraph.get_shared_edge_mask_between_nodes(space_node, parent_space_node)
             else:
@@ -71,6 +68,8 @@ class MissionGenerator:
                 else:
                     layer[position] = lock_tile
             elif isinstance(node, GNode):
+                layer[position] = Tiles.empty
+            elif isinstance(node, Collectable):
                 layer[position] = Tiles.collectable
 
 

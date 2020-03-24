@@ -9,6 +9,8 @@
     "tile_world_save_file":"/Users/projects/dungeon-design/test.dat",
     "puzzle_script_save_file":"/Users/projects/dungeon-design/test.html",
     "engine":"CC",
+    "draw_graph":true,
+    "ask_for_rating":false,
     "aesthetic":{
         "noise":0.0,
         "single_lock_is_hazard":0.1,

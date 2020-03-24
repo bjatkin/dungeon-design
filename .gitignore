@@ -137,3 +137,5 @@ config.json
 SuperCC.jar
 settings.ini
 test.dat
+
+ratings/ratings.csv

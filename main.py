@@ -55,7 +55,7 @@ for i in range(level_count):
     level.map_password = "    "
     level.time_limit = 100
 
-    was_successful = Generator.generate(level, size, aesthetic_settings)
+    was_successful = Generator.generate(level, size, aesthetic_settings, draw_graph=config.draw_graph)
     print("Was Generator Successful: {}".format(was_successful))
 
     level_set.levels.append(level)
@@ -81,7 +81,6 @@ if config.engine == 'TW':
     # Run TWorld
     wd = config.tile_world_loc
     subprocess.Popen("\"{}/tworld.exe\" \"{}\" --read-only".format(wd, config.tile_world_save_file), cwd=wd, shell=True)
-    rate_levels(ratings, config.name, seeds, level_count)
 
 elif config.engine == 'CC':
     TWLeveSetWriter.write(level_set, config.tile_world_save_file)
@@ -89,8 +88,9 @@ elif config.engine == 'CC':
     # Run SuperCC
     wd = config.super_cc_loc
     subprocess.Popen("java -jar {}/SuperCC.jar \"{}\"".format(wd, config.super_cc_save_file), cwd=wd, shell=True)
-    rate_levels(ratings, config.name, seeds, level_count)
 
 else:
     PSLevelSetWriter.write(level_set, config.puzzle_script_save_file)
+
+if config.ask_for_rating:
     rate_levels(ratings, config.name, seeds, level_count)
