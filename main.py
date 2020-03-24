@@ -63,7 +63,6 @@ for i in range(level_count):
     if config.play_or_generate == "generate":
         ratings.add_level(seed)
     
-ratings.save()
 
 def rate_levels(ratings, name, seeds, level_count):
     for i in range(level_count):
@@ -71,7 +70,6 @@ def rate_levels(ratings, name, seeds, level_count):
         if r == "":
             r = 0
         ratings.add_rating(name, seeds[i], r)
-        ratings.save()
 
     ratings.save()
 

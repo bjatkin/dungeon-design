@@ -6,6 +6,8 @@ class Ratings():
         self.file = file
         self.file_data = ''
 
+        open(file, 'a').close() # Create a file if it doesn't exist.
+
         with open(file, 'r') as csvfile:
             csv_reader = csv.reader(csvfile, delimiter=',')
             for i, row in enumerate(csv_reader):
@@ -44,5 +46,5 @@ class Ratings():
     def save(self):
         # Write file_data to file
         header = "seed,brandon_rating,ryan_rating\n"
-        with open(self.file, 'w') as csvfile:
+        with open(self.file, 'a') as csvfile:
             csvfile.write(header + self.file_data)
