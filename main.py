@@ -80,7 +80,7 @@ if config.engine == 'TW':
 
     # Run TWorld
     wd = config.tile_world_loc
-    subprocess.Popen("{}/tworld.exe {} --read-only".format(wd, config.tile_world_save_file), cwd=wd, shell=True)
+    subprocess.Popen("\"{}/tworld.exe\" \"{}\" --read-only".format(wd, config.tile_world_save_file), cwd=wd, shell=True)
     rate_levels(ratings, config.name, seeds, level_count)
 
 elif config.engine == 'CC':
