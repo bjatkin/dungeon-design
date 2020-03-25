@@ -89,6 +89,7 @@ elif config.engine == 'CC':
 
 else:
     PSLevelSetWriter.write(level_set, config.puzzle_script_save_file)
+    subprocess.Popen(config.puzzle_script_save_file, shell=True)
 
 if config.ask_for_rating:
     rate_levels(ratings, config.name, seeds, level_count)
