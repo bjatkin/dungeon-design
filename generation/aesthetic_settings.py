@@ -26,6 +26,7 @@ class AestheticSettings:
             self.branch_probability = [0.8, 0.2]
             self.max_multi_lock_count = 2
             self.max_locks_per_multi_lock = 4
+            self.collectable_in_room_probability = 0.75
             
 
     def __init__(self):

@@ -60,6 +60,8 @@ class Level:
                     string += "lY"
                 if tile == Tiles.collectable:
                     string += "c "
+                if tile == Tiles.required_collectable_barrier:
+                    string += "@ "
                 if tile == Tiles.water:
                     string += "w "
                 if tile == Tiles.flippers:

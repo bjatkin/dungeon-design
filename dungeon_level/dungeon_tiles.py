@@ -56,4 +56,4 @@ monster_tiles = [Tiles.monster]
 mission_tiles = [Tiles.key_blue, Tiles.key_red, Tiles.key_green, Tiles.key_yellow, 
                  Tiles.lock_blue, Tiles.lock_red, Tiles.lock_green, Tiles.lock_yellow,
                  Tiles.water, Tiles.flippers, Tiles.fire, Tiles.fire_boots,
-                 Tiles.player, Tiles.finish]
+                 Tiles.player, Tiles.finish, Tiles.collectable]

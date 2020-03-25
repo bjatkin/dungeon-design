@@ -204,8 +204,8 @@ class Start(GNode):
 
 
 class Key(GNode):
-    def __init__(self, name=None, parent_s=None, child_s=None, lock_s=None):
-        super(Key, self).__init__(name, parent_s, child_s)
+    def __init__(self, name=None, parent_s=None, lock_s=None):
+        super(Key, self).__init__(name, parent_s, None)
 
         self.lock_s = set()
         if lock_s is not None:
@@ -275,11 +275,26 @@ class End(GNode):
 
 
 
-class Collectable(GNode):
+class Collectable(Key):
     def __init__(self, name=None, parent_s=None):
         super(Collectable, self).__init__(name=name, parent_s=parent_s)
+
 
     def _get_to_string_properties(self):
         return { 
                 "parents": [n.name for n in self.parent_s],
+            }
+
+
+
+class CollectableBarrier(Lock):
+    def __init__(self, name=None, parent_s=None, child_s=None, collectables=None):
+        super(CollectableBarrier, self).__init__(name, parent_s, child_s, key_s=collectables)
+
+
+    def _get_to_string_properties(self):
+        return { 
+                "parents": [n.name for n in self.parent_s],
+                "children": [n.name for n in self.child_s],
+                "collectables": [n.name for n in self.key_s],
             }

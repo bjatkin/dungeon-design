@@ -4,13 +4,12 @@ from graph_to_level.subgraph_finder import SubgraphFinder
 from dungeon_level.dungeon_tiles import Tiles, mission_tiles, TileTypes, key_tiles, item_tiles, item_to_hazard, key_to_lock
 from dungeon_level.level import Level
 from validation.solver import Solver
-from graph_structure.graph_node import GNode, Node, Key, Lock, Start, End, Collectable
+from graph_structure.graph_node import Node, Key, Lock, Start, End, Collectable, CollectableBarrier
 from log import Log
 
 class MissionGenerator:
     @staticmethod
     def generate_mission(level, solution_node_order, mission_aesthetic):
-        # Log.print(level)
         positions_map = dict()
         node_to_tile = dict()
 
@@ -19,9 +18,11 @@ class MissionGenerator:
         mission_to_spaces_mapping = SubgraphFinder.get_subgraph_mapping(spatial_graph.nodes, mission_spatial_nodes)
         if mission_to_spaces_mapping is not None:
             MissionGenerator.apply_mission_mapping_to_level(level, solution_node_order, mission_to_mission_spatial, mission_to_spaces_mapping, positions_map, node_to_tile, mission_aesthetic)
+
+            level.required_collectable_count = np.count_nonzero(level.upper_layer == Tiles.collectable)
             return Solver.does_level_follow_mission(level, solution_node_order, positions_map)
         return False
-        
+
 
     @staticmethod
     def apply_mission_mapping_to_level(level, solution_node_order, mission_to_mission_spatial, mission_to_spaces_mapping, positions_map, node_to_tile, mission_aesthetic):
@@ -58,6 +59,10 @@ class MissionGenerator:
                 layer[position] = Tiles.player
             elif isinstance(node, End):
                 layer[position] = Tiles.finish
+            elif isinstance(node, Collectable):
+                layer[position] = Tiles.collectable
+            elif isinstance(node, CollectableBarrier):
+                layer[position] = Tiles.required_collectable_barrier
             elif isinstance(node, Key):
                 key_tile = MissionGenerator.get_matching_tile(node_to_tile, node, mission_aesthetic, get='key')
                 layer[position] = key_tile
@@ -67,10 +72,6 @@ class MissionGenerator:
                     MissionGenerator.spread_hazard(layer, lock_tile, position, mission_aesthetic)
                 else:
                     layer[position] = lock_tile
-            elif isinstance(node, GNode):
-                layer[position] = Tiles.empty
-            elif isinstance(node, Collectable):
-                layer[position] = Tiles.collectable
 
 
     @staticmethod
@@ -117,22 +118,24 @@ class MissionGenerator:
 
     @staticmethod
     def convert_mission_graph_to_spatial_subgraph_form(solution_node_order):
+        def is_mission_node_spatial_subgraph_node(node):
+            return not (isinstance(node, Key) or isinstance(node, End) or isinstance(node, Collectable))
+
         subgraph_nodes = set()
         solution_nodes_to_subgraph_nodes = dict()
         for node in solution_node_order:
-            if not isinstance(node, Key) and not isinstance(node, End):
+            if is_mission_node_spatial_subgraph_node(node):
                 subgraph_node = Node(node.name)
                 subgraph_nodes.add(subgraph_node)
                 solution_nodes_to_subgraph_nodes[node] = subgraph_node
         
         for node in solution_node_order:
-            if isinstance(node, Key) or isinstance(node, End):
+            if not is_mission_node_spatial_subgraph_node(node):
                 solution_nodes_to_subgraph_nodes[node] = solution_nodes_to_subgraph_nodes[next(iter(node.parent_s))]
-                # solution_nodes_to_subgraph_nodes[next(iter(node.parent_s))] = node
             else:
                 subgraph_node = solution_nodes_to_subgraph_nodes[node]
                 for child in node.child_s:
-                    if not isinstance(child, Key) and not isinstance(child, End):
+                    if is_mission_node_spatial_subgraph_node(child):
                         subgraph_adjacent_node = solution_nodes_to_subgraph_nodes[child]
                         subgraph_node.add_adjacent_nodes(subgraph_adjacent_node)
 

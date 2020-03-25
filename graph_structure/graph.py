@@ -1,4 +1,4 @@
-from graph_structure.graph_node import Node, GNode, Start, Key, Lock, End, Collectable
+from graph_structure.graph_node import Node, Start, Key, Lock, End, Collectable, CollectableBarrier
 import numpy as np
 
 class Graph():
@@ -23,10 +23,11 @@ class Graph():
         
         node_to_grow.add_child_s(end)
 
-        for _ in range(np.random.randint(aesthetic.max_multi_lock_count)):
-            self.add_multi_lock(self.start, lock_count=np.random.randint(aesthetic.max_locks_per_multi_lock))
+        if aesthetic.max_multi_lock_count > 0:
+            for _ in range(np.random.randint(aesthetic.max_multi_lock_count)):
+                self.add_multi_lock(lock_count=np.random.randint(aesthetic.max_locks_per_multi_lock))
 
-        self.fill_dead_ends(start)
+        self.fill_rooms_with_collectables(aesthetic)
     
 
     def grow_graph(self, lock_parent, multi="None"):
@@ -66,14 +67,14 @@ class Graph():
         return descendant
 
     
-    def add_multi_lock(self, start, lock_count=2):
+    def add_multi_lock(self, lock_count=2):
         def is_node_multilock_candidate(node):
             is_candidate = (isinstance(node, Key) and
                             len(node.lock_s) == 1 and
                             len(next(iter(node.lock_s)).key_s) == 1)
             return is_candidate
 
-        multilock_key_candidates = [node for node in Node.find_all_nodes(start) if is_node_multilock_candidate(node)]
+        multilock_key_candidates = [node for node in Node.find_all_nodes(self.start) if is_node_multilock_candidate(node)]
         multilock_key = np.random.choice(multilock_key_candidates)
         lock = next(iter(multilock_key.lock_s))
 
@@ -103,15 +104,39 @@ class Graph():
             lock_parent.remove_child_s(lock_replace_child)
         return lock
 
+    def add_collectable(self, collectable_parent):
+        collectable_id = self.get_collectable_id()
+        collectable = Collectable(name="C{}".format(collectable_id), parent_s=collectable_parent)
+        return collectable
 
-    def fill_dead_ends(self, start):
+
+    def fill_rooms_with_collectables(self, aesthetic):
+        def can_node_contain_collectable(node):
+            return isinstance(node, Start) or isinstance(node, Lock)
+
+        collectables = []
+        possible_collectable_room_nodes = [node for node in Node.find_all_nodes(self.start) if can_node_contain_collectable(node)]
+        collectable_rooms = [room for room in possible_collectable_room_nodes if np.random.random() < aesthetic.collectable_in_room_probability]
+        for collectable_room in collectable_rooms:
+            collectable = self.add_collectable(collectable_room)
+            collectables.append(collectable)
+
+        collectables.extend(self.fill_dead_ends())
+
+        end_parent = next(iter(self.end.parent_s))
+        self.end.remove_parent_s(end_parent)
+        collectable_barrier = CollectableBarrier("B", end_parent, self.end, collectables)
+
+
+    def fill_dead_ends(self):
+        collectables = []
         def visit_method(node, visited_nodes):
             if len(node.child_s) == 0 and isinstance(node, Lock):
-                collectable_id = self.get_collectable_id()
-                collectable = Collectable(name="C{}".format(collectable_id), parent_s=[node])
-                node.add_child_s(collectable)
+                collectable = self.add_collectable(node)
+                collectables.append(collectable)
         
-        GNode.traverse_nodes_breadth_first(self.start, visit_method)
+        Node.traverse_nodes_breadth_first(self.start, visit_method)
+        return collectables
 
 
     def get_lock_id(self):

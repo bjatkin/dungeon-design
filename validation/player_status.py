@@ -78,7 +78,7 @@ class PlayerStatus:
         if current_tile == Tiles.finish: # We can walk to the finish, but we can't walk through it since the level will have completed.
             return False
 
-        if neighbor_tile == Tiles.required_collectable_barrier and self.collectable_count < self.required_collectable_count: # To pass through the collectable barrier, you need to have all the collectables first.
+        if current_tile == Tiles.required_collectable_barrier: # To pass through the collectable barrier, you need to have all the collectables first.
             return False
 
         if neighbor_tile == Tiles.movable_block: # TODO: We can't path find with blocks yet.

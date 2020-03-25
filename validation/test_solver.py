@@ -1,7 +1,7 @@
 import unittest
 from dungeon_level.level import Level
 from dungeon_level.dungeon_tiles import Tiles
-from graph_structure.graph_node import Node, GNode, Start, End, Lock, Key
+from graph_structure.graph_node import Node, Start, End, Lock, Key, Collectable, CollectableBarrier
 from validation.solver import Solver
 import numpy as np
 
@@ -21,6 +21,8 @@ F = Tiles.fire
 Fb= Tiles.fire_boots
 W = Tiles.water
 fl= Tiles.flippers
+c = Tiles.collectable
+B = Tiles.required_collectable_barrier
 
 class TestSolver(unittest.TestCase):
     def test_solver_linear_solvable(self):
@@ -804,3 +806,90 @@ class TestSolver(unittest.TestCase):
 
         does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, True)
+
+
+    def test_solver_collectables(self):
+        level = Level()
+        level.upper_layer = np.array([
+            [s, e, B, f ],
+            [c, c, w, e ]], dtype=object)
+        level.required_collectable_count = 2
+        
+
+        start = Start()
+        c0 = Collectable("c0")
+        c1 = Collectable("c1")
+        barrier = CollectableBarrier("B", collectables=[c0, c1])
+        end = End()
+
+        start.add_child_s([c0, c1, barrier])
+        barrier.add_child_s(end)
+
+        positions_map = {
+            start:   np.array([0,0]),
+            c0:      np.array([1,0]),
+            c1:      np.array([1,1]),
+            barrier: np.array([0,2]),
+            end:     np.array([0,3]),
+        }
+
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        self.assertEqual(does_level_follow_mission, True)
+
+
+    def test_solver_collectables_too_many_required_collectables(self):
+        level = Level()
+        level.upper_layer = np.array([
+            [s, e, B, f ],
+            [c, c, w, e ]], dtype=object)
+        level.required_collectable_count = 3
+        
+
+        start = Start()
+        c0 = Collectable("c0")
+        c1 = Collectable("c1")
+        barrier = CollectableBarrier("B", collectables=[c0, c1])
+        end = End()
+
+        start.add_child_s([c0, c1, barrier])
+        barrier.add_child_s(end)
+
+        positions_map = {
+            start:   np.array([0,0]),
+            c0:      np.array([1,0]),
+            c1:      np.array([1,1]),
+            barrier: np.array([0,2]),
+            end:     np.array([0,3]),
+        }
+
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        self.assertEqual(does_level_follow_mission, False)
+
+
+    def test_solver_collectables_unreachable_collectable(self):
+        level = Level()
+        level.upper_layer = np.array([
+            [s, e, B, f ],
+            [c, e, w, c ]], dtype=object)
+        level.required_collectable_count = 2
+        
+
+        start = Start()
+        c0 = Collectable("c0")
+        c1 = Collectable("c1")
+        barrier = CollectableBarrier("B", collectables=[c0, c1])
+        end = End()
+
+        start.add_child_s([c0, barrier])
+        barrier.add_child_s([c1, end])
+
+        positions_map = {
+            start:   np.array([0,0]),
+            c0:      np.array([1,0]),
+            c1:      np.array([1,3]),
+            barrier: np.array([0,2]),
+            end:     np.array([0,3]),
+        }
+
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        self.assertEqual(does_level_follow_mission, False)

@@ -2,7 +2,7 @@ from validation.path_finder import PathFinder
 from validation.player_status import PlayerStatus
 from dungeon_level.dungeon_tiles import Tiles, lock_tiles, TileTypes, hazard_tiles
 from dungeon_level.level import Level
-from graph_structure.graph_node import GNode, Start, End, Key, Lock
+from graph_structure.graph_node import Start, End, Key, Lock, Collectable, CollectableBarrier
 from scipy.ndimage.measurements import label as label_connected_components
 
 import numpy as np
@@ -37,7 +37,7 @@ class Solver:
 
     # We should only be able to unlock a lock if we have reached its key
     @staticmethod
-    def do_keys_open_correct_locks(node, reached, positions_map, layer, player_status):
+    def do_keys_open_correct_locks(current_node, reached, positions_map, layer, player_status):
         for node in reached:
             if isinstance(node, Lock) and node in positions_map:
                 tile = layer[tuple(positions_map[node])]
@@ -47,7 +47,6 @@ class Solver:
                     elif tile.get_tile_type() == TileTypes.item_hazard and player_status.get_item_count(tile) > 0:
                         return False
         return True
-
 
 
     @staticmethod
@@ -107,20 +106,22 @@ class Solver:
             pass
         elif isinstance(current_node, End):
             pass
+        elif isinstance(current_node, Collectable):
+            player_status.collectable_count += 1
+        elif isinstance(current_node, CollectableBarrier):
+            if player_status.collectable_count >= player_status.required_collectable_count:
+                layer[current_position] = Tiles.empty
         elif isinstance(current_node, Key):
             if tile_type == TileTypes.key_lock:
                 player_status.add_to_key_count(current_tile)
             elif tile_type == TileTypes.item_hazard:
                 player_status.add_to_item_count(current_tile)
-
         elif isinstance(current_node, Lock):
             if tile_type == TileTypes.key_lock:
                 player_status.remove_from_key_count(current_tile)
                 layer[current_position] = Tiles.empty
             elif tile_type == TileTypes.item_hazard:
                 Solver.remove_hazard_component(layer, current_position, current_tile)
-        elif isinstance(current_node, GNode):
-            player_status.collectable_count += 1
         pass
 
     @staticmethod
