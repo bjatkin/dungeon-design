@@ -16,7 +16,7 @@ class Graph():
         node_to_grow = start
         tree_depth = np.random.randint(aesthetic.min_depth, aesthetic.max_depth)
         for _ in range(tree_depth):
-            branch_count = np.random.choice([1, 2, 3, 4], p=aesthetic.branch_probability)
+            branch_count = np.random.choice(range(1, len(aesthetic.branch_probability) + 1), p=aesthetic.branch_probability)
             for _ in range(branch_count):
                 f = self.grow_graph(node_to_grow)
             node_to_grow = f
