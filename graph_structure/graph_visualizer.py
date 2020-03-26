@@ -5,7 +5,7 @@ from collections import defaultdict
 from graph_structure.graph import Graph
 
 class GraphVisualizer:
-    node_spacing = 50
+    node_spacing = 90
     node_size = 45
     padding = np.array([15, 15])
     connection_color = (0, 0, 0)
@@ -17,9 +17,9 @@ class GraphVisualizer:
 
 
     @staticmethod
-    def show_graph(graph, draw_straight_lines=True, draw_key_connections=True):
-        sorted_nodes = Node.find_all_nodes(graph.start, method="topological-sort")
-        node_positions = GraphVisualizer.get_node_arrangement(sorted_nodes)
+    def show_graph(start_node, draw_straight_lines=True, draw_key_connections=True):
+        sorted_nodes = Node.find_all_nodes(start_node, method="topological-sort")
+        node_positions = GraphVisualizer.get_node_layout(start_node)
 
         im = Image.new('RGB', GraphVisualizer.get_image_size(node_positions), GraphVisualizer.background_color) 
         draw = ImageDraw.Draw(im) 
@@ -60,22 +60,64 @@ class GraphVisualizer:
         else:
             return None
 
+    
+    @staticmethod
+    def get_node_depth(node):
+        node_depth = 0
+        parent = GraphVisualizer.get_not_key_parent(node)
+        while parent is not None:
+            node_depth += 1
+            node = parent
+            parent = GraphVisualizer.get_not_key_parent(node)
+
+        return node_depth
+
 
     @staticmethod
-    def get_node_arrangement(nodes):
-        node_positions = defaultdict(lambda: np.zeros((2), dtype=int))
-        rows = defaultdict(lambda: 0)
+    def get_max_width_below_row(rows, row):
+        rows_below = {k:v for k,v in rows.items() if k >= row}
+        if len(rows_below) > 0:
+            return max(rows_below.values())
+        else:
+            return rows.default_factory()
+
+
+    # Layouts out the nodes from left to right so that:
+    # * Each node is only as far left as its parent
+    # * Each node is spaced apart from its neighbors so that all of its children can fit beside each other below the node.
+    # * Nodes are not considered children of Keys/Collectables
+    # * Keys/Collectables come last in a each node's children
+    @staticmethod
+    def get_node_layout(start_node):
+        def only_visit_children_of_non_keys(node, child, visited_nodes):
+            return not isinstance(node, Key)
+        def sort_keys_last(node):
+            if isinstance(node, Collectable):
+                return 2
+            elif isinstance(node, Key):
+                return 1
+            else:
+                return 0
+
+        nodes = Node.find_all_nodes(
+            node=start_node, 
+            method="depth-first", 
+            will_traverse_method=only_visit_children_of_non_keys,
+            child_sort_method=sort_keys_last)
+        node_positions = dict()
+        rows = defaultdict(lambda: -1)
         for node in nodes:
-            if len(node.parent_s) > 0:
-                parent_node = GraphVisualizer.get_not_key_parent(node)
-                node_positions[node][1] = node_positions[parent_node][1] + 2
-                # find the size of this row
-                new_y = rows[node_positions[node][1]] + 2
-                node_positions[node][0] = new_y
-                if new_y < node_positions[parent_node][0]:
-                    node_positions[node][0] = node_positions[parent_node][0] - 2
-                    rows[node_positions[node][1]] = node_positions[parent_node][1] - 2
-                rows[node_positions[node][1]] += 2
+            node_depth = GraphVisualizer.get_node_depth(node)
+            if not isinstance(node, Key):
+                row_width = GraphVisualizer.get_max_width_below_row(rows, node_depth) 
+            else:
+                row_width = rows[node_depth]
+
+            node_width = np.maximum(row_width + 1, rows[node_depth - 1])
+
+            rows[node_depth] = node_width
+            node_positions[node] = np.array([node_width, node_depth])
+
         return node_positions
 
 

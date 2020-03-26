@@ -52,46 +52,74 @@ class Node(object):
 
     # traversal_order=['preorder','postorder']
     @staticmethod
-    def traverse_nodes_depth_first(node, visit_method, will_traverse_method = lambda node, child, visited_nodes: True, traversal_order='preorder'):
+    def traverse_nodes_depth_first(node, visit_method, will_traverse_method = lambda node, child, visited_nodes: True, child_sort_method=None, traversal_order='preorder'):
         visited_nodes = set()
-        Node._traverse_nodes_depth_first(node, visit_method, will_traverse_method, visited_nodes, traversal_order)
+        Node._traverse_nodes_depth_first(
+            node=node, 
+            visit_method=visit_method, 
+            will_traverse_method=will_traverse_method, 
+            visited_nodes=visited_nodes, 
+            child_sort_method=child_sort_method, 
+            traversal_order=traversal_order)
 
 
     @staticmethod
-    def _traverse_nodes_depth_first(node, visit_method, will_traverse_method, visited_nodes, traversal_order):
+    def _traverse_nodes_depth_first(node, visit_method, will_traverse_method, visited_nodes, child_sort_method, traversal_order):
         visited_nodes.add(node)
         if traversal_order == 'preorder':
             visit_method(node, visited_nodes)
 
-        for child in node.adjacent_nodes:
+        for child in Node._sort_children(node, child_sort_method):
             if child not in visited_nodes:
-                will_traverse = will_traverse_method(node, child, visited_nodes)
+                if will_traverse_method is not None:
+                    will_traverse = will_traverse_method(node, child, visited_nodes)
+                else:
+                    will_traverse = True
                 if will_traverse:
-                    Node._traverse_nodes_depth_first(child, visit_method, will_traverse_method, visited_nodes, traversal_order)
+                    Node._traverse_nodes_depth_first(
+                        node=child, 
+                        visit_method=visit_method, 
+                        will_traverse_method=will_traverse_method, 
+                        visited_nodes=visited_nodes, 
+                        child_sort_method=child_sort_method, 
+                        traversal_order=traversal_order)
 
         if traversal_order == 'postorder':
             visit_method(node, visited_nodes)
 
 
     @staticmethod
-    def traverse_nodes_breadth_first(node, visit_method, will_traverse_method = lambda node, visited_nodes: True):
+    def _sort_children(node, child_sort_method):
+        if child_sort_method is not None:
+            children = sorted(node.adjacent_nodes, key=child_sort_method)
+        else:
+            children = node.adjacent_nodes
+        return children
+
+
+
+    @staticmethod
+    def traverse_nodes_breadth_first(node, visit_method, will_traverse_method = lambda node, visited_nodes: True, child_sort_method=None):
         visited_nodes = set()
         queue = []
         queue.append(node)
         while (len(queue) > 0):
             node = queue.pop(0)
             if node not in visited_nodes:
-                will_traverse = will_traverse_method(node, visited_nodes)
+                if will_traverse_method is not None:
+                    will_traverse = will_traverse_method(node, visited_nodes)
+                else:
+                    will_traverse = True
                 if will_traverse:
                     visited_nodes.add(node)
                     visit_method(node, visited_nodes)
-                    for child in node.adjacent_nodes:
+                    for child in Node._sort_children(node, child_sort_method):
                         queue.append(child)
 
 
     # method=['depth-first','breadth-first','topological-sort']
     @staticmethod
-    def find_all_nodes(node, method="depth-first"):
+    def find_all_nodes(node, method="depth-first", will_traverse_method=None, child_sort_method=None):
         visited = []
 
         def visit_method(node, visited_nodes):
@@ -99,11 +127,11 @@ class Node(object):
             visited.append(node)
 
         if method == "depth-first":
-            Node.traverse_nodes_depth_first(node, visit_method)
+            Node.traverse_nodes_depth_first(node, visit_method, will_traverse_method=will_traverse_method, child_sort_method=child_sort_method)
         elif method == "breadth-first":
-            Node.traverse_nodes_breadth_first(node, visit_method)
+            Node.traverse_nodes_breadth_first(node, visit_method, will_traverse_method=will_traverse_method, child_sort_method=child_sort_method)
         elif method == "topological-sort":
-            Node.traverse_nodes_depth_first(node, visit_method, traversal_order='postorder')
+            Node.traverse_nodes_depth_first(node, visit_method, traversal_order='postorder', will_traverse_method=will_traverse_method, child_sort_method=child_sort_method)
             visited.reverse()
 
         return visited

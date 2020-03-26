@@ -47,7 +47,7 @@ class Generator:
     def _generate_mission_graph(mission_graph_aesthetic, draw=False):
         graph = Graph(mission_graph_aesthetic)
         if draw:
-            GraphVisualizer.show_graph(graph)
+            GraphVisualizer.show_graph(graph.start)
 
         return Node.find_all_nodes(graph.start, method="topological-sort")
         # return Generator._get_lock_water_fire_lock_graph()
