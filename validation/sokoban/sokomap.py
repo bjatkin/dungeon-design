@@ -75,13 +75,13 @@ class SokoMap:
                 c = base_l[x]
                 if c == SokobanTiles.TILE_PLAYER:
                     c = SokobanTiles.TILE_SPACE
-                    player = (x,y)
+                    player = (y,x)
                 elif c == SokobanTiles.TILE_PLAYER_ON_GOAL:
                     c = SokobanTiles.TILE_GOAL
-                    player = (x,y)
+                    player = (y,x)
                 elif c == SokobanTiles.TILE_PLAYER_ON_DEADLOCK:
                     c = SokobanTiles.TILE_DEADLOCK
-                    player = (x,y)
+                    player = (y,x)
                 l.append(c)
             sokomap.append(l)
             y += 1
@@ -110,7 +110,7 @@ class SokoMap:
             x = 0
             for i in l:
                 if i == something:
-                    result.append((x,y))
+                    result.append((y,x))
                 x += 1
             y += 1
 
@@ -149,8 +149,8 @@ class SokoMap:
 
 
     def is_legal(self, nplayer):
-        (nx, ny) = nplayer
-        (x, y) = self.get_player()
+        (ny, nx) = nplayer
+        (y, x) = self.get_player()
 
         if nx < 0 or ny < 0 or ny >= len(self.sokomap) or nx >= len(self.sokomap[ny]):
             return False
@@ -211,8 +211,8 @@ class SokoMap:
 
 
     def tunnel_macro(self, nMap, box, push):
-        (px, py) = push
-        (bx, by) = box
+        (py, px) = push
+        (by, bx) = box
 
         if px != 0:
             # horizontal push
@@ -227,7 +227,7 @@ class SokoMap:
                     return None
                 by = by + 1
 
-        if (bx, by) != box:
+        if (by, bx) != box:
             # Some puzzles have multiple tunnels and require a box to pushed
             # into the tunnel and then the player to travel through another
             # tunnel and push it out of the tunnel again - credit: AJ
@@ -236,7 +236,7 @@ class SokoMap:
             bx -= px
             by -= py
 
-            return (bx, by)
+            return (by, bx)
 
         return None
 
@@ -254,7 +254,7 @@ class SokoMap:
 
 
     def move(self, nplayer):
-        (x,y) = self.get_player()
+        (y,x) = self.get_player()
         new_map = deepcopy(self.sokomap)
         box = None
 
@@ -266,10 +266,10 @@ class SokoMap:
         elif new_map[y][x] == SokobanTiles.TILE_PLAYER_ON_GOAL:
             new_map[y][x] = SokobanTiles.TILE_GOAL
 
-        (nx,ny) = nplayer
+        (ny,nx) = nplayer
         xdiff = nx - x
         ydiff = ny - y
-        m = (xdiff, ydiff)
+        m = (ydiff, xdiff)
         carry = False
         if new_map[ny][nx] == SokobanTiles.TILE_BLOCK:
             carry = True
@@ -283,10 +283,10 @@ class SokoMap:
             bx = nx + xdiff
             by = ny + ydiff
 
-            box = self.tunnel_macro(new_map, (bx, by), m)
+            box = self.tunnel_macro(new_map, (by, bx), m)
             #box = None
             if box is not None:
-                (bx, by) = box
+                (by, bx) = box
 
                 nx = bx - xdiff
                 ny = by - ydiff
@@ -304,26 +304,26 @@ class SokoMap:
 
         if new_map[ny][nx] == SokobanTiles.TILE_SPACE:
             new_map[ny][nx] = SokobanTiles.TILE_PLAYER
-        elif new_map[ny][nx] == SokobanTiles.TILE_DEADLOCK :
+        elif new_map[ny][nx] == SokobanTiles.TILE_DEADLOCK:
             new_map[ny][nx] = SokobanTiles.TILE_PLAYER_ON_DEADLOCK
         elif new_map[ny][nx] == SokobanTiles.TILE_GOAL:
             new_map[ny][nx] = SokobanTiles.TILE_PLAYER_ON_GOAL
         
 
         new_sokomap = SokoMap()
-        new_sokomap.set_map(new_map, (nx, ny))
+        new_sokomap.set_map(new_map, (ny, nx))
         new_sokomap.set_move_list(self.get_move_list())
         new_sokomap.add_move(m)
 
         return new_sokomap
 
 
-    def _filter_neighbours(self, xy, offsets, filt):
-        x, y = xy
-        for (dx,dy) in offsets:
-            nxy = (x+dx,y+dy)
-            if (filt(nxy)):
-                yield nxy
+    def _filter_neighbours(self, yx, offsets, filt):
+        y, x = yx
+        for (dy,dx) in offsets:
+            nyx = (y+dy,x+dx)
+            if (filt(nyx)):
+                yield nyx
 
 
     def children(self):
@@ -331,7 +331,7 @@ class SokoMap:
 
 
     def get_neighbors(self, node):
-        def filt(nx,ny):
+        def filt(ny,nx):
             try:
                 return ny >= 0 and nx >= 0 and self.sokomap[ny][nx] != SokobanTiles.TILE_WALL
             except IndexError:
@@ -347,9 +347,9 @@ class SokoMap:
         q = []
         for y,a in enumerate(self.sokomap):
              for x,b in enumerate(self.sokomap[y]):
-                 dist[(x,y)] = float('inf')
-                 prev[(x,y)] = None
-                 q.append((x,y))
+                 dist[(y,x)] = float('inf')
+                 prev[(y,x)] = None
+                 q.append((y,x))
         dist[source] = 0
 
         while len(q) != 0:
@@ -399,15 +399,15 @@ class SokoMap:
                     for tx,b in enumerate(self.sokomap[ty]):
                         if self.sokomap[ty][tx] == SokobanTiles.TILE_WALL:
                             break
-                        path = self.shortest_path((sx, sy), (tx, ty))
+                        path = self.shortest_path((sy, sx), (ty, tx))
                         score = 0.0
                         for s in path:
-                            (x, y) = s
+                            (y, x) = s
                             sscore = 0.0
                             # Alternatives
                             for n in self.get_neighbors(s):
                                 if n not in path:
-                                    (nx, ny) = n
+                                    (ny, nx) = n
                                     px = nx - x
                                     py = ny - y
                                     hx = x - px
@@ -425,7 +425,7 @@ class SokoMap:
                                         sscore = 1
                             # Goal-Skew
                             for g in self.get_goals():
-                                gpath = self.shortest_path((sx,sy), g)
+                                gpath = self.shortest_path((sy,sx), g)
                                 if s in gpath:
                                     sscore /= 2
                                     break
@@ -434,7 +434,7 @@ class SokoMap:
                             si = path.index(s)
                             if len(path) < si+1:
                                 n = path[si+1]
-                                (nx, ny) = n
+                                (ny, nx) = n
                                 px = nx - x
                                 py = ny - y
                                 hx = x - px
@@ -447,7 +447,7 @@ class SokoMap:
 
                             # Tunnel
                             if si > 0:
-                                (mx, my) = path[si-1]
+                                (my, mx) = path[si-1]
                                 px = x - mx
                                 py = y - my
 
@@ -461,8 +461,8 @@ class SokoMap:
                                         sscore = 0
 
                             score += sscore
-                        inf[(tx, ty)] = score
-                self.influence_table[(sx, sy)] = deepcopy(inf)
+                        inf[(ty, tx)] = score
+                self.influence_table[(sy, sx)] = deepcopy(inf)
 
         average = 0.0
         count = 0
@@ -574,7 +574,7 @@ class SokoMap:
 
 
         # Connect _deadlock Markers if they next to a contin. wall w/o goals
-        def connect_markers(dx,dy, view):
+        def connect_markers(dy,dx, view):
             up = True
             down = True
             found = False
@@ -620,6 +620,6 @@ class SokoMap:
         xy_v = self.DirectView(self.sokomap)
         yx_v = self.Swap_XY_View(xy_v)
         for dead in self.get_deadlocks():
-            (dx,dy) = dead
-            connect_markers(dx, dy, xy_v)
-            connect_markers(dy, dx, yx_v)
+            (dy,dx) = dead
+            connect_markers(dy, dx, xy_v)
+            connect_markers(dx, dy, yx_v)

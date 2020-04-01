@@ -33,7 +33,7 @@ class SokobanSolver:
         sokomap_level[tuple(sokoban_lock)] = SokobanTiles.TILE_GOAL
 
         sokomap = SokoMap()
-        sokomap.set_map(sokomap_level.tolist(), (player_position[1], player_position[0]) )
+        sokomap.set_map(sokomap_level.tolist(), tuple(player_position))
         return sokomap
 
 
