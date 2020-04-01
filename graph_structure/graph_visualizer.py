@@ -29,7 +29,7 @@ class GraphVisualizer:
             parent_node = GraphVisualizer.get_not_key_parent(node)
             if parent_node is not None:
                 GraphVisualizer.draw_connection(draw, node_positions[parent_node], node_positions[node], straight=draw_straight_lines, is_key_connection=False)
-            if isinstance(node, Key):
+            if isinstance(node, Key) and draw_key_connections:
                 for lock in node.lock_s:
                     GraphVisualizer.draw_connection(draw, node_positions[node], node_positions[lock], straight=True, is_key_connection=True)
         
