@@ -81,8 +81,8 @@ class PlayerStatus:
         if current_tile == Tiles.required_collectable_barrier: # To pass through the collectable barrier, you need to have all the collectables first.
             return False
 
-        if neighbor_tile == Tiles.movable_block: # TODO: We can't path find with blocks yet.
-            return False
+        # if current_tile == Tiles.movable_block: # TODO: We can't path find with blocks yet.
+        #     return False
 
         # We can't have the player go past a lock because we can't have the level change as we
         # are performing A* and if we go past a lock, then we have to change our key count and

@@ -1,5 +1,6 @@
 from validation.path_finder import PathFinder
 from validation.player_status import PlayerStatus
+from validation.sokoban.sokoban_solver import SokobanSolver
 from dungeon_level.dungeon_tiles import Tiles, lock_tiles, TileTypes, hazard_tiles
 from dungeon_level.level import Level
 from graph_structure.graph_node import Start, End, Key, Lock, Collectable, CollectableBarrier
@@ -17,6 +18,9 @@ class Solver:
         player_status = PlayerStatus(level.required_collectable_count)
 
         for i, node in enumerate(solution_node_order):
+            if not Solver.can_solve_sokoban(layer, player_status, node, positions_map):
+                return Solver.get_return_result(False, False, give_failure_reason)
+
             if i > 0: # We don't need to check if we can reach the first node, since we start there
                 if not Solver.can_reach_node(node, positions_map, layer, player_status):
                     return Solver.get_return_result(False, False, give_failure_reason)
@@ -33,6 +37,33 @@ class Solver:
             
         # We've made it to the final node, rejoice!
         return Solver.get_return_result(False, True, give_failure_reason)
+
+
+    @staticmethod
+    def get_sokoban_key_position_from_lock(layer, current_node, positions_map):
+        if isinstance(current_node, Lock):
+            key_node = next(iter(current_node.key_s))
+            key_position = positions_map[key_node]
+            key_tile = layer[tuple(key_position)]
+            if key_tile == Tiles.movable_block:
+                return key_position
+        return None
+
+
+    @staticmethod
+    def can_solve_sokoban(layer, player_status, current_node, positions_map):
+        sokoban_key_position = Solver.get_sokoban_key_position_from_lock(layer, current_node, positions_map)
+        if not sokoban_key_position is None:
+            lock_position = positions_map[current_node]
+            can_solve_sokoban = SokobanSolver.is_sokoban_solvable(layer, lock_position, sokoban_key_position, lock_position)
+            if can_solve_sokoban:
+                layer[tuple(lock_position)] = Tiles.empty
+                layer[tuple(sokoban_key_position)] = Tiles.empty
+            
+            return can_solve_sokoban
+        else:
+            return True
+        
 
 
     # We should only be able to unlock a lock if we have reached its key
