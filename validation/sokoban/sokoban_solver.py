@@ -8,10 +8,10 @@ from validation.sokoban.sokomap_hashtable import HashTable
 # I just wrapped it minimally to be compatible with the rest of our code.
 class SokobanSolver:
     @staticmethod
-    def is_sokoban_solvable(level, player_position, sokoban_key, sokoban_lock, get_solution=False):
-        sokomap = SokobanSolver.convert_level_to_sokomap(level, player_position, sokoban_lock)
+    def is_sokoban_solvable(level_layer, player_position, sokoban_key, sokoban_lock, get_solution=False):
+        sokomap = SokobanSolver._convert_level_to_sokomap(level_layer, player_position, sokoban_lock)
         sokomap.static_deadlock()
-        solution = SokobanSolver.IDAstar(sokomap, SokobanSolver.heuristic)
+        solution = SokobanSolver._IDAstar(sokomap, SokobanSolver._heuristic)
         is_solvable = (not solution is None)
 
         if get_solution:
@@ -21,16 +21,20 @@ class SokobanSolver:
     
 
     @staticmethod
-    def convert_level_to_sokomap(level, player_position, sokoban_lock):
-        sokomap_level = np.full(level.upper_layer.shape, SokobanTiles.TILE_SPACE)
-        sokomap_level[level.upper_layer == Tiles.wall] = SokobanTiles.TILE_WALL
-        sokomap_level[level.upper_layer == Tiles.finish] = SokobanTiles.TILE_WALL
+    def _convert_level_to_sokomap(level_layer, player_position, sokoban_lock):
+        sokomap_level = np.full(level_layer.shape, SokobanTiles.TILE_SPACE)
+        sokomap_level[level_layer == Tiles.wall] = SokobanTiles.TILE_WALL
+        sokomap_level[level_layer == Tiles.finish] = SokobanTiles.TILE_WALL
         for lock in lock_tiles:
-            sokomap_level[level.upper_layer == lock] = SokobanTiles.TILE_WALL
-        sokomap_level[level.upper_layer == Tiles.movable_block] = SokobanTiles.TILE_BLOCK
+            sokomap_level[level_layer == lock] = SokobanTiles.TILE_WALL
+        sokomap_level[level_layer == Tiles.movable_block] = SokobanTiles.TILE_BLOCK
 
         sokomap_level[tuple(player_position)] = SokobanTiles.TILE_PLAYER
-        sokomap_level[tuple(sokoban_lock)] = SokobanTiles.TILE_GOAL
+        if np.array_equal(player_position, sokoban_lock):
+            goal_tile = SokobanTiles.TILE_PLAYER_ON_GOAL
+        else:
+            goal_tile = SokobanTiles.TILE_GOAL
+        sokomap_level[tuple(sokoban_lock)] = goal_tile
 
         sokomap = SokoMap()
         sokomap.set_map(sokomap_level.tolist(), tuple(player_position))
@@ -38,18 +42,18 @@ class SokobanSolver:
 
 
     @staticmethod
-    def manhattan_distance(a, b):
+    def _manhattan_distance(a, b):
         return abs(a[0]-b[0]) + abs(a[1]-b[1])
 
 
     @staticmethod
-    def heuristic(sokomap):
+    def _heuristic(sokomap):
         # generate all possible combinations of goals for each block
         solutions = []
         for block in sokomap.get_blocks():
             solution = []
             for goal in sokomap.get_goals():
-                sol = ( block, goal, SokobanSolver.manhattan_distance(block, goal) )
+                sol = ( block, goal, SokobanSolver._manhattan_distance(block, goal) )
                 solution.append(sol)
             solutions.append(solution)
 
@@ -80,8 +84,8 @@ class SokobanSolver:
         d = float('inf')
         v = (-1,-1)
         for x in sokomap.get_unplaced_blocks():
-            if SokobanSolver.manhattan_distance(w, x) < d:
-                d = SokobanSolver.manhattan_distance(w, x)
+            if SokobanSolver._manhattan_distance(w, x) < d:
+                d = SokobanSolver._manhattan_distance(w, x)
                 v = x
         if v != (-1,-1):
             best = best + d
@@ -90,7 +94,7 @@ class SokobanSolver:
 
 
     @staticmethod
-    def is_closed(closed_set, x):
+    def _is_closed(closed_set, x):
         for y in closed_set:
             if x == y:
                 return True
@@ -98,7 +102,7 @@ class SokobanSolver:
 
 
     @staticmethod
-    def IDAstar(sokomap, h):
+    def _IDAstar(sokomap, h):
         open_set = []
         closed_set = []
         visit_set = []
@@ -125,7 +129,7 @@ class SokobanSolver:
                     # get the sucessors of the current state
                     for x in current_state.children():
                         # test if node has been "closed"
-                        if SokobanSolver.is_closed(closed_set,x):
+                        if SokobanSolver._is_closed(closed_set,x):
                             continue
 
                         # check if this has already been generated
@@ -155,26 +159,3 @@ class SokobanSolver:
             open_set.extend(visit_set)
             visit_set = []
             closed_set = []
-
-
-    @staticmethod
-    def depth_first_search__scan(sokomap, h):
-        open_set = [sokomap]
-        hashtable = HashTable()
-        hashtable.check_add(sokomap)
-        nodes = 0
-
-        while len(open_set) > 0:
-            current_state = open_set.pop()
-
-            nodes += 1
-            if current_state.is_solution():
-                return current_state # SOLUTION FOUND!!!
-
-            for x in current_state.children():
-                # check if this has already been generated
-                if hashtable.check_add(x):
-                    continue
-
-                open_set.append(x)
-        return None

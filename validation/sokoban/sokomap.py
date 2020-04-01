@@ -147,12 +147,17 @@ class SokoMap:
     def get_deadlocks(self):
         return self.get_something(SokobanTiles.TILE_DEADLOCK)
 
+    
+    def is_legal_position(self, ny, nx):
+        return not (nx < 0 or ny < 0 or ny >= len(self.sokomap) or nx >= len(self.sokomap[ny]))
+
+
 
     def is_legal(self, nplayer):
         (ny, nx) = nplayer
         (y, x) = self.get_player()
 
-        if nx < 0 or ny < 0 or ny >= len(self.sokomap) or nx >= len(self.sokomap[ny]):
+        if not self.is_legal_position(ny, nx):
             return False
 
         if self.sokomap[ny][nx] == SokobanTiles.TILE_WALL:
@@ -170,7 +175,7 @@ class SokoMap:
             bx = nx + xdiff
             by = ny + ydiff
 
-            if self.sokomap[by][bx] in self.TILES_WRONG_FOR_BLOCK:
+            if not self.is_legal_position(by, bx) or self.sokomap[by][bx] in self.TILES_WRONG_FOR_BLOCK:
                 return False
 
             min_n_off = (-ydiff,-xdiff)
@@ -184,9 +189,10 @@ class SokoMap:
                 filtered = [SokobanTiles.TILE_BLOCK_ON_GOAL if self.sokomap[by][bx] == SokobanTiles.TILE_GOAL \
                                              else SokobanTiles.TILE_BLOCK]
                 for (dy,dx) in [(dy1,dx1),(dy2,dx2),(dy1+dy2,dx1+dx2)]:
-                    x = self.sokomap[by+dy][bx+dx]
-                    if x in self.TILES_WRONG_FOR_2x2:
-                        filtered.append(x)
+                    if self.is_legal_position(by+dy, bx+dx):
+                        x = self.sokomap[by+dy][bx+dx]
+                        if x in self.TILES_WRONG_FOR_2x2:
+                            filtered.append(x)
                 # There are 4 in total
                 return (len(filtered) == 4 and (SokobanTiles.TILE_BLOCK in filtered))
 
@@ -216,14 +222,14 @@ class SokoMap:
 
         if px != 0:
             # horizontal push
-            while nMap[by+1][bx] == SokobanTiles.TILE_WALL and nMap[by-1][bx] == SokobanTiles.TILE_WALL:
-                if nMap[by][bx+1] != SokobanTiles.TILE_SPACE:
+            while (not self.is_legal_position(by+1, bx) or nMap[by+1][bx] == SokobanTiles.TILE_WALL) and (not self.is_legal_position(by-1,bx) or nMap[by-1][bx] == SokobanTiles.TILE_WALL):
+                if not self.is_legal_position(by, bx+1) or nMap[by][bx+1] != SokobanTiles.TILE_SPACE:
                     return None
                 bx = bx + 1
         if py != 0:
             # vertical push
-            while nMap[by][bx+1] == SokobanTiles.TILE_WALL and nMap[by][bx-1] == SokobanTiles.TILE_WALL:
-                if nMap[by+1][bx] != SokobanTiles.TILE_SPACE:
+            while (not self.is_legal_position(by, bx+1) or nMap[by][bx+1] == SokobanTiles.TILE_WALL) and (not self.is_legal_position(by, bx-1) or nMap[by][bx-1] == SokobanTiles.TILE_WALL):
+                if not self.is_legal_position(by+1, bx) or nMap[by+1][bx] != SokobanTiles.TILE_SPACE:
                     return None
                 by = by + 1
 
