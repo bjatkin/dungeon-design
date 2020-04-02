@@ -26,6 +26,8 @@ class TestPlayerStatus(unittest.TestCase):
         add_values = [3, 7, 9, 11]
         remove_values = [2, 4, 6, 8]
         for i, tile in enumerate(tiles1):
+            if tile == Tiles.sokoban_block:
+                continue
             self.assertEqual(0, get_method(player_status, tile))
 
             add_method(player_status, tile, add_values[i])
@@ -35,6 +37,8 @@ class TestPlayerStatus(unittest.TestCase):
             self.assertEqual(add_values[i] - remove_values[i], get_method(player_status, tile))
 
         for i, tile in enumerate(tiles2):
+            if tile == Tiles.sokoban_goal:
+                continue
             self.assertEqual(add_values[i] - remove_values[i], get_method(player_status, tile))
 
             add_method(player_status, tile, add_values[i])
@@ -53,7 +57,8 @@ class TestPlayerStatus(unittest.TestCase):
         w = Tiles.wall
         F = Tiles.fire
         f = Tiles.finish
-        b = Tiles.movable_block
+        b = Tiles.sokoban_block
+        g = Tiles.sokoban_goal
         kB = Tiles.key_blue
         kR = Tiles.key_red
         kG = Tiles.key_green
@@ -66,7 +71,7 @@ class TestPlayerStatus(unittest.TestCase):
             [e, b,kB,kG, e],
             [F, F, e, e, e],
             [e, e, e, e, e],
-            [lB,lR,lG,lY,e]], dtype=object)
+            [lB,lR,lG,lY,g]], dtype=object)
         player_status = PlayerStatus(4)
         h, w = layer.shape
 

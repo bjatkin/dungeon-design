@@ -27,7 +27,7 @@ class SokobanSolver:
         sokomap_level[level_layer == Tiles.finish] = SokobanTiles.TILE_WALL
         for lock in lock_tiles:
             sokomap_level[level_layer == lock] = SokobanTiles.TILE_WALL
-        sokomap_level[level_layer == Tiles.movable_block] = SokobanTiles.TILE_BLOCK
+        sokomap_level[level_layer == Tiles.sokoban_block] = SokobanTiles.TILE_BLOCK
 
         sokomap_level[tuple(player_position)] = SokobanTiles.TILE_PLAYER
         if np.array_equal(player_position, sokoban_lock):

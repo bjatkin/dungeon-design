@@ -70,5 +70,9 @@ class Level:
                     string += "F "
                 if tile == Tiles.fire_boots:
                     string += "Fb"
+                if tile == Tiles.sokoban_block:
+                    string += "[]"
+                if tile == Tiles.sokoban_goal:
+                    string += "><"
             string += "\n"
         return string

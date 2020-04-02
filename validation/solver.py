@@ -11,6 +11,7 @@ import numpy as np
 class Solver:
     @staticmethod
     def does_level_follow_mission(level, solution_node_order, positions_map, give_failure_reason=False):
+        print(level)
         layer = np.array(level.upper_layer)
         visited_nodes = set()
         reached = set()
@@ -45,7 +46,7 @@ class Solver:
             key_node = next(iter(current_node.key_s))
             key_position = positions_map[key_node]
             key_tile = layer[tuple(key_position)]
-            if key_tile == Tiles.movable_block:
+            if key_tile == Tiles.sokoban_block:
                 return key_position
         return None
 

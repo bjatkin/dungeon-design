@@ -23,7 +23,7 @@ W = Tiles.water
 fl= Tiles.flippers
 c = Tiles.collectable
 B = Tiles.required_collectable_barrier
-b = Tiles.movable_block
+b = Tiles.sokoban_block
 
 class TestSokobanSolver(unittest.TestCase):
     def test_sokoban_solver(self):
