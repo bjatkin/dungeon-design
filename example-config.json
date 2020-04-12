@@ -10,8 +10,29 @@
     "puzzle_script_save_file":"/Users/projects/dungeon-design/test.html",
     "engine":"CC",
     "aesthetic":{
-        "noise":0.0,
-        "single_lock_is_hazard":0.1,
-        "fill_space":false
+        "level_space_aesthetic":{
+            "rectangle_count": 40,
+            "rectangle_min":4,
+            "rectangle_max":15,
+            "noise_percentage":0.15,
+            "noise_empty_percentage":0.5
+        },
+        "mission_aesthetic":{
+            "hazard_spread_probability":{
+                "water":0.8,
+                "fire":0.3
+            },
+            "single_lock_is_hazard_probability": 0.1
+        },
+        "tweaker_aesthetic":{
+            "should_fill_unused_space":true
+        },
+        "mission_graph_aesthetic":{
+            "max_depth":5,
+            "min_depth":1,
+            "branch_probability":[0.8, 0.2, 0.0, 0.0],
+            "max_multi_lock_count":2,
+            "max_locks_per_multi_lock":4
+        }
     }
 }

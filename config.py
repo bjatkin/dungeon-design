@@ -1,3 +1,4 @@
+from generation.aesthetic_settings import AestheticSettings
 import json
 
 class ConfigReader():
@@ -15,11 +16,5 @@ class ConfigReader():
             self.name = data['name']
             self.ratings_file = data['ratings_file']
 
-            self.aesthetic = Aesthetic()
-            self.aesthetic.noise = data['aesthetic']['noise']
-            self.aesthetic.single_lock_is_hazard = data['aesthetic']['single_lock_is_hazard']
-            self.aesthetic.fill_space = data['aesthetic']['fill_space']
-
-class Aesthetic():
-    def __init__(self):
-        pass
+            self.aesthetic = AestheticSettings()
+            self.aesthetic.from_config_data(data['aesthetic'])
