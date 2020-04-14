@@ -2,6 +2,8 @@ from dungeon_level.dungeon_tiles import Tiles, key_to_lock, key_tiles
 from generation.drawing import Drawing
 import numpy as np
 
+import pdb
+
 class LevelSpaceGenerator:
     @staticmethod
     def generate(level, size, level_space_aesthetic):
@@ -13,6 +15,11 @@ class LevelSpaceGenerator:
 
         Drawing.draw_rectangle(level.upper_layer, (0,0), size - 1, Tiles.wall)
 
+        if level_space_aesthetic.x_mirrior or level_space_aesthetic.y_mirrior:
+            LevelSpaceGenerator.mirrior_level(level, 
+                x_mirrior=level_space_aesthetic.x_mirrior, 
+                y_mirrior=level_space_aesthetic.y_mirrior,
+            )
 
     @staticmethod
     def add_random_rectangles(level, size, level_space_aesthetic):
@@ -49,3 +56,35 @@ class LevelSpaceGenerator:
         random_positions = np.stack([y_vals, x_vals], axis=1)
         random_positions += BORDER // 2
         return random_positions
+    
+    @staticmethod
+    def mirrior_level(level, x_mirrior=False, y_mirrior=False):
+        if not x_mirrior and not y_mirrior:
+            return
+
+        x_mid = (len(level.upper_layer) // 2)
+        x_len = len(level.upper_layer)
+        y_mid = (len(level.upper_layer[0]) // 2)
+        y_len = len(level.upper_layer[0])
+
+        if y_mirrior and not x_mirrior:
+            for i in range(x_mid):
+                for j in range(y_len):
+                    level.upper_layer[x_mid+(x_mid-i)-1][j] = level.upper_layer[i][j]
+                    level.lower_layer[x_mid+(x_mid-i)-1][j] = level.lower_layer[i][j]
+
+        elif x_mirrior and not y_mirrior:
+            for i in range(x_len):
+                for j in range(y_mid):
+                    level.upper_layer[i][y_mid+(y_mid-j)-1] = level.upper_layer[i][j]
+                    level.lower_layer[i][y_mid+(y_mid-j)-1] = level.lower_layer[i][j]
+        else:
+            for i in range(x_mid):
+                for j in range(y_mid):
+                    level.upper_layer[x_mid+(x_mid-i)-1][y_mid+(y_mid-j)-1] = level.upper_layer[i][j]
+                    level.upper_layer[i][y_mid+(y_mid-j)-1] = level.upper_layer[i][j]
+                    level.upper_layer[x_mid+(x_mid-i)-1][j] = level.upper_layer[i][j]
+
+                    level.lower_layer[x_mid+(x_mid-i)-1][y_mid+(y_mid-i)-1] = level.lower_layer[i][j]
+                    level.lower_layer[i][y_mid+(y_mid-i)-1] = level.lower_layer[i][j]
+                    level.lower_layer[x_mid+(x_mid-i)-1][j] = level.lower_layer[i][j]

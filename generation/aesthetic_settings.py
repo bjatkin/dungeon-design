@@ -16,6 +16,8 @@ class AestheticSettings:
             self.rectangle_max = config['rectangle_max']
             self.noise_percentage = config['noise_percentage']
             self.noise_empty_percentage = config['noise_empty_percentage']
+            self.x_mirrior = config['x_mirrior']
+            self.y_mirrior = config['y_mirrior']
 
     class MissionAesthetic:
         def __init__(self):
@@ -74,19 +76,21 @@ class AestheticSettings:
         self.LevelSpaceAesthetic.rectangle_max = int(d[4])
         self.LevelSpaceAesthetic.noise_percentage = int(d[5])
         self.LevelSpaceAesthetic.noise_empty_percentage = float(d[6])
-        self.MissionAesthetic.hazard_spread_probability[Tiles.fire] = float(d[7])
-        self.MissionAesthetic.hazard_spread_probability[Tiles.water] = float(d[8])
-        self.MissionAesthetic.single_lock_is_hazard_probability = float(d[9])
-        self.TweakerAesthetic.should_fill_unused_space = bool(d[10])
-        self.MissionGraphAesthetic.max_depth = int(d[11])
-        self.MissionGraphAesthetic.min_depth = int(d[12])
+        self.LevelSpaceAesthetic.x_mirrior = float(d[7])
+        self.LevelSpaceAesthetic.y_mirrior = float(d[8])
+        self.MissionAesthetic.hazard_spread_probability[Tiles.fire] = float(d[9])
+        self.MissionAesthetic.hazard_spread_probability[Tiles.water] = float(d[10])
+        self.MissionAesthetic.single_lock_is_hazard_probability = float(d[11])
+        self.TweakerAesthetic.should_fill_unused_space = bool(d[12])
+        self.MissionGraphAesthetic.max_depth = int(d[13])
+        self.MissionGraphAesthetic.min_depth = int(d[14])
 
-        branch_str = d[13].split(":")
+        branch_str = d[15].split(":")
         branch_arr = [float(branch_str[0][1:]), float(branch_str[1], float(branch_str[2][:-1]))]
         self.MissionGraphAesthetic.branch_probability = branch_arr
 
-        self.MissionGraphAesthetic.max_multi_lock_count = int(d[14])
-        self.MissionGraphAesthetic.max_locks_per_multi_lock = int(d[15])
+        self.MissionGraphAesthetic.max_multi_lock_count = int(d[16])
+        self.MissionGraphAesthetic.max_locks_per_multi_lock = int(d[17])
 
     @staticmethod
     def csv_header():
@@ -95,6 +99,8 @@ class AestheticSettings:
             "rectangle_max,"+\
             "noise_percentage,"+\
             "noise_empty_percentage,"+\
+            "x_mirrior,"+\
+            "y_mirrior,"+\
             "hazard_spread_probability_water,"+\
             "hazard_spread_probability_fire,"+\
             "single_lock_is_hazard_probability,"+\
@@ -112,6 +118,8 @@ class AestheticSettings:
             str(self.level_space_aesthetic.rectangle_max),
             str(self.level_space_aesthetic.noise_percentage),
             str(self.level_space_aesthetic.noise_empty_percentage),
+            str(self.level_space_aesthetic.x_mirrior),
+            str(self.level_space_aesthetic.y_mirrior),
             str(self.mission_aesthetic.hazard_spread_probability[Tiles.water]),
             str(self.mission_aesthetic.hazard_spread_probability[Tiles.fire]),
             str(self.mission_aesthetic.single_lock_is_hazard_probability),
