@@ -139,3 +139,5 @@ settings.ini
 test.dat
 
 ratings/ratings.csv
+# Mac files
+.DS_Store
