@@ -38,7 +38,7 @@ class TestSokobanSolver(unittest.TestCase):
         sokoban_lock = np.array([2, 4])
         is_solvable, solution = SokobanSolver.is_sokoban_solvable(layer, player_start, sokoban_key, sokoban_lock, get_solution=True)
         self.assertTrue(is_solvable)
-        self.assertEqual(solution, [(1,0), (0,1), (0,1)])
+        self.assertTrue(np.array_equal(np.array(solution), np.array([(1,0), (0,1), (0,1)])))
 
 
     def test_sokoban_solver2(self):
@@ -54,8 +54,7 @@ class TestSokobanSolver(unittest.TestCase):
         sokoban_lock = np.array([1, 5])
         is_solvable, solution = SokobanSolver.is_sokoban_solvable(layer, player_start, sokoban_key, sokoban_lock, get_solution=True)
         self.assertTrue(is_solvable)
-        self.assertEqual(solution, [(1,0), (0,-1), (-1,0), (0,-1), (-1,0), (0,1), (0,1), (0,1)])
-
+        self.assertTrue(np.array_equal(np.array(solution), np.array([(1,0), (0,-1), (-1,0), (0,-1), (-1,0), (0,1), (0,1), (0,1)])))
 
     def test_sokoban_player_on_goal(self):
         layer = np.array([
@@ -70,7 +69,7 @@ class TestSokobanSolver(unittest.TestCase):
         sokoban_lock = np.array([2, 3])
         is_solvable, solution = SokobanSolver.is_sokoban_solvable(layer, player_start, sokoban_key, sokoban_lock, get_solution=True)
         self.assertTrue(is_solvable)
-        self.assertEqual(solution, [(1,0), (0,-1), (0,-1), (-1,0), (0,1)])
+        self.assertTrue(np.array_equal(np.array(solution), np.array([(-1,0), (0,-1), (0,-1), (1,0), (0,1)])))
 
     def test_is_valid_position(self):
         sG = SokobanTiles.TILE_GOAL
@@ -78,17 +77,17 @@ class TestSokobanSolver(unittest.TestCase):
         sE = SokobanTiles.TILE_SPACE
         sP = SokobanTiles.TILE_PLAYER
         sokomap = SokoMap()
-        sokomap.set_map([[sE, sE, sE, sE],
-                         [sE, sP, sB, sG],
-                         [sE, sE, sE, sE]], (1,1))
+        sokomap.set_map(np.array([[sE, sE, sE, sE],
+                                  [sE, sP, sB, sG],
+                                  [sE, sE, sE, sE]]), np.array([1,1]))
             
         for i in range(3):
             for j in range(4):
-                self.assertTrue(sokomap.is_legal_position(i, j))
+                self.assertTrue(SokoMap.is_legal_position(sokomap.sokomap, np.array([i, j])))
 
-                self.assertFalse(sokomap.is_legal_position(-i - 1, j))
-                self.assertFalse(sokomap.is_legal_position(i, -j - 1))
-                self.assertFalse(sokomap.is_legal_position(-i - 1, -j - 1))
-                self.assertFalse(sokomap.is_legal_position(i, j + 4))
-                self.assertFalse(sokomap.is_legal_position(i + 3, j))
-                self.assertFalse(sokomap.is_legal_position(i + 3, j + 4))
+                self.assertFalse(SokoMap.is_legal_position(sokomap.sokomap, np.array([-i - 1, j])))
+                self.assertFalse(SokoMap.is_legal_position(sokomap.sokomap, np.array([i, -j - 1])))
+                self.assertFalse(SokoMap.is_legal_position(sokomap.sokomap, np.array([-i - 1, -j - 1])))
+                self.assertFalse(SokoMap.is_legal_position(sokomap.sokomap, np.array([i, j + 4])))
+                self.assertFalse(SokoMap.is_legal_position(sokomap.sokomap, np.array([i + 3, j])))
+                self.assertFalse(SokoMap.is_legal_position(sokomap.sokomap, np.array([i + 3, j + 4])))

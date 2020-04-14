@@ -15,7 +15,11 @@ class SokobanSolver:
         is_solvable = (not solution is None)
 
         if get_solution:
-            return is_solvable, solution.move_list
+            if is_solvable:
+                move_list = solution.move_list
+            else:
+                move_list = None
+            return is_solvable, move_list
         else:
             return is_solvable
     
@@ -37,7 +41,7 @@ class SokobanSolver:
         sokomap_level[tuple(sokoban_lock)] = goal_tile
 
         sokomap = SokoMap()
-        sokomap.set_map(sokomap_level.tolist(), tuple(player_position))
+        sokomap.set_map(sokomap_level, player_position)
         return sokomap
 
 
@@ -64,16 +68,16 @@ class SokobanSolver:
             used_block = []
             solution = []
 
-            used_goal.append(s[1])
-            used_block.append(s[0])
+            used_goal.append(tuple(s[1]))
+            used_block.append(tuple(s[0]))
             solution.append(s)
             h = s[2]
             for lin in solutions:
                 for col in lin:
-                    if col[1] not in used_goal and col[0] not in used_block:
+                    if tuple(col[1]) not in used_goal and tuple(col[0]) not in used_block:
                         solution.append(col)
-                        used_goal.append(col[1])
-                        used_block.append(col[0])
+                        used_goal.append(tuple(col[1]))
+                        used_block.append(tuple(col[0]))
                         h = h + col[2]
                         break
             if h < best:
@@ -82,12 +86,12 @@ class SokobanSolver:
 
         w = sokomap.get_player()
         d = float('inf')
-        v = (-1,-1)
+        v = None
         for x in sokomap.get_unplaced_blocks():
             if SokobanSolver._manhattan_distance(w, x) < d:
                 d = SokobanSolver._manhattan_distance(w, x)
                 v = x
-        if v != (-1,-1):
+        if v is not None:
             best = best + d
 
         return best

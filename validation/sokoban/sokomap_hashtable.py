@@ -6,7 +6,7 @@ class HashTable:
 
 
     def check_add(self, sokomap):
-        key = str(sokomap.get_blocks() + [sokomap.get_player()])
+        key = "{} {}".format(sokomap.get_blocks(), sokomap.get_player())
         if key in self.table:
             return True
         else:

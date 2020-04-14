@@ -1,5 +1,6 @@
 from copy import deepcopy
 from enum import Enum, unique
+import numpy as np
 
 class SokobanTiles(Enum):
     TILE_BLOCK = 'B '
@@ -18,10 +19,11 @@ class SokoMap:
     TILES_WRONG_FOR_BLOCK = frozenset([SokobanTiles.TILE_BLOCK, SokobanTiles.TILE_WALL, SokobanTiles.TILE_BLOCK_ON_GOAL, SokobanTiles.TILE_DEADLOCK])
     TILES_WRONG_FOR_2x2 = frozenset([SokobanTiles.TILE_BLOCK, SokobanTiles.TILE_WALL, SokobanTiles.TILE_BLOCK_ON_GOAL])
     TILES_SPACEY = frozenset([SokobanTiles.TILE_SPACE, SokobanTiles.TILE_DEADLOCK])
+    NEIGHBORS_4 = np.array([(1, 0), (-1, 0), (0, 1), (0, -1)])
 
 
     def __init__(self):
-        self.sokomap = []
+        self.sokomap = None
 
         self.g_val = 0
         self.f_val = 0
@@ -32,7 +34,7 @@ class SokoMap:
 
     def __eq__(self, other):
         if isinstance(other, SokoMap):
-            return (self.sokomap == other.sokomap and self.player == other.player)
+            return np.all([np.array_equal(self.sokomap, other.sokomap), np.array_equal(self.player, other.player)])
         return NotImplemented
 
 
@@ -54,43 +56,11 @@ class SokoMap:
 
 
     def get_f(self):
-        return self.g_val
+        return self.f_val
 
 
     def set_parent(self, parent):
         self.parent = parent
-
-
-    def read_map(self, filename):
-        # read from txt map file
-        map_file = open(filename, 'r')
-        temp = map_file.readlines()
-        sokomap = [] # in memory map representation: list of lists of chars
-        y = 0
-        player = None
-        for line in temp:
-            base_l = list(line)[0:-1] # removes newline
-            l = []
-            for x in range(0,len(base_l)):
-                c = base_l[x]
-                if c == SokobanTiles.TILE_PLAYER:
-                    c = SokobanTiles.TILE_SPACE
-                    player = (y,x)
-                elif c == SokobanTiles.TILE_PLAYER_ON_GOAL:
-                    c = SokobanTiles.TILE_GOAL
-                    player = (y,x)
-                elif c == SokobanTiles.TILE_PLAYER_ON_DEADLOCK:
-                    c = SokobanTiles.TILE_DEADLOCK
-                    player = (y,x)
-                l.append(c)
-            sokomap.append(l)
-            y += 1
-
-        while sokomap[-1] == ['\n'] or sokomap[-1] == []:
-             # remove last "line" (empty, original only had a newline)
-            sokomap.pop()
-
-        self.set_map(sokomap, player)
 
 
     def get_map(self):
@@ -101,27 +71,15 @@ class SokoMap:
         for line in self.sokomap:
             converted_line = "".join([x.value for x in line])
             print(converted_line)
+        print()
 
 
     def get_something(self, something):
-        result = []
-        y = 0
-        for l in self.sokomap:
-            x = 0
-            for i in l:
-                if i == something:
-                    result.append((y,x))
-                x += 1
-            y += 1
-
-        return result
+        return np.argwhere(self.sokomap == something)
 
 
     def _get_several_things(self, somethings):
-        total = []
-        for thing in somethings:
-            total.extend(self.get_something(thing))
-        return total
+        return np.vstack([self.get_something(x) for x in somethings])
 
 
     def get_goals(self):
@@ -148,67 +106,70 @@ class SokoMap:
         return self.get_something(SokobanTiles.TILE_DEADLOCK)
 
     
-    def is_legal_position(self, ny, nx):
-        return not (nx < 0 or ny < 0 or ny >= len(self.sokomap) or nx >= len(self.sokomap[ny]))
+    @staticmethod
+    def is_legal_position(sokomap, position):
+        return not np.any(np.logical_or(position < 0, position >= sokomap.shape))
 
 
+    def is_legal(self, new_player_position):
+        player_position = self.get_player()
 
-    def is_legal(self, nplayer):
-        (ny, nx) = nplayer
-        (y, x) = self.get_player()
-
-        if not self.is_legal_position(ny, nx):
+        if not self.is_legal_position(self.sokomap, new_player_position):
             return False
 
-        if self.sokomap[ny][nx] == SokobanTiles.TILE_WALL:
+        if self.sokomap[tuple(new_player_position)] == SokobanTiles.TILE_WALL:
             return False # cant move into a wall
 
-        if self.sokomap[ny][nx] in self.TILES_BLOCKY:
+        if self.sokomap[tuple(new_player_position)] in self.TILES_BLOCKY:
             # is trying to push a block
             # the only way this works is if the space after the block is free
             # or a goal so we calculate where the block is going to be pushed
             # into and see if it's "open"
 
-            xdiff = nx - x
-            ydiff = ny - y
+            player_diff = new_player_position - player_position
 
-            bx = nx + xdiff
-            by = ny + ydiff
+            block_position = new_player_position + player_diff
 
-            if not self.is_legal_position(by, bx) or self.sokomap[by][bx] in self.TILES_WRONG_FOR_BLOCK:
+            if not SokoMap.is_legal_position(self.sokomap, block_position) or self.sokomap[tuple(block_position)] in self.TILES_WRONG_FOR_BLOCK:
                 return False
 
-            min_n_off = (-ydiff,-xdiff)
+            min_n_off = tuple(-player_diff)
 
             # Check for a segment of 2*2 adjacent blocks or walls. Like:
             #
             #      $$    #$     #$   $$
             #      ##    #$     $$   $$
             #
-            def _my_check(dy1,dx1,dy2,dx2):
-                filtered = [SokobanTiles.TILE_BLOCK_ON_GOAL if self.sokomap[by][bx] == SokobanTiles.TILE_GOAL \
+            def _my_check(d1, d2):
+                filtered = [SokobanTiles.TILE_BLOCK_ON_GOAL if self.sokomap[tuple(block_position)] == SokobanTiles.TILE_GOAL \
                                              else SokobanTiles.TILE_BLOCK]
-                for (dy,dx) in [(dy1,dx1),(dy2,dx2),(dy1+dy2,dx1+dx2)]:
-                    if self.is_legal_position(by+dy, bx+dx):
-                        x = self.sokomap[by+dy][bx+dx]
+                for d in [d1, d2, d1 + d2]:
+                    if SokoMap.is_legal_position(self.sokomap, block_position + d):
+                        x = self.sokomap[tuple(block_position + d)]
                         if x in self.TILES_WRONG_FOR_2x2:
                             filtered.append(x)
                 # There are 4 in total
                 return (len(filtered) == 4 and (SokobanTiles.TILE_BLOCK in filtered))
 
             for y_offset in [(-1,0),(1,0)]:
-                if ((y_offset != min_n_off) and (not (y_offset == (-1,0) and by == 0 ))):
+                if ((y_offset != min_n_off) and (not (y_offset == (-1,0) and block_position[0] == 0 ))):
                     for x_offset in [(0,-1),(0,1)]:
-                        if ((x_offset != min_n_off) and (not (x_offset == -1 and bx == 0 ))):
-                            for dir_offsets in [\
-                                    (x_offset,y_offset), \
-                                    (y_offset,x_offset) \
-                                    ]:
-                                if (_my_check(dir_offsets[0][0], dir_offsets[0][1], dir_offsets[1][0], dir_offsets[1][1])):
+                        if ((x_offset != min_n_off) and (not (x_offset == -1 and block_position[1] == 0 ))):
+                            for dir_offsets in np.array([[x_offset,y_offset],[y_offset,x_offset]]):
+                                if (_my_check(dir_offsets[0], dir_offsets[1])):
                                     return False
 
         # everything is OK
         return True
+
+    
+    @staticmethod
+    def value_at(sokomap, position):
+        if SokoMap.is_legal_position(sokomap, position):
+            return sokomap[tuple(position)]
+        else:
+            return None
+
 
 
     def is_solution(self):
@@ -216,33 +177,28 @@ class SokoMap:
         return len(unplaced_blocks) == 0
 
 
-    def tunnel_macro(self, nMap, box, push):
-        (py, px) = push
-        (by, bx) = box
+    def is_block_in_tunnel(self, sokomap, block_position, push_direction):
+        side = np.flip(push_direction)
+        sides = np.vstack([side, -side])
+        is_wall_beside_block = [SokoMap.value_at(sokomap, block_position + side) in [None, SokobanTiles.TILE_WALL] for side in sides]
+        return np.all(is_wall_beside_block)
 
-        if px != 0:
-            # horizontal push
-            while (not self.is_legal_position(by+1, bx) or nMap[by+1][bx] == SokobanTiles.TILE_WALL) and (not self.is_legal_position(by-1,bx) or nMap[by-1][bx] == SokobanTiles.TILE_WALL):
-                if not self.is_legal_position(by, bx+1) or nMap[by][bx+1] != SokobanTiles.TILE_SPACE:
-                    return None
-                bx = bx + 1
-        if py != 0:
-            # vertical push
-            while (not self.is_legal_position(by, bx+1) or nMap[by][bx+1] == SokobanTiles.TILE_WALL) and (not self.is_legal_position(by, bx-1) or nMap[by][bx-1] == SokobanTiles.TILE_WALL):
-                if not self.is_legal_position(by+1, bx) or nMap[by+1][bx] != SokobanTiles.TILE_SPACE:
-                    return None
-                by = by + 1
 
-        if (by, bx) != box:
-            # Some puzzles have multiple tunnels and require a box to pushed
+    def tunnel_macro(self, nMap, block_position, push_direction):
+        original_block_position = np.array(block_position)
+
+        while self.is_block_in_tunnel(nMap, block_position, push_direction) and SokoMap.value_at(nMap, block_position + push_direction) == SokobanTiles.TILE_SPACE:
+            block_position += push_direction
+        
+        if not np.array_equal(block_position, original_block_position):
+            # Some puzzles have multiple tunnels and require a block to pushed
             # into the tunnel and then the player to travel through another
             # tunnel and push it out of the tunnel again - credit: AJ
-            # To solve that, the macro will not push the box out of the tunnel
+            # To solve that, the macro will not push the block out of the tunnel
             # but rather leave it on the edge
-            bx -= px
-            by -= py
+            block_position -= push_direction
 
-            return (by, bx)
+            return block_position
 
         return None
 
@@ -259,91 +215,83 @@ class SokoMap:
         return self.move_list
 
 
-    def move(self, nplayer):
-        (y,x) = self.get_player()
-        new_map = deepcopy(self.sokomap)
-        box = None
+    def move(self, new_player_position):
+        player_position = self.get_player().copy()
+        new_map = self.sokomap.copy()
+        block = None
 
         # transform the new location of the player
-        if new_map[y][x] == SokobanTiles.TILE_PLAYER:
-            new_map[y][x] = SokobanTiles.TILE_SPACE
-        elif new_map[y][x] == SokobanTiles.TILE_PLAYER_ON_DEADLOCK:
-            new_map[y][x] = SokobanTiles.TILE_DEADLOCK
-        elif new_map[y][x] == SokobanTiles.TILE_PLAYER_ON_GOAL:
-            new_map[y][x] = SokobanTiles.TILE_GOAL
+        player_tile = new_map[tuple(player_position)]
+        if player_tile == SokobanTiles.TILE_PLAYER:
+            new_map[tuple(player_position)] = SokobanTiles.TILE_SPACE
+        elif player_tile == SokobanTiles.TILE_PLAYER_ON_DEADLOCK:
+            new_map[tuple(player_position)] = SokobanTiles.TILE_DEADLOCK
+        elif player_tile == SokobanTiles.TILE_PLAYER_ON_GOAL:
+            new_map[tuple(player_position)] = SokobanTiles.TILE_GOAL
 
-        (ny,nx) = nplayer
-        xdiff = nx - x
-        ydiff = ny - y
-        m = (ydiff, xdiff)
+        offset = new_player_position - player_position
         carry = False
-        if new_map[ny][nx] == SokobanTiles.TILE_BLOCK:
+        new_player_tile = new_map[tuple(new_player_position)]
+        if new_player_tile == SokobanTiles.TILE_BLOCK:
             carry = True
-            new_map[ny][nx] = SokobanTiles.TILE_SPACE
-        elif new_map[ny][nx] == SokobanTiles.TILE_BLOCK_ON_GOAL:
+            new_map[tuple(new_player_position)] = SokobanTiles.TILE_SPACE
+        elif new_player_tile == SokobanTiles.TILE_BLOCK_ON_GOAL:
             carry = True
-            new_map[ny][nx] = SokobanTiles.TILE_GOAL
+            new_map[tuple(new_player_position)] = SokobanTiles.TILE_GOAL
 
         # push a block into a new space if necessary
         if carry:
-            bx = nx + xdiff
-            by = ny + ydiff
+            block_position = new_player_position + offset
 
-            box = self.tunnel_macro(new_map, (by, bx), m)
-            #box = None
-            if box is not None:
-                (by, bx) = box
+            new_block_position = self.tunnel_macro(new_map, block_position, offset)
+            if new_block_position is not None:
+                new_player_position = new_block_position - offset
+                new_map[tuple(new_player_position)] = SokobanTiles.TILE_SPACE
 
-                nx = bx - xdiff
-                ny = by - ydiff
-                # it must be a space (that's checked inside tunnel_macro)
+            # Place the block
 
-                new_map[ny][nx] = SokobanTiles.TILE_SPACE
-
-            # Place the box
-            if new_map[by][bx] == SokobanTiles.TILE_SPACE:
-                new_map[by][bx] = SokobanTiles.TILE_BLOCK
-            elif new_map[by][bx] == SokobanTiles.TILE_GOAL:
-                new_map[by][bx] = SokobanTiles.TILE_BLOCK_ON_GOAL
+            block_tile = new_map[tuple(block_position)]
+            if block_tile == SokobanTiles.TILE_SPACE:
+                new_map[tuple(block_position)] = SokobanTiles.TILE_BLOCK
+            elif block_tile == SokobanTiles.TILE_GOAL:
+                new_map[tuple(block_position)] = SokobanTiles.TILE_BLOCK_ON_GOAL
             else:
                 pass
 
-        if new_map[ny][nx] == SokobanTiles.TILE_SPACE:
-            new_map[ny][nx] = SokobanTiles.TILE_PLAYER
-        elif new_map[ny][nx] == SokobanTiles.TILE_DEADLOCK:
-            new_map[ny][nx] = SokobanTiles.TILE_PLAYER_ON_DEADLOCK
-        elif new_map[ny][nx] == SokobanTiles.TILE_GOAL:
-            new_map[ny][nx] = SokobanTiles.TILE_PLAYER_ON_GOAL
-        
+        new_player_tile = new_map[tuple(new_player_position)]
+        if new_player_tile == SokobanTiles.TILE_SPACE:
+            new_map[tuple(new_player_position)] = SokobanTiles.TILE_PLAYER
+        elif new_player_tile == SokobanTiles.TILE_DEADLOCK:
+            new_map[tuple(new_player_position)] = SokobanTiles.TILE_PLAYER_ON_DEADLOCK
+        elif new_player_tile == SokobanTiles.TILE_GOAL:
+            new_map[tuple(new_player_position)] = SokobanTiles.TILE_PLAYER_ON_GOAL
 
         new_sokomap = SokoMap()
-        new_sokomap.set_map(new_map, (ny, nx))
+        new_sokomap.set_map(new_map, new_player_position)
         new_sokomap.set_move_list(self.get_move_list())
-        new_sokomap.add_move(m)
+        new_sokomap.add_move(offset)
 
         return new_sokomap
 
 
-    def _filter_neighbours(self, yx, offsets, filt):
-        y, x = yx
-        for (dy,dx) in offsets:
-            nyx = (y+dy,x+dx)
-            if (filt(nyx)):
-                yield nyx
+    def _filter_neighbors(self, position, offsets, filter):
+        indices = offsets + position
+        for index in indices:
+            if filter(index):
+                yield index
 
 
     def children(self):
-        return [self.move(nxy) for nxy in self._filter_neighbours(self.get_player(), [(0,-1),(0,1),(-1,0),(1,0)], (lambda nxy: self.is_legal(nxy)))]
+        filtered_neighbors = list(self._filter_neighbors(self.get_player(), SokoMap.NEIGHBORS_4, self.is_legal))
+        child_nodes = [self.move(neighbor) for neighbor in filtered_neighbors]
+        return child_nodes
 
 
     def get_neighbors(self, node):
-        def filt(ny,nx):
-            try:
-                return ny >= 0 and nx >= 0 and self.sokomap[ny][nx] != SokobanTiles.TILE_WALL
-            except IndexError:
-                return False
-
-        return self._filter_neighbours(node, [(1,0),(-1,0),(0,1),(0,-1)], filt)
+        def filter(position):
+            return self.value_at(self.sokomap, position) not in {None, SokobanTiles.TILE_WALL}
+        
+        return self._filter_neighbors(node, SokoMap.NEIGHBORS_4, filter)
 
 
     def shortest_path(self, source, target):
@@ -351,11 +299,14 @@ class SokoMap:
         dist = {}
         prev = {}
         q = []
-        for y,a in enumerate(self.sokomap):
-             for x,b in enumerate(self.sokomap[y]):
-                 dist[(y,x)] = float('inf')
-                 prev[(y,x)] = None
-                 q.append((y,x))
+        h, w = self.sokomap.shape
+        for y in range(h):
+            for x in range(w):
+                position = (y,x)
+                dist[position] = float('inf')
+                prev[position] = None
+                q.append(position)
+
         dist[source] = 0
 
         while len(q) != 0:
@@ -396,14 +347,16 @@ class SokoMap:
 
     def build_influence_table(self):
         self.influence_table = {}
-        for sy,a in enumerate(self.sokomap):
-            for sx,b in enumerate(self.sokomap[sy]):
+
+        h, w = self.sokomap.shape
+        for sy in range(h):
+            for sx in range(w):
                 inf = {}
-                if self.sokomap[sy][sx] == SokobanTiles.TILE_WALL:
+                if self.sokomap[sy, sx] == SokobanTiles.TILE_WALL:
                     break
-                for ty,a in enumerate(self.sokomap):
-                    for tx,b in enumerate(self.sokomap[ty]):
-                        if self.sokomap[ty][tx] == SokobanTiles.TILE_WALL:
+                for ty in range(h):
+                    for tx in range(w):
+                        if self.sokomap[ty, tx] == SokobanTiles.TILE_WALL:
                             break
                         path = self.shortest_path((sy, sx), (ty, tx))
                         score = 0.0
@@ -418,11 +371,11 @@ class SokoMap:
                                     py = ny - y
                                     hx = x - px
                                     hy = y - py
-                                    if self.sokomap[ny][nx] == SokobanTiles.TILE_WALL:
+                                    if self.sokomap[ny, nx] == SokobanTiles.TILE_WALL:
                                         sscore = 0
-                                    elif self.sokomap[hy][hx] != SokobanTiles.TILE_WALL:
+                                    elif self.sokomap[hy, hx] != SokobanTiles.TILE_WALL:
                                         # "pushability" test
-                                        # this tests if we can push a box from
+                                        # this tests if we can push a block from
                                         # s to n. It's an inacurate test
                                         # i.e. it's not always possible with
                                         # this condition but it will do
@@ -446,7 +399,7 @@ class SokoMap:
                                 hx = x - px
                                 hy = y - py
                                 # Same poor test for "pushability" as before
-                                if self.sokomap[hy][hx] != SokobanTiles.TILE_WALL:
+                                if self.sokomap[hy, hx] != SokobanTiles.TILE_WALL:
                                     sscore += 2
                                 else:
                                     sscore += 1
@@ -458,12 +411,12 @@ class SokoMap:
                                 py = y - my
 
                                 if px != 0: # horizontal push
-                                    if self.sokomap[my+1][mx] == SokobanTiles.TILE_WALL and \
-                                       self.sokomap[my-1][mx] == SokobanTiles.TILE_WALL:
+                                    if self.sokomap[my+1, mx] == SokobanTiles.TILE_WALL and \
+                                       self.sokomap[my-1, mx] == SokobanTiles.TILE_WALL:
                                         sscore = 0
                                 else:   # vertical push
-                                    if self.sokomap[my][mx+1] == SokobanTiles.TILE_WALL and \
-                                       self.sokomap[my][mx-1] == SokobanTiles.TILE_WALL:
+                                    if self.sokomap[my, mx+1] == SokobanTiles.TILE_WALL and \
+                                       self.sokomap[my, mx-1] == SokobanTiles.TILE_WALL:
                                         sscore = 0
 
                             score += sscore
@@ -495,61 +448,43 @@ class SokoMap:
 
 
         def get(self, y, x):
-            return self.sokomap[y][x]
+            return self.sokomap[y, x]
 
 
         def set(self, y, x, val):
-            self.sokomap[y][x] = val
+            self.sokomap[y, x] = val
             return
 
 
         def y_len(self):
-            return len(self.sokomap)
+            return self.sokomap.shape[0]
 
 
         def x_len(self):
-            return max([row.len for row in self.sokomap])
+            return self.sokomap.shape[1]
 
 
 
-
-    class Proxy_View:
-        def __init__(self, v):
-            self.v = v
-
-        def _map(self, y, x):
-            return y, x
+    class Swap_XY_View:
+        def __init__(self, sokomap):
+            self.sokomap = sokomap
 
 
         def get(self, y, x):
-            return self.v.get(*self._map(y, x))
+            return self.sokomap[x, y]
 
 
         def set(self, y, x, val):
-            return self.v.set(*self._map(y, x), val)
+            self.sokomap[x, y] = val
+            return
 
 
         def y_len(self):
-            return self.v.y_len()
+            return self.sokomap.shape[1]
 
 
         def x_len(self):
-            return self.v.x_len()
-
-
-
-
-    class Swap_XY_View(Proxy_View):
-        def _map(self, y, x):
-            return x,y
-
-
-        def y_len(self):
-            return self.v.x_len()
-
-
-        def x_len(self):
-            return self.v.y_len()
+            return self.sokomap.shape[0]
 
 
 
@@ -557,22 +492,21 @@ class SokoMap:
         """Detects fixed deadlocks (very basic, not perfect"""
 
         def _place_deadlock(y,x,delta_y,delta_x):
-            try:
-                if self.sokomap[y+delta_y][x] == SokobanTiles.TILE_WALL and \
-                   self.sokomap[y][x+delta_x] == SokobanTiles.TILE_WALL:
-                    self.sokomap[y][x] = SokobanTiles.TILE_DEADLOCK
-                    return True
-            except IndexError:
-                pass
-            return False
+            if (self.value_at(self.sokomap, np.array([y + delta_y, x])) == SokobanTiles.TILE_WALL and
+                    self.value_at(self.sokomap, np.array([y, x + delta_x])) == SokobanTiles.TILE_WALL):
+                self.sokomap[y, x] = SokobanTiles.TILE_DEADLOCK
+                return True
+            else:
+                return False
 
         # Place _deadlock Markers in corners (without goals)
-        for y,a in enumerate(self.sokomap):
-            for x,b in enumerate(self.sokomap[y]):
+        h, w = self.sokomap.shape
+        for y in range(h):
+            for x in range(w):
                 if x == 0 or x == (len(self.sokomap[0])-1) or \
                    y == 0 or (y == len(self.sokomap)-1):
                     continue
-                if self.sokomap[y][x] == SokobanTiles.TILE_SPACE:
+                if self.sokomap[y, x] == SokobanTiles.TILE_SPACE:
                     _place_deadlock(y,x,-1,-1) or \
                     _place_deadlock(y,x,-1,1) or \
                     _place_deadlock(y,x,1,-1) or \
@@ -624,7 +558,7 @@ class SokoMap:
                         x += 1
 
         xy_v = self.DirectView(self.sokomap)
-        yx_v = self.Swap_XY_View(xy_v)
+        yx_v = self.Swap_XY_View(self.sokomap)
         for dead in self.get_deadlocks():
             (dy,dx) = dead
             connect_markers(dy, dx, xy_v)
