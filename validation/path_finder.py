@@ -1,7 +1,6 @@
 import numpy as np
 from dungeon_level.dungeon_tiles import Tiles
 from dungeon_level.level import Level
-from validation.player_status import PlayerStatus
 from hashlib import sha1
 from numpy import ndarray, uint8, array
 
@@ -25,14 +24,14 @@ class PathFinder:
     neighbor_offsets = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
     @staticmethod
-    def is_reachable(layer, position_a, position_b, player_status, allow_diagonal=False):
-        results = PathFinder.a_star(layer, position_a, position_b, player_status, allow_diagonal=allow_diagonal)
+    def is_reachable(layer, position_a, position_b, can_traverse, allow_diagonal=False):
+        results = PathFinder.a_star(layer, position_a, position_b, can_traverse, allow_diagonal=allow_diagonal)
         is_unreachable = results[1] is None
         return not is_unreachable
 
     @staticmethod
-    def find_path(layer, position_a, position_b, player_status, allow_diagonal=False):
-        f_costs, parents = PathFinder.a_star(layer, position_a, position_b, player_status, allow_diagonal=allow_diagonal)
+    def find_path(layer, position_a, position_b, can_traverse, allow_diagonal=False):
+        f_costs, parents = PathFinder.a_star(layer, position_a, position_b, can_traverse, allow_diagonal=allow_diagonal)
         if parents is None:
             return None
         else:
@@ -47,7 +46,7 @@ class PathFinder:
 
 
     @staticmethod
-    def a_star(layer, position_a, position_b, player_status, allow_diagonal=False):
+    def a_star(layer, position_a, position_b, can_traverse, allow_diagonal=False):
         if allow_diagonal:
             offsets = PathFinder.diagonal_neighbor_offsets
             distance = PathFinder.diagonal_manhattan_distance
@@ -79,9 +78,14 @@ class PathFinder:
             current_g_cost = g_costs[tuple(current_position)]
             for neighbor_offset in offsets:
                 neighbor_position = current_position + neighbor_offset
+                parent = parents[tuple(current_position)]
+                if parent is not None:
+                    previous_position = parent + current_position
+                else:
+                    previous_position = None
 
                 if (neighbor_position in closed_tiles or
-                    not player_status.can_traverse(layer, current_position, neighbor_position)):
+                    not can_traverse(layer, previous_position, current_position, neighbor_position)):
                     continue
 
                 old_f = f_costs[tuple(neighbor_position)]

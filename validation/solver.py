@@ -1,4 +1,5 @@
 from validation.path_finder import PathFinder
+from validation.player_traverser import PlayerTraverser
 from validation.player_status import PlayerStatus
 from validation.sokoban.sokoban_solver import SokobanSolver
 from dungeon_level.dungeon_tiles import Tiles, lock_tiles, TileTypes, hazard_tiles
@@ -56,7 +57,7 @@ class Solver:
         sokoban_key_position = Solver.get_sokoban_key_position_from_lock(layer, current_node, positions_map)
         if not sokoban_key_position is None:
             lock_position = positions_map[current_node]
-            can_solve_sokoban = SokobanSolver.is_sokoban_solvable(layer, lock_position, sokoban_key_position, lock_position)
+            can_solve_sokoban = SokobanSolver.is_sokoban_solvable(layer, player_status, sokoban_key_position, lock_position)
             if can_solve_sokoban:
                 layer[tuple(lock_position)] = Tiles.empty
                 layer[tuple(sokoban_key_position)] = Tiles.empty
@@ -122,7 +123,7 @@ class Solver:
         if node not in positions_map:
             return False
         tile_position = positions_map[node]
-        is_reachable = PathFinder.is_reachable(layer, player_status.player_position, tile_position, player_status)
+        is_reachable = PathFinder.is_reachable(layer, player_status.player_position, tile_position, PlayerTraverser.can_traverse)
         return is_reachable
 
 
