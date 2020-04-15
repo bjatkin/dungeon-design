@@ -30,10 +30,18 @@ class Level:
 
     def __repr__(self):
         string = "Title: {}\nTime Limit: {}\nRequired Collectables: {}\n".format(self.map_title, self.time_limit, self.required_collectable_count)
-        h, w = self.upper_layer.shape
+        string += Level.layer_to_string(self.upper_layer)
+        return string
+
+    @staticmethod
+    def layer_to_string(layer, additional_points=None):
+        lines = []
+        TILE_SIZE = 2
+        h, w = layer.shape
         for y in range(h):
+            string = ""
             for x in range(w):
-                tile = self.upper_layer[y,x]
+                tile = layer[y,x]
                 if tile == Tiles.empty:
                     string += ". "
                 if tile == Tiles.wall:
@@ -70,5 +78,18 @@ class Level:
                     string += "F "
                 if tile == Tiles.fire_boots:
                     string += "Fb"
-            string += "\n"
+                if tile == Tiles.sokoban_block:
+                    string += "[]"
+                if tile == Tiles.sokoban_goal:
+                    string += "><"
+            lines.append(string)
+
+        if additional_points is not None:
+            for symbol, position in additional_points.items():
+                line = list(lines[position[0]])
+                index = position[1] * TILE_SIZE
+                line[index:index+len(symbol)] = symbol
+                lines[position[0]] = "".join(line)
+        
+        string = "\n".join(lines)
         return string

@@ -50,7 +50,21 @@ class Generator:
             GraphVisualizer.show_graph(graph.start)
 
         return Node.find_all_nodes(graph.start, method="topological-sort")
-        # return Generator._get_lock_water_fire_lock_graph()
+        # return Generator._get_simple_graph()
+
+
+    @staticmethod
+    def _get_simple_graph():
+        start = Start()
+        key = Key()
+        lock = Lock()
+        end = End()
+        start.add_child_s([key, lock])
+        key.add_lock_s(lock)
+        lock.add_child_s(end)
+
+        return Node.find_all_nodes(start, method="topological-sort")
+
 
     @staticmethod
     def _get_water_lock_graph():

@@ -100,8 +100,13 @@ class MissionGenerator:
             return None
         
         if key_node not in node_to_tile:
-            if len(key_node.lock_s) > 1 or np.random.random() < mission_aesthetic.single_lock_is_hazard_probability:
+            random_value = np.random.random()
+            sokoban_probability = mission_aesthetic.single_lock_is_hazard_probability + mission_aesthetic.single_lock_is_sokoban_probability
+
+            if len(key_node.lock_s) > 1 or random_value < mission_aesthetic.single_lock_is_hazard_probability:
                 node_to_tile[key_node] = np.random.choice(item_tiles)
+            elif random_value < sokoban_probability:
+                node_to_tile[key_node] = Tiles.sokoban_block
             else:
                 node_to_tile[key_node] = np.random.choice(key_tiles)
 

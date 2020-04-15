@@ -23,6 +23,8 @@ W = Tiles.water
 fl= Tiles.flippers
 c = Tiles.collectable
 B = Tiles.required_collectable_barrier
+b = Tiles.sokoban_block
+g = Tiles.sokoban_goal
 
 class TestSolver(unittest.TestCase):
     def test_solver_linear_solvable(self):
@@ -893,3 +895,100 @@ class TestSolver(unittest.TestCase):
 
         does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
         self.assertEqual(does_level_follow_mission, False)
+
+
+    def test_sokoban_solvable(self):
+        level = Level()
+        level.upper_layer = np.array([
+            [s,kR, b, e, e, e, g,lR, f ],
+            [e, e, e, e, e, e, w, w, e ]], dtype=object)
+        
+
+        start = Start()
+        key = Key("key")
+        block = Key("block")
+        water = Lock("water")
+        lock = Lock("lock")
+        end = End()
+        start.add_child_s([key, block, water])
+        block.add_lock_s([water])
+        key.add_lock_s(lock)
+        water.add_child_s(lock)
+        lock.add_child_s(end)
+
+        positions_map = {
+            start:  np.array([0,0]),
+            key:    np.array([0,1]),
+            block:  np.array([0,2]),
+            water:  np.array([0,6]),
+            lock:   np.array([0,7]),
+            end:    np.array([0,8]),
+        }
+
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        self.assertEqual(does_level_follow_mission, True)
+
+
+    def test_sokoban_solvable_lock_in_middle(self):
+        level = Level()
+        level.upper_layer = np.array([
+            [s,kR, b, e,lR, e, g, e, f ],
+            [e, e, e, e, w, e, w, w, e ]], dtype=object)
+        
+
+        start = Start()
+        key = Key("key")
+        block = Key("block")
+        water = Lock("water")
+        lock = Lock("lock")
+        end = End()
+        start.add_child_s([key, block, lock])
+        block.add_lock_s([water])
+        key.add_lock_s(lock)
+        lock.add_child_s(water)
+        water.add_child_s(end)
+
+        positions_map = {
+            start:  np.array([0,0]),
+            key:    np.array([0,1]),
+            block:  np.array([0,2]),
+            water:  np.array([0,6]),
+            lock:   np.array([0,4]),
+            end:    np.array([0,8]),
+        }
+
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        self.assertEqual(does_level_follow_mission, True)
+
+
+    def test_sokoban_unsolvable(self):
+        level = Level()
+        level.upper_layer = np.array([
+            [s,kR, e, e, e, e, W,lR, f ],
+            [e, e, b, e, e, e, w, w, e ]], dtype=object)
+        
+
+        start = Start()
+        key = Key("key")
+        block = Key("block")
+        water = Lock("water")
+        lock = Lock("lock")
+        end = End()
+        start.add_child_s([key, block, water])
+        block.add_lock_s([water])
+        key.add_lock_s(lock)
+        water.add_child_s(lock)
+        lock.add_child_s(end)
+
+        positions_map = {
+            start:  np.array([0,0]),
+            key:    np.array([0,1]),
+            block:  np.array([1,2]),
+            water:  np.array([0,6]),
+            lock:   np.array([0,7]),
+            end:    np.array([0,8]),
+        }
+
+        does_level_follow_mission, failure_reason = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map, give_failure_reason=True)
+        self.assertEqual(does_level_follow_mission, False)
+

@@ -3,6 +3,7 @@ from tile_world.tile_world_writer.test_level_writer import TestTileWorldLevel
 from validation.test_path_finder import TestPathFinder
 from validation.test_solver import TestSolver
 from validation.test_player_status import TestPlayerStatus
+from validation.sokoban.test_sokoban_solver import TestSokobanSolver
 from graph_structure.test_graph_node import TestGraphNode
 from graph_structure.test_graph_visualizer import TestGraphVisualizer
 from graph_to_level.legacy.test_unraveler import TestUnraveler

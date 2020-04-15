@@ -1,5 +1,7 @@
 from validation.path_finder import PathFinder
+from validation.player_traverser import PlayerTraverser
 from validation.player_status import PlayerStatus
+from validation.sokoban.sokoban_solver import SokobanSolver
 from dungeon_level.dungeon_tiles import Tiles, lock_tiles, TileTypes, hazard_tiles
 from dungeon_level.level import Level
 from graph_structure.graph_node import Start, End, Key, Lock, Collectable, CollectableBarrier
@@ -10,18 +12,23 @@ import numpy as np
 class Solver:
     @staticmethod
     def does_level_follow_mission(level, solution_node_order, positions_map, give_failure_reason=False):
+        # print(level)
         layer = np.array(level.upper_layer)
         visited_nodes = set()
         reached = set()
         unreached = set(solution_node_order)
         player_status = PlayerStatus(level.required_collectable_count)
+        player_status.player_position = positions_map[solution_node_order[0]]
 
         for i, node in enumerate(solution_node_order):
-            if i > 0: # We don't need to check if we can reach the first node, since we start there
-                if not Solver.can_reach_node(node, positions_map, layer, player_status):
-                    return Solver.get_return_result(False, False, give_failure_reason)
+            path = Solver.can_reach_node(node, positions_map, layer, player_status, return_path=True)
+            if path is None:
+                return Solver.get_return_result(False, False, give_failure_reason)
 
-            Solver.update_state(layer, player_status, node, positions_map, visited_nodes)
+            if not Solver.can_solve_sokoban(layer, player_status.player_position, node, positions_map):
+                return Solver.get_return_result(False, False, give_failure_reason)
+
+            Solver.update_state(layer, player_status, node, positions_map, visited_nodes, path)
 
             new_reachable_nodes = Solver.update_reachability(node, unreached, reached, solution_node_order)
 
@@ -33,6 +40,33 @@ class Solver:
             
         # We've made it to the final node, rejoice!
         return Solver.get_return_result(False, True, give_failure_reason)
+
+
+    @staticmethod
+    def get_sokoban_key_position_from_lock(layer, current_node, positions_map):
+        if isinstance(current_node, Lock):
+            key_node = next(iter(current_node.key_s))
+            key_position = positions_map[key_node]
+            key_tile = layer[tuple(key_position)]
+            if key_tile == Tiles.sokoban_block:
+                return key_position
+        return None
+
+
+    @staticmethod
+    def can_solve_sokoban(layer, player_position, current_node, positions_map):
+        sokoban_key_position = Solver.get_sokoban_key_position_from_lock(layer, current_node, positions_map)
+        if not sokoban_key_position is None:
+            lock_position = positions_map[current_node]
+            can_solve_sokoban = SokobanSolver.is_sokoban_solvable(layer, player_position, sokoban_key_position, lock_position)
+            if can_solve_sokoban:
+                layer[tuple(lock_position)] = Tiles.empty
+                layer[tuple(sokoban_key_position)] = Tiles.empty
+            
+            return can_solve_sokoban
+        else:
+            return True
+        
 
 
     # We should only be able to unlock a lock if we have reached its key
@@ -86,19 +120,21 @@ class Solver:
 
 
     @staticmethod
-    def can_reach_node(node, positions_map, layer, player_status):
+    def can_reach_node(node, positions_map, layer, player_status, return_path=False):
         if node not in positions_map:
-            return False
+            if return_path:
+                return None
+            else:
+                return False
         tile_position = positions_map[node]
-        is_reachable = PathFinder.is_reachable(layer, player_status.player_position, tile_position, player_status)
-        return is_reachable
+        result = PathFinder.find_path(layer, player_status.player_position, tile_position, PlayerTraverser.can_traverse, return_path=return_path)
+        return result
 
 
     @staticmethod
-    def update_state(layer, player_status, current_node, positions_map, visited_nodes):
+    def update_state(layer, player_status, current_node, positions_map, visited_nodes, path):
         visited_nodes.add(current_node)
-        player_status.player_position = positions_map[current_node]
-        current_position = tuple(player_status.player_position)
+        current_position = tuple(positions_map[current_node])
         current_tile = layer[current_position]
         tile_type = current_tile.get_tile_type()
 
@@ -122,7 +158,10 @@ class Solver:
                 layer[current_position] = Tiles.empty
             elif tile_type == TileTypes.item_hazard:
                 Solver.remove_hazard_component(layer, current_position, current_tile)
-        pass
+                
+        # Step backwards on the path 1
+        # player_status.player_position = path[-1]
+
 
     @staticmethod
     def remove_hazard_component(layer, hazard_position, hazard_tile):

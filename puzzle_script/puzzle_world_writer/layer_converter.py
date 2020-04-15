@@ -8,7 +8,8 @@ class LayerConverter:
         DungeonTiles.wall                           : PWTiles.wall,
         DungeonTiles.player                         : PWTiles.player,
         DungeonTiles.finish                         : PWTiles.finish,
-        DungeonTiles.movable_block                  : PWTiles.movable_block,
+        DungeonTiles.sokoban_block                  : PWTiles.movable_block,
+        DungeonTiles.sokoban_goal                   : PWTiles.empty,   # PW doesn't have a sokoban goal yet
         DungeonTiles.collectable                    : PWTiles.chip,
         DungeonTiles.required_collectable_barrier   : PWTiles.socket,
         DungeonTiles.water                          : PWTiles.water,
