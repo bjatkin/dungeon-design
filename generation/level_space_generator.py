@@ -15,10 +15,10 @@ class LevelSpaceGenerator:
 
         Drawing.draw_rectangle(level.upper_layer, (0,0), size - 1, Tiles.wall)
 
-        if level_space_aesthetic.x_mirrior or level_space_aesthetic.y_mirrior:
-            LevelSpaceGenerator.mirrior_level(level, 
-                x_mirrior=level_space_aesthetic.x_mirrior, 
-                y_mirrior=level_space_aesthetic.y_mirrior,
+        if level_space_aesthetic.x_mirror or level_space_aesthetic.y_mirror:
+            LevelSpaceGenerator.mirror_level(level, 
+                x_mirror=level_space_aesthetic.x_mirror, 
+                y_mirror=level_space_aesthetic.y_mirror,
             )
 
     @staticmethod
@@ -58,8 +58,8 @@ class LevelSpaceGenerator:
         return random_positions
     
     @staticmethod
-    def mirrior_level(level, x_mirrior=False, y_mirrior=False):
-        if not x_mirrior and not y_mirrior:
+    def mirror_level(level, x_mirror=False, y_mirror=False):
+        if not x_mirror and not y_mirror:
             return
 
         x_mid = (len(level.upper_layer) // 2)
@@ -67,13 +67,13 @@ class LevelSpaceGenerator:
         y_mid = (len(level.upper_layer[0]) // 2)
         y_len = len(level.upper_layer[0])
 
-        if y_mirrior and not x_mirrior:
+        if y_mirror and not x_mirror:
             for i in range(x_mid):
                 for j in range(y_len):
                     level.upper_layer[x_mid+(x_mid-i)-1][j] = level.upper_layer[i][j]
                     level.lower_layer[x_mid+(x_mid-i)-1][j] = level.lower_layer[i][j]
 
-        elif x_mirrior and not y_mirrior:
+        elif x_mirror and not y_mirror:
             for i in range(x_len):
                 for j in range(y_mid):
                     level.upper_layer[i][y_mid+(y_mid-j)-1] = level.upper_layer[i][j]

@@ -16,8 +16,8 @@ class AestheticSettings:
             self.rectangle_max = config['rectangle_max']
             self.noise_percentage = config['noise_percentage']
             self.noise_empty_percentage = config['noise_empty_percentage']
-            self.x_mirrior = config['x_mirrior']
-            self.y_mirrior = config['y_mirrior']
+            self.x_mirror = config['x_mirror']
+            self.y_mirror = config['y_mirror']
 
     class MissionAesthetic:
         def __init__(self):
@@ -76,8 +76,8 @@ class AestheticSettings:
         self.LevelSpaceAesthetic.rectangle_max = int(d[4])
         self.LevelSpaceAesthetic.noise_percentage = int(d[5])
         self.LevelSpaceAesthetic.noise_empty_percentage = float(d[6])
-        self.LevelSpaceAesthetic.x_mirrior = float(d[7])
-        self.LevelSpaceAesthetic.y_mirrior = float(d[8])
+        self.LevelSpaceAesthetic.x_mirror = float(d[7])
+        self.LevelSpaceAesthetic.y_mirror = float(d[8])
         self.MissionAesthetic.hazard_spread_probability[Tiles.fire] = float(d[9])
         self.MissionAesthetic.hazard_spread_probability[Tiles.water] = float(d[10])
         self.MissionAesthetic.single_lock_is_hazard_probability = float(d[11])
@@ -99,8 +99,8 @@ class AestheticSettings:
             "rectangle_max,"+\
             "noise_percentage,"+\
             "noise_empty_percentage,"+\
-            "x_mirrior,"+\
-            "y_mirrior,"+\
+            "x_mirror,"+\
+            "y_mirror,"+\
             "hazard_spread_probability_water,"+\
             "hazard_spread_probability_fire,"+\
             "single_lock_is_hazard_probability,"+\
@@ -118,8 +118,8 @@ class AestheticSettings:
             str(self.level_space_aesthetic.rectangle_max),
             str(self.level_space_aesthetic.noise_percentage),
             str(self.level_space_aesthetic.noise_empty_percentage),
-            str(self.level_space_aesthetic.x_mirrior),
-            str(self.level_space_aesthetic.y_mirrior),
+            str(self.level_space_aesthetic.x_mirror),
+            str(self.level_space_aesthetic.y_mirror),
             str(self.mission_aesthetic.hazard_spread_probability[Tiles.water]),
             str(self.mission_aesthetic.hazard_spread_probability[Tiles.fire]),
             str(self.mission_aesthetic.single_lock_is_hazard_probability),
