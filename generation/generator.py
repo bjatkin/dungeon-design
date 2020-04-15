@@ -49,8 +49,8 @@ class Generator:
         if draw:
             GraphVisualizer.show_graph(graph.start)
 
-        # return Node.find_all_nodes(graph.start, method="topological-sort")
-        return Generator._get_simple_graph()
+        return Node.find_all_nodes(graph.start, method="topological-sort")
+        # return Generator._get_simple_graph()
 
 
     @staticmethod

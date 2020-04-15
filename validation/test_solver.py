@@ -24,6 +24,7 @@ fl= Tiles.flippers
 c = Tiles.collectable
 B = Tiles.required_collectable_barrier
 b = Tiles.sokoban_block
+g = Tiles.sokoban_goal
 
 class TestSolver(unittest.TestCase):
     def test_solver_linear_solvable(self):
@@ -899,7 +900,7 @@ class TestSolver(unittest.TestCase):
     def test_sokoban_solvable(self):
         level = Level()
         level.upper_layer = np.array([
-            [s,kR, b, e, e, e, W,lR, f ],
+            [s,kR, b, e, e, e, g,lR, f ],
             [e, e, e, e, e, e, w, w, e ]], dtype=object)
         
 
@@ -931,7 +932,7 @@ class TestSolver(unittest.TestCase):
     def test_sokoban_solvable_lock_in_middle(self):
         level = Level()
         level.upper_layer = np.array([
-            [s,kR, b, e,lR, e, W, e, f ],
+            [s,kR, b, e,lR, e, g, e, f ],
             [e, e, e, e, w, e, w, w, e ]], dtype=object)
         
 

@@ -1,165 +1,76 @@
 import numpy as np
-from validation.sokoban.sokomap import SokoMap, SokobanTiles
-from dungeon_level.dungeon_tiles import Tiles, lock_tiles
-from validation.sokoban.sokomap_hashtable import HashTable
+import copy
+from dungeon_level.dungeon_tiles import Tiles, lock_tiles, key_tiles, item_tiles, hazard_tiles
+from dungeon_level.level import Level
+from validation.player_traverser import PlayerTraverser
+from validation.path_finder import PathFinder
 
-# Sokoban Solver comes from the following repo:
-# https://github.com/lrei/willy
-# I just wrapped it minimally to be compatible with the rest of our code.
 class SokobanSolver:
     @staticmethod
     def is_sokoban_solvable(level_layer, player_position, sokoban_key, sokoban_lock, get_solution=False):
-        sokomap = SokobanSolver._convert_level_to_sokomap(level_layer, player_position, sokoban_lock)
-        sokomap.static_deadlock()
-        solution = SokobanSolver._IDAstar(sokomap, SokobanSolver._heuristic)
-        is_solvable = (not solution is None)
 
-        if get_solution:
-            if is_solvable:
-                move_list = solution.move_list
-            else:
-                move_list = None
-            return is_solvable, move_list
+        layer = copy.deepcopy(level_layer)
+        layer[tuple(sokoban_key)] = Tiles.empty
+        sokoban_traverser = SokobanTraverser(player_position)
+        def can_traverse(layer, previous_position, current_position, next_position):
+            return sokoban_traverser.can_traverse(layer, previous_position, current_position, next_position)
+
+        is_solvable = PathFinder.find_path(layer, sokoban_key, sokoban_lock, can_traverse)
+        return is_solvable
+
+
+class SokobanTraverser:
+    def __init__(self, player_start_position):
+        self.player_start_position = player_start_position
+
+
+    def print_status(self, layer, push_from_position, current_block_position, previous_block_position):
+        current_player_position = self.get_current_player_position(previous_block_position)
+        string = Level.layer_to_string(layer, {"*":push_from_position, "P":current_player_position, "[]":current_block_position})
+        print("\n{}".format(string))
+
+
+    def can_traverse(self, layer, previous_block_position, current_block_position, next_block_position):
+        if not Level.is_position_within_layer_bounds(layer, next_block_position):
+            return False
+
+        push_direction = next_block_position - current_block_position
+        push_from_position = current_block_position - push_direction
+        current_player_position = self.get_current_player_position(previous_block_position)
+
+        if not self.is_tile_empty(layer, push_from_position):
+            return False
+        
+        if not self.is_tile_empty(layer, next_block_position):
+            return False
+
+        if not self.can_player_reach_push_position(layer, push_from_position, current_block_position, current_player_position):
+            return False
+
+        return True
+
+    def get_current_player_position(self, previous_block_position):
+        # This may seem like an obvious line of code, but
+        # the position that the player currently is in is the location
+        # of the previous block since the player had to be there in order
+        # to push the block from its previous position to the current position.
+        # If there is no previous block position however, we use the start position of the player.
+        if previous_block_position is not None:
+            return previous_block_position
         else:
-            return is_solvable
-    
-
-    @staticmethod
-    def _convert_level_to_sokomap(level_layer, player_position, sokoban_lock):
-        sokomap_level = np.full(level_layer.shape, SokobanTiles.TILE_SPACE)
-        sokomap_level[level_layer == Tiles.wall] = SokobanTiles.TILE_WALL
-        sokomap_level[level_layer == Tiles.finish] = SokobanTiles.TILE_WALL
-        for lock in lock_tiles:
-            sokomap_level[level_layer == lock] = SokobanTiles.TILE_WALL
-        sokomap_level[level_layer == Tiles.sokoban_block] = SokobanTiles.TILE_BLOCK
-
-        sokomap_level[tuple(player_position)] = SokobanTiles.TILE_PLAYER
-        if np.array_equal(player_position, sokoban_lock):
-            goal_tile = SokobanTiles.TILE_PLAYER_ON_GOAL
-        else:
-            goal_tile = SokobanTiles.TILE_GOAL
-        sokomap_level[tuple(sokoban_lock)] = goal_tile
-
-        sokomap = SokoMap()
-        sokomap.set_map(sokomap_level, player_position)
-        return sokomap
+            return self.player_start_position
 
 
-    @staticmethod
-    def _manhattan_distance(a, b):
-        return abs(a[0]-b[0]) + abs(a[1]-b[1])
+    def is_tile_empty(self, layer, next_block_position):
+        if not Level.is_position_within_layer_bounds(layer, next_block_position):
+            return False
+        return layer[tuple(next_block_position)] in {Tiles.empty, Tiles.sokoban_goal, Tiles.player, Tiles.collectable, Tiles.fire_boots, Tiles.flippers, Tiles.key_blue, Tiles.key_green, Tiles.key_red, Tiles.key_yellow}
 
-
-    @staticmethod
-    def _heuristic(sokomap):
-        # generate all possible combinations of goals for each block
-        solutions = []
-        for block in sokomap.get_blocks():
-            solution = []
-            for goal in sokomap.get_goals():
-                sol = ( block, goal, SokobanSolver._manhattan_distance(block, goal) )
-                solution.append(sol)
-            solutions.append(solution)
-
-        # Select the best
-        best = float('inf')
-        for s in solutions[0]:
-            used_goal = []
-            used_block = []
-            solution = []
-
-            used_goal.append(tuple(s[1]))
-            used_block.append(tuple(s[0]))
-            solution.append(s)
-            h = s[2]
-            for lin in solutions:
-                for col in lin:
-                    if tuple(col[1]) not in used_goal and tuple(col[0]) not in used_block:
-                        solution.append(col)
-                        used_goal.append(tuple(col[1]))
-                        used_block.append(tuple(col[0]))
-                        h = h + col[2]
-                        break
-            if h < best:
-                best = h
-                result = solution
-
-        w = sokomap.get_player()
-        d = float('inf')
-        v = None
-        for x in sokomap.get_unplaced_blocks():
-            if SokobanSolver._manhattan_distance(w, x) < d:
-                d = SokobanSolver._manhattan_distance(w, x)
-                v = x
-        if v is not None:
-            best = best + d
-
-        return best
-
-
-    @staticmethod
-    def _is_closed(closed_set, x):
-        for y in closed_set:
-            if x == y:
-                return True
-        return False
-
-
-    @staticmethod
-    def _IDAstar(sokomap, h):
-        open_set = []
-        closed_set = []
-        visit_set = []
-        path_limit = h(sokomap) - 1
-        sucess = False
-        it = 0
-
-        while True:
-            path_limit = path_limit + 1
-            sokomap.set_g(0)
-            open_set.insert(0, sokomap)
-            hashtable = HashTable()
-            nodes = 0
-
-            while len(open_set) > 0:
-                current_state = open_set.pop(0)
-
-                nodes = nodes + 1
-                if current_state.is_solution():
-                    return current_state # SOLUTION FOUND!!!
-
-                if current_state.get_f() <= path_limit:
-                    closed_set.insert(0, current_state)
-                    # get the sucessors of the current state
-                    for x in current_state.children():
-                        # test if node has been "closed"
-                        if SokobanSolver._is_closed(closed_set,x):
-                            continue
-
-                        # check if this has already been generated
-                        if hashtable.check_add(x):
-                            continue
-
-                        # compute G for each
-                        x.set_g(current_state.get_g() + 1)
-                        x.set_f(x.get_g()+ h(x))
-                        #x.setParent(current_state)
-                        open_set.insert(0, x) # push
-                else:
-                    visit_set.insert(0, current_state)
-
-            it = it + 1
-            if len(visit_set) == 0:
-                return None
-
-            # set a new cut-off value (path_limit)
-            low = visit_set[0].get_f()
-            for x in visit_set:
-                if x.get_f() < low:
-                    low = x.get_f()
-            path_limit = low
-
-            # move nodes from VISIT to OPEN and reset closed_set
-            open_set.extend(visit_set)
-            visit_set = []
-            closed_set = []
+        
+    def can_player_reach_push_position(self, layer, push_from_position, current_block_position, current_player_position):
+        current_block_position_t = tuple(current_block_position)
+        previous_tile = layer[current_block_position_t]
+        layer[current_block_position_t] = Tiles.sokoban_block
+        can_player_reach_push_position = PathFinder.find_path(layer, current_player_position, push_from_position, PlayerTraverser.can_traverse)
+        layer[current_block_position_t] = previous_tile
+        return can_player_reach_push_position

@@ -13,8 +13,8 @@ class AestheticSettings:
     class MissionAesthetic:
         def __init__(self):
             self.hazard_spread_probability = {Tiles.water: 0.8, Tiles.fire: 0.3}
-            self.single_lock_is_hazard_probability = 0.0
-            self.single_lock_is_sokoban_probability = 1
+            self.single_lock_is_hazard_probability = 0.1
+            self.single_lock_is_sokoban_probability = 0.3
 
     class TweakerAesthetic:
         def __init__(self):
