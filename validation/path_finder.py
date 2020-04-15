@@ -24,25 +24,22 @@ class PathFinder:
     neighbor_offsets = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
     @staticmethod
-    def is_reachable(layer, position_a, position_b, can_traverse, allow_diagonal=False):
-        results = PathFinder.a_star(layer, position_a, position_b, can_traverse, allow_diagonal=allow_diagonal)
-        is_unreachable = results[1] is None
-        return not is_unreachable
-
-    @staticmethod
-    def find_path(layer, position_a, position_b, can_traverse, allow_diagonal=False):
+    def find_path(layer, position_a, position_b, can_traverse, allow_diagonal=False, return_path=False):
         f_costs, parents = PathFinder.a_star(layer, position_a, position_b, can_traverse, allow_diagonal=allow_diagonal)
-        if parents is None:
-            return None
+        if not return_path:
+            return parents is not None
         else:
-            current_position = position_b
-            path = [current_position]
-            while not np.array_equal(current_position, position_a):
-                direction = parents[tuple(current_position)]
-                current_position = current_position + direction
-                path.append(current_position)
-            path.reverse()
-            return path
+            if parents is None:
+                return None
+            else:
+                current_position = position_b
+                path = [current_position]
+                while not np.array_equal(current_position, position_a):
+                    direction = parents[tuple(current_position)]
+                    current_position = current_position + direction
+                    path.append(current_position)
+                path.reverse()
+                return path
 
 
     @staticmethod

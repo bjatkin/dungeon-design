@@ -48,7 +48,7 @@ class TestPathFinder(unittest.TestCase):
             self.assertTrue(np.array_equal(parents[i], expected_parents[i]))
 
 
-        path = PathFinder.find_path(layer, np.array([4,5]), np.array([1,2]), PlayerTraverser.can_traverse, True)
+        path = PathFinder.find_path(layer, np.array([4,5]), np.array([1,2]), PlayerTraverser.can_traverse, True, True)
         expected_path = [
             [4,5],
             [3,5],
