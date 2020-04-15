@@ -11,6 +11,7 @@ from graph_to_level.legacy.test_spatial_graph_generator import TestSpatialGraphG
 from graph_to_level.test_spatial_graph import TestSpatialGraph
 from graph_to_level.test_subgraph_finder import TestSubgraphFinder
 from generation.test_drawing import TestDrawing
+from generation.test_aesthetic_settings import TestAestheticSettings
 from generation.test_mission_generator import TestMissionGenerator
 from log import Log
 
