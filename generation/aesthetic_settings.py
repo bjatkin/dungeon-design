@@ -60,7 +60,6 @@ class AestheticSettings:
 
     def from_csv_data(self, csv_data):
         default_settings = AestheticSettings()
-        csv_data = csv_data.split(AestheticSettings.CSV_SEPARATOR)
         data_paths = AestheticSettings.get_csv_data_paths()
         for data_path, value in zip(data_paths, csv_data):
             aesthetic, setting = data_path
@@ -91,13 +90,11 @@ class AestheticSettings:
         return data_paths
 
 
-    CSV_SEPARATOR = "\t"
     @staticmethod
     def get_csv_header():
         data_paths = AestheticSettings.get_csv_data_paths()
         data_paths = ["{}.{}".format(aesthetic, setting) for aesthetic, setting in data_paths]
-        header = AestheticSettings.CSV_SEPARATOR.join(data_paths)
-        return header
+        return data_paths
 
     
     def to_csv_data(self):
@@ -107,5 +104,4 @@ class AestheticSettings:
         self.mission_aesthetic.hazard_spread_probability = list(self.mission_aesthetic.hazard_spread_probability.values())
         settings = [str(self.__dict__[aesthetic].__dict__[setting]) for aesthetic, setting in data_paths]
         self.mission_aesthetic.hazard_spread_probability = temp
-        csv_data = AestheticSettings.CSV_SEPARATOR.join(settings)
-        return csv_data
+        return settings

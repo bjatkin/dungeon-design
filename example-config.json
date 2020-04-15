@@ -26,7 +26,8 @@
                 "water":0.8,
                 "fire":0.3
             },
-            "single_lock_is_hazard_probability": 0.1
+            "single_lock_is_hazard_probability": 0.1,
+            "single_lock_is_sokoban_probability": 0.3
         },
         "tweaker_aesthetic":{
             "should_fill_unused_space":true

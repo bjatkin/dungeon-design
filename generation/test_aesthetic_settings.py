@@ -13,8 +13,9 @@ class TestAestheticSettings(unittest.TestCase):
         aesthetic_settings.mission_aesthetic.hazard_spread_probability = { Tiles.water: 1, Tiles.fire: 2 }
         aesthetic_settings.mission_graph_aesthetic.branch_probability = [0, 1, 2, 3]
         csv_data = aesthetic_settings.to_csv_data()
-        expected_csv_data = (""
-            + "0\t1\t2\t3\t4\t5\t6\t[1, 2]\t8\t9\t[0, 1, 2, 3]\t11\t12\t13\t14\t15\t16\t17")
+        expected_csv_data = ["0", "1", "2", "3", "4", "5", "6", "[1, 2]", "8", "9", "[0, 1, 2, 3]", "11", "12", "13", "14", "15", "16"]
+
+        self.assertEqual(expected_csv_data, csv_data)
         
         aesthetic_settings2 = AestheticSettings()
         aesthetic_settings2.from_csv_data(csv_data)
@@ -29,24 +30,24 @@ class TestAestheticSettings(unittest.TestCase):
     def test_get_csv_header(self):
         header = AestheticSettings.get_csv_header()
 
-        expected_header = (""
-            + "level_space_aesthetic.noise_empty_percentage\t"
-            + "level_space_aesthetic.noise_percentage\t"
-            + "level_space_aesthetic.rectangle_count\t"
-            + "level_space_aesthetic.rectangle_max\t"
-            + "level_space_aesthetic.rectangle_min\t"
-            + "level_space_aesthetic.x_mirror\t"
-            + "level_space_aesthetic.y_mirror\t"
-            + "mission_aesthetic.hazard_spread_probability\t"
-            + "mission_aesthetic.single_lock_is_hazard_probability\t"
-            + "mission_aesthetic.single_lock_is_sokoban_probability\t"
-            + "mission_graph_aesthetic.branch_probability\t"
-            + "mission_graph_aesthetic.collectable_in_room_probability\t"
-            + "mission_graph_aesthetic.max_depth\t"
-            + "mission_graph_aesthetic.max_locks_per_multi_lock\t"
-            + "mission_graph_aesthetic.max_multi_lock_count\t"
-            + "mission_graph_aesthetic.min_depth\t"
-            + "tweaker_aesthetic.should_fill_unused_space")
+        expected_header = [
+            "level_space_aesthetic.noise_empty_percentage",
+            "level_space_aesthetic.noise_percentage",
+            "level_space_aesthetic.rectangle_count",
+            "level_space_aesthetic.rectangle_max",
+            "level_space_aesthetic.rectangle_min",
+            "level_space_aesthetic.x_mirror",
+            "level_space_aesthetic.y_mirror",
+            "mission_aesthetic.hazard_spread_probability",
+            "mission_aesthetic.single_lock_is_hazard_probability",
+            "mission_aesthetic.single_lock_is_sokoban_probability",
+            "mission_graph_aesthetic.branch_probability",
+            "mission_graph_aesthetic.collectable_in_room_probability",
+            "mission_graph_aesthetic.max_depth",
+            "mission_graph_aesthetic.max_locks_per_multi_lock",
+            "mission_graph_aesthetic.max_multi_lock_count",
+            "mission_graph_aesthetic.min_depth",
+            "tweaker_aesthetic.should_fill_unused_space"]
 
         self.assertEqual(header, expected_header)
 
