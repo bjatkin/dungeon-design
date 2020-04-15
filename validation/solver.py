@@ -44,7 +44,7 @@ class Solver:
 
     @staticmethod
     def get_sokoban_key_position_from_lock(layer, current_node, positions_map):
-        if isinstance(current_node, Lock):
+        if isinstance(current_node, Lock) and len(current_node.key_s) > 0:
             key_node = next(iter(current_node.key_s))
             key_position = positions_map[key_node]
             key_tile = layer[tuple(key_position)]
@@ -75,7 +75,7 @@ class Solver:
         for node in reached:
             if isinstance(node, Lock) and node in positions_map:
                 tile = layer[tuple(positions_map[node])]
-                if next(iter(node.key_s)) not in reached:
+                if len(node.key_s) > 0 and next(iter(node.key_s)) not in reached:
                     if tile.get_tile_type() == TileTypes.key_lock and player_status.get_key_count(tile) > 0:
                         return False
                     elif tile.get_tile_type() == TileTypes.item_hazard and player_status.get_item_count(tile) > 0:
