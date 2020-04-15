@@ -14,12 +14,8 @@ class LevelSpaceGenerator:
         LevelSpaceGenerator.add_random_noise(level, size, level_space_aesthetic)
 
         Drawing.draw_rectangle(level.upper_layer, (0,0), size - 1, Tiles.wall)
+        LevelSpaceGenerator.mirror_level(level, level_space_aesthetic.x_mirror_probability, level_space_aesthetic.y_mirror_probability)
 
-        if level_space_aesthetic.x_mirror or level_space_aesthetic.y_mirror:
-            LevelSpaceGenerator.mirror_level(level, 
-                x_mirror=level_space_aesthetic.x_mirror, 
-                y_mirror=level_space_aesthetic.y_mirror,
-            )
 
     @staticmethod
     def add_random_rectangles(level, size, level_space_aesthetic):
@@ -58,33 +54,17 @@ class LevelSpaceGenerator:
         return random_positions
     
     @staticmethod
-    def mirror_level(level, x_mirror=False, y_mirror=False):
-        if not x_mirror and not y_mirror:
-            return
+    def mirror_level(level, x_mirror_probability, y_mirror_probability):
+        x_mirror = np.random.random() < x_mirror_probability
+        y_mirror = np.random.random() < y_mirror_probability
 
-        x_mid = (len(level.upper_layer) // 2)
-        x_len = len(level.upper_layer)
-        y_mid = (len(level.upper_layer[0]) // 2)
-        y_len = len(level.upper_layer[0])
+        level_size = np.array(level.upper_layer.shape)
+        midpoint = level_size // 2
 
-        if y_mirror and not x_mirror:
-            for i in range(x_mid):
-                for j in range(y_len):
-                    level.upper_layer[x_mid+(x_mid-i)-1][j] = level.upper_layer[i][j]
-                    level.lower_layer[x_mid+(x_mid-i)-1][j] = level.lower_layer[i][j]
+        if x_mirror:
+            flipped_level = np.flip(level.upper_layer, 0)
+            level.upper_layer[midpoint[0]:, :] = flipped_level[midpoint[0]:, :]
 
-        elif x_mirror and not y_mirror:
-            for i in range(x_len):
-                for j in range(y_mid):
-                    level.upper_layer[i][y_mid+(y_mid-j)-1] = level.upper_layer[i][j]
-                    level.lower_layer[i][y_mid+(y_mid-j)-1] = level.lower_layer[i][j]
-        else:
-            for i in range(x_mid):
-                for j in range(y_mid):
-                    level.upper_layer[x_mid+(x_mid-i)-1][y_mid+(y_mid-j)-1] = level.upper_layer[i][j]
-                    level.upper_layer[i][y_mid+(y_mid-j)-1] = level.upper_layer[i][j]
-                    level.upper_layer[x_mid+(x_mid-i)-1][j] = level.upper_layer[i][j]
-
-                    level.lower_layer[x_mid+(x_mid-i)-1][y_mid+(y_mid-i)-1] = level.lower_layer[i][j]
-                    level.lower_layer[i][y_mid+(y_mid-i)-1] = level.lower_layer[i][j]
-                    level.lower_layer[x_mid+(x_mid-i)-1][j] = level.lower_layer[i][j]
+        if y_mirror:
+            flipped_level = np.flip(level.upper_layer, 1)
+            level.upper_layer[:, midpoint[1]:] = flipped_level[:, midpoint[1]:]

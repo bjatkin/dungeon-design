@@ -30,7 +30,7 @@ if level_count == 0:
     print("You must generate at least one level, level_count =", level_count)
     exit()
 
-size = (30, 30)
+size = (30,30)
 level_set = LevelSet()
 aesthetic_settings = config.aesthetic
 

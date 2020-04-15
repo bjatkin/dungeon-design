@@ -15,8 +15,8 @@ class AestheticSettings:
             self.rectangle_max = 15
             self.noise_percentage = 0.15
             self.noise_empty_percentage = 0.5
-            self.x_mirror = False
-            self.y_mirror = False
+            self.x_mirror_probability = 0.5
+            self.y_mirror_probability = 0.5
         
 
     class MissionAesthetic(AestheticBase):

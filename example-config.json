@@ -18,8 +18,8 @@
             "rectangle_max":15,
             "noise_percentage":0.15,
             "noise_empty_percentage":0.5,
-            "y_mirror":true,
-            "x_mirror":true
+            "y_mirror_probability":0.5,
+            "x_mirror_probability":0.5
         },
         "mission_aesthetic":{
             "hazard_spread_probability":{
