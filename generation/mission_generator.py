@@ -4,7 +4,7 @@ from graph_to_level.subgraph_finder import SubgraphFinder
 from dungeon_level.dungeon_tiles import Tiles, mission_tiles, TileTypes, key_tiles, item_tiles, item_to_hazard, key_to_lock
 from dungeon_level.level import Level
 from validation.solver import Solver
-from graph_structure.graph_node import Node, Key, Lock, Start, End, Collectable, CollectableBarrier
+from graph_structure.graph_node import Node, Key, Lock, Start, End, Collectable, CollectableBarrier, Room
 from log import Log
 
 class MissionGenerator:
@@ -29,7 +29,7 @@ class MissionGenerator:
         for mission_node in solution_node_order:
             space_node = mission_to_spaces_mapping[mission_to_mission_spatial[mission_node]]
 
-            if isinstance(mission_node, Lock):
+            if isinstance(mission_node, Lock) or isinstance(mission_node, Room):
                 mission_node_parent = [parent for parent in mission_node.parent_s if not isinstance(parent, Key)][0]
                 parent_space_node = mission_to_spaces_mapping[mission_to_mission_spatial[mission_node_parent]]
                 mask = SpatialGraph.get_shared_edge_mask_between_nodes(space_node, parent_space_node)
@@ -72,6 +72,8 @@ class MissionGenerator:
                     MissionGenerator.spread_hazard(layer, lock_tile, position, mission_aesthetic)
                 else:
                     layer[position] = lock_tile
+            elif isinstance(node, Room):
+                layer[position] = Tiles.empty
 
 
     @staticmethod

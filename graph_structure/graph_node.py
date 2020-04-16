@@ -326,3 +326,6 @@ class CollectableBarrier(Lock):
                 "children": [n.name for n in self.child_s],
                 "collectables": [n.name for n in self.key_s],
             }
+
+class Room(GNode):
+    pass
