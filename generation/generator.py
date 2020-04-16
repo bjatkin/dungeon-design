@@ -20,13 +20,14 @@ class Generator:
         for retry_count in range(max_retry_count):
             Generator._set_level_space(level, size, pregenerated_level_layer, aesthetic_settings.level_space_aesthetic)
             solution_node_order = Generator._get_mission_graph(pregenerated_solution_node_order, aesthetic_settings.mission_graph_aesthetic, draw_graph)
-            is_solvable, solution_moves = MissionGenerator.generate_mission(level, solution_node_order, aesthetic_settings.mission_aesthetic)
+            is_solvable, solution = MissionGenerator.generate_mission(level, solution_node_order, aesthetic_settings.mission_aesthetic)
             if is_solvable:
                 LevelTweaker.tweak_level(level, aesthetic_settings.tweaker_aesthetic)
                 break
         end_time = time.time()
         # Log.print("Level generated in {} seconds".format(end_time - start_time))
-        return is_solvable, solution_moves
+        return is_solvable, solution
+
 
     @staticmethod
     def _set_level_space(level, size, pregenerated_level_layer, level_space_aesthetic):

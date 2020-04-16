@@ -2,6 +2,7 @@ from validation.path_finder import PathFinder
 from validation.player_traverser import PlayerTraverser
 from validation.player_status import PlayerStatus
 from validation.sokoban.sokoban_solver import SokobanSolver
+from analysis.solution import Solution
 from dungeon_level.dungeon_tiles import Tiles, lock_tiles, TileTypes, hazard_tiles
 from dungeon_level.level import Level
 from graph_structure.graph_node import Start, End, Key, Lock, Collectable, CollectableBarrier, Room, SokobanKey, SokobanLock
@@ -20,32 +21,31 @@ class Solver:
         reached = set()
         unreached = set(solution_node_order)
         player_status = PlayerStatus(level.required_collectable_count)
-        start_position = positions_map[solution_node_order[0]]
-        player_status.player_position = start_position.copy()
-        solution_moves = []
+        solution = Solution(positions_map[solution_node_order[0]])
+        player_status.player_position = solution.start_position.copy()
 
         for i, current_node in enumerate(solution_node_order):
             moves = Solver.can_reach_node(current_node, positions_map, layer, player_status.player_position, return_type="moves")
             if moves is None:
-                return False, solution_moves
+                return False, solution
 
             is_sokoban_step, sokoban_moves = Solver.get_sokoban_moves(layer, player_status.player_position, current_node, positions_map)
             if is_sokoban_step and sokoban_moves is None:
-                return False, solution_moves
+                return False, solution
 
-            Solver.update_solution_moves(solution_moves, current_node, moves, sokoban_moves)
-            Solver.update_state(layer, player_status, current_node, positions_map, visited_nodes, start_position, solution_moves)
+            solution.add_step(current_node, moves, sokoban_moves)
+            Solver.update_state(layer, player_status, current_node, positions_map, visited_nodes, solution)
 
             new_reachable_nodes = Solver.update_reachability(current_node, unreached, reached, solution_node_order)
 
             if not Solver.do_keys_open_correct_locks(current_node, reached, positions_map, layer, player_status):
-                return False, solution_moves
+                return False, solution
 
             if not Solver.are_correct_nodes_reachable(unreached, new_reachable_nodes, positions_map, layer, player_status.player_position):
-                return False, solution_moves
+                return False, solution
             
         # We've made it to the final node, rejoice!
-        return True, solution_moves
+        return True, solution
     
 
     @staticmethod
@@ -149,12 +149,12 @@ class Solver:
 
 
     @staticmethod
-    def update_state(layer, player_status, current_node, positions_map, visited_nodes, start_position, moves):
+    def update_state(layer, player_status, current_node, positions_map, visited_nodes, solution):
         visited_nodes.add(current_node)
         current_node_position = tuple(positions_map[current_node])
         current_tile = layer[current_node_position]
         tile_type = current_tile.get_tile_type()
-        player_status.player_position = Solver.get_player_position_after_movement(start_position, moves)
+        player_status.player_position = solution.get_final_solution_position()
 
         if isinstance(current_node, Start):
             pass
@@ -180,28 +180,6 @@ class Solver:
                 layer[current_node_position] = Tiles.empty
             elif tile_type == TileTypes.item_hazard:
                 Solver.remove_hazard_component(layer, current_node_position, current_tile)
-
-
-    @staticmethod
-    def get_player_position_after_movement(start_position, moves):
-        flattened_moves = []
-        for move_list in moves:
-            for move in move_list[1]:
-                flattened_moves.append(move)
-        offset = np.sum(np.array(flattened_moves, dtype=int), axis=0)
-        offset_position = offset + start_position
-        return offset_position
-
-    
-    @staticmethod
-    def update_solution_moves(solution_moves, current_node, moves, sokoban_moves):
-        if sokoban_moves is not None:
-            solution_moves.append( (current_node, sokoban_moves) )
-        else:
-            solution_moves.append( (current_node, moves) )
-
-        if isinstance(current_node, SokobanKey) or isinstance(current_node, Start):
-            del solution_moves[-1]
 
 
     @staticmethod
