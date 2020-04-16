@@ -4,7 +4,7 @@ from graph_to_level.subgraph_finder import SubgraphFinder
 from dungeon_level.dungeon_tiles import Tiles, mission_tiles, TileTypes, key_tiles, item_tiles, item_to_hazard, key_to_lock
 from dungeon_level.level import Level
 from validation.solver import Solver
-from graph_structure.graph_node import Node, Key, Lock, Start, End, Collectable, CollectableBarrier, Room
+from graph_structure.graph_node import Node, Key, Lock, Start, End, Collectable, CollectableBarrier, Room, SokobanKey, SokobanLock
 from log import Log
 
 class MissionGenerator:
@@ -21,7 +21,7 @@ class MissionGenerator:
 
             level.required_collectable_count = np.count_nonzero(level.upper_layer == Tiles.collectable)
             return Solver.does_level_follow_mission(level, solution_node_order, positions_map)
-        return False
+        return False, None
 
 
     @staticmethod
@@ -102,15 +102,13 @@ class MissionGenerator:
             return None
         
         if key_node not in node_to_tile:
-            random_value = np.random.random()
-            sokoban_probability = mission_aesthetic.single_lock_is_hazard_probability + mission_aesthetic.single_lock_is_sokoban_probability
-
-            if len(key_node.lock_s) > 1 or random_value < mission_aesthetic.single_lock_is_hazard_probability:
-                node_to_tile[key_node] = np.random.choice(item_tiles)
-            elif random_value < sokoban_probability:
+            if isinstance(key_node, SokobanKey):
                 node_to_tile[key_node] = Tiles.sokoban_block
             else:
-                node_to_tile[key_node] = np.random.choice(key_tiles)
+                if len(key_node.lock_s) > 1 or np.random.random() < mission_aesthetic.single_lock_is_hazard_probability:
+                    node_to_tile[key_node] = np.random.choice(item_tiles)
+                else:
+                    node_to_tile[key_node] = np.random.choice(key_tiles)
 
         tile = node_to_tile[key_node]
 

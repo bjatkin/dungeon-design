@@ -1,4 +1,4 @@
-from graph_structure.graph_node import Node, Start, Key, Lock, End, Collectable, CollectableBarrier, Room
+from graph_structure.graph_node import Node, Start, Key, Lock, End, Collectable, CollectableBarrier, Room, SokobanKey, SokobanLock
 import numpy as np
 
 class Graph():
@@ -20,7 +20,7 @@ class Graph():
         for _ in range(tree_depth):
             branch_count = np.random.choice(range(1, len(aesthetic.branch_probability) + 1), p=aesthetic.branch_probability)
             for _ in range(branch_count):
-                f = self.grow_graph(node_to_grow)
+                f = self.grow_graph(node_to_grow, aesthetic)
             node_to_grow = f
         
         node_to_grow.add_child_s(end)
@@ -33,11 +33,11 @@ class Graph():
         self.fill_rooms_with_collectables(aesthetic)
     
 
-    def grow_graph(self, lock_parent, multi="None"):
+    def grow_graph(self, lock_parent, aesthetic, multi="None"):
         ancestor = self.get_random_ancestor(lock_parent)
         key_parent = self.get_random_descendant(ancestor)
 
-        key = self.add_key(key_parent)
+        key = self.add_key(key_parent, aesthetic)
         lock = self.add_lock(lock_parent, key)
         return lock
 
@@ -91,16 +91,23 @@ class Graph():
             lock = self.add_lock(current_node, multilock_key, child)
 
     
-    def add_key(self, key_parent, lock=None):
+    def add_key(self, key_parent, aesthetic, lock=None):
         key_id = self.get_key_id()
-        key = Key(name="K{}".format(key_id), parent_s=key_parent, lock_s=lock)
+        name = "K{}".format(key_id)
+        if np.random.random() < aesthetic.key_is_sokoban_probability:
+            key = SokobanKey(name=name, parent_s=key_parent, lock_s=lock)
+        else:
+            key = Key(name, parent_s=key_parent, lock_s=lock)
         key.id = key_id
         return key
 
 
     def add_lock(self, lock_parent, key, lock_replace_child=None):
         lock_id = self.get_lock_id()
-        lock = Lock(name="L{}".format(lock_id), parent_s=lock_parent, key_s=key)
+        if isinstance(key, SokobanKey):
+            lock = SokobanLock(name="L{}".format(lock_id), parent_s=lock_parent, key_s=key)
+        else:
+            lock = Lock(name="L{}".format(lock_id), parent_s=lock_parent, key_s=key)
         lock.id = lock_id
         if lock_replace_child != None:
             lock.add_child_s(lock_replace_child)

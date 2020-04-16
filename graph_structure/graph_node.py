@@ -329,3 +329,9 @@ class CollectableBarrier(Lock):
 
 class Room(GNode):
     pass
+
+class SokobanKey(Key):
+    pass
+
+class SokobanLock(Lock):
+    pass

@@ -13,14 +13,14 @@ class TestAestheticSettings(unittest.TestCase):
         aesthetic_settings.mission_aesthetic.hazard_spread_probability = { Tiles.water: 1, Tiles.fire: 2 }
         aesthetic_settings.mission_graph_aesthetic.branch_probability = [0, 1, 2, 3]
         csv_data = aesthetic_settings.to_csv_data()
-        expected_csv_data = ["0", "1", "2", "3", "4", "5", "6", "[1, 2]", "8", "9", "[0, 1, 2, 3]", "11", "12", "13", "14", "15", "16", "17"]
+        expected_csv_data = ["0", "1", "2", "3", "4", "5", "6", "[1, 2]", "8", "[0, 1, 2, 3]", "10", "11", "12", "13", "14", "15", "16", "17"]
 
         self.assertEqual(expected_csv_data, csv_data)
         
         aesthetic_settings2 = AestheticSettings()
         aesthetic_settings2.from_csv_data(csv_data)
 
-        expected_values = [0.0, 1.0, 2, 3, 4, 5.0, 6.0, {Tiles.water: 1.0, Tiles.fire: 2.0}, 8.0, 9.0, [0.0, 1.0, 2.0, 3.0], 11.0, 12.0, 13, 14, 15, 16, True ]
+        expected_values = [0.0, 1.0, 2, 3, 4, 5.0, 6.0, {Tiles.water: 1.0, Tiles.fire: 2.0}, 8.0, [0.0, 1.0, 2.0, 3.0], 10.0, 11.0, 12.0, 13, 14, 15, 16, True ]
         for path, expected_value in zip(paths, expected_values):
             aesthetic, setting = path
             value = aesthetic_settings2.__dict__[aesthetic].__dict__[setting]
@@ -40,10 +40,10 @@ class TestAestheticSettings(unittest.TestCase):
             "level_space_aesthetic.y_mirror_probability",
             "mission_aesthetic.hazard_spread_probability",
             "mission_aesthetic.single_lock_is_hazard_probability",
-            "mission_aesthetic.single_lock_is_sokoban_probability",
             "mission_graph_aesthetic.branch_probability",
             "mission_graph_aesthetic.collectable_in_room_probability",
             "mission_graph_aesthetic.insert_room_probability",
+            "mission_graph_aesthetic.key_is_sokoban_probability",
             "mission_graph_aesthetic.max_depth",
             "mission_graph_aesthetic.max_locks_per_multi_lock",
             "mission_graph_aesthetic.max_multi_lock_count",
@@ -69,10 +69,10 @@ class TestAestheticSettings(unittest.TestCase):
                 (l, "y_mirror_probability"),
                 (m, "hazard_spread_probability"),
                 (m, "single_lock_is_hazard_probability"),
-                (m, "single_lock_is_sokoban_probability"),
                 (g, "branch_probability"),
                 (g, "collectable_in_room_probability"),
                 (g, "insert_room_probability"),
+                (g, "key_is_sokoban_probability"),
                 (g, "max_depth"),
                 (g, "max_locks_per_multi_lock"),
                 (g, "max_multi_lock_count"),
@@ -101,7 +101,8 @@ class TestAestheticSettings(unittest.TestCase):
                 'max_multi_lock_count': 5,
                 'max_locks_per_multi_lock': 6,
                 'collectable_in_room_probability': 0.7,
-                'insert_room_probability': 0.8
+                'insert_room_probability': 0.8,
+                'key_is_sokoban_probability': 0.9
             },
             "tweaker_aesthetic":
             {
@@ -114,8 +115,7 @@ class TestAestheticSettings(unittest.TestCase):
                     'water': 0.1,
                     'fire': 0.2
                 },
-                'single_lock_is_hazard_probability': 0.3,
-                'single_lock_is_sokoban_probability': 0.4
+                'single_lock_is_hazard_probability': 0.3
             }
         }
 
@@ -136,10 +136,10 @@ class TestAestheticSettings(unittest.TestCase):
         self.assertEqual(aesthetic.mission_graph_aesthetic.max_locks_per_multi_lock, 6)
         self.assertEqual(aesthetic.mission_graph_aesthetic.collectable_in_room_probability, 0.7)
         self.assertEqual(aesthetic.mission_graph_aesthetic.insert_room_probability, 0.8)
+        self.assertEqual(aesthetic.mission_graph_aesthetic.key_is_sokoban_probability, 0.9)
 
         self.assertEqual(aesthetic.tweaker_aesthetic.should_fill_unused_space, False)
 
         self.assertEqual(aesthetic.mission_aesthetic.hazard_spread_probability[Tiles.water], 0.1)
         self.assertEqual(aesthetic.mission_aesthetic.hazard_spread_probability[Tiles.fire], 0.2)
         self.assertEqual(aesthetic.mission_aesthetic.single_lock_is_hazard_probability, 0.3)
-        self.assertEqual(aesthetic.mission_aesthetic.single_lock_is_sokoban_probability, 0.4)

@@ -1,7 +1,7 @@
 import unittest
 from dungeon_level.level import Level
 from dungeon_level.dungeon_tiles import Tiles
-from graph_structure.graph_node import Node, Start, End, Lock, Key, Collectable, CollectableBarrier
+from graph_structure.graph_node import Node, Start, End, Lock, Key, Collectable, CollectableBarrier, SokobanKey, SokobanLock
 from validation.solver import Solver
 import numpy as np
 
@@ -951,8 +951,8 @@ class TestSolver(unittest.TestCase):
 
         start = Start()
         key = Key("key")
-        block = Key("block")
-        water = Lock("water")
+        block = SokobanKey("block")
+        water = SokobanLock("water")
         lock = Lock("lock")
         end = End()
         start.add_child_s([key, block, water])
@@ -997,8 +997,8 @@ class TestSolver(unittest.TestCase):
 
         start = Start()
         key = Key("key")
-        block = Key("block")
-        water = Lock("water")
+        block = SokobanKey("block")
+        water = SokobanLock("water")
         lock = Lock("lock")
         end = End()
         start.add_child_s([key, block, lock])
@@ -1036,8 +1036,8 @@ class TestSolver(unittest.TestCase):
 
         start = Start()
         key = Key("key")
-        block = Key("block")
-        water = Lock("water")
+        block = SokobanKey("block")
+        water = SokobanLock("water")
         lock = Lock("lock")
         end = End()
         start.add_child_s([key, block, water])

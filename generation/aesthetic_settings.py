@@ -28,7 +28,6 @@ class AestheticSettings:
         def __init__(self):
             self.hazard_spread_probability = {Tiles.water: 0.8, Tiles.fire: 0.3}
             self.single_lock_is_hazard_probability = 0.1
-            self.single_lock_is_sokoban_probability = 0.3
         
         def from_config_data(self, config):
             super(AestheticSettings.MissionAesthetic, self).from_config_data(config)
@@ -50,6 +49,7 @@ class AestheticSettings:
             self.max_locks_per_multi_lock = 4
             self.collectable_in_room_probability = 0.75
             self.insert_room_probability = 0.4
+            self.key_is_sokoban_probability = 0.3
             
         
     def __init__(self):
