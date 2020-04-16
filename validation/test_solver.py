@@ -32,6 +32,15 @@ uM = [(-1,0)]
 dM = [(1,0)]
 
 class TestSolver(unittest.TestCase):
+    def assert_moves_equal(self, moves, expected_moves):
+        self.assertEqual(len(moves), len(expected_moves))
+        zipped_moves = zip(moves, expected_moves)
+        for move, expected_move in zipped_moves:
+            node, move = move
+            expected_node, expected_move = expected_move
+            self.assertEqual(node, expected_node)
+            self.assertEqual(np.array(move).tolist(), np.array(expected_move).tolist())
+
     def test_solver_linear_solvable(self):
         level = Level()
         level.upper_layer = np.array([
@@ -58,10 +67,10 @@ class TestSolver(unittest.TestCase):
         self.assertEqual(does_level_follow_mission, True)
 
         expected_moves = [
-            [0,1],
-            [0,1],
-            [0,1]]
-        self.assertTrue(np.array_equal(np.array(moves), np.array(expected_moves)))
+            (key, rM),
+            (lock, rM),
+            (end, rM)]
+        self.assert_moves_equal(moves, expected_moves)
 
 
 
@@ -115,9 +124,17 @@ class TestSolver(unittest.TestCase):
         does_level_follow_mission, moves = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
         self.assertEqual(does_level_follow_mission, True)
 
-        expected_moves = rM + 3 * lM + 5 * rM + 7 * lM + 9 * rM
-        self.assertTrue(np.array_equal(np.array(moves), np.array(expected_moves)))
-
+        expected_moves = [
+            (key_red, rM),
+            (lock_red, 2*lM),
+            (key_blue, lM),
+            (lock_blue, 4*rM),
+            (key_green, rM),
+            (lock_green, 6*lM),
+            (key_yellow, lM),
+            (lock_yellow, 8*rM),
+            (end, rM)]
+        self.assert_moves_equal(moves, expected_moves)
 
 
     def test_solver_linear_unsolvable(self):
@@ -831,7 +848,6 @@ class TestSolver(unittest.TestCase):
             [s, e, B, f ],
             [c, c, w, e ]], dtype=object)
         level.required_collectable_count = 2
-        
 
         start = Start()
         c0 = Collectable("c0")
@@ -852,6 +868,20 @@ class TestSolver(unittest.TestCase):
 
         does_level_follow_mission, moves = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
         self.assertEqual(does_level_follow_mission, True)
+
+        if moves[0][0] == c1:
+            expected_moves = [
+                (c1, dM + rM),
+                (c0, lM),
+                (barrier, rM + uM + rM),
+                (end, rM)]
+        else:
+            expected_moves = [
+                (c0, dM),
+                (c1, rM),
+                (barrier, uM + rM),
+                (end, rM)]
+        self.assert_moves_equal(moves, expected_moves)
 
 
     def test_solver_collectables_too_many_required_collectables(self):
@@ -943,8 +973,19 @@ class TestSolver(unittest.TestCase):
         does_level_follow_mission, moves = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
         self.assertEqual(does_level_follow_mission, True)
 
-        expected_moves = rM * 8
-        self.assertTrue(np.array_equal(np.array(moves), np.array(expected_moves)))
+        if moves[0][0] == water:
+            expected_moves = [
+                (water, 5*rM),
+                (key, 4*lM),
+                (lock, 6*rM),
+                (end, rM)]
+        else:
+            expected_moves = [
+                (key, rM),
+                (water, 4*rM),
+                (lock, 2*rM),
+                (end, rM)]
+        self.assert_moves_equal(moves, expected_moves)
 
 
     def test_sokoban_solvable_lock_in_middle(self):
@@ -978,9 +1019,12 @@ class TestSolver(unittest.TestCase):
         does_level_follow_mission, moves = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
         self.assertEqual(does_level_follow_mission, True)
 
-        expected_moves = rM + dM + rM + rM + uM + rM + lM + dM + lM + lM + uM + 7 * rM
-        self.assertTrue(np.array_equal(np.array(moves), np.array(expected_moves)))
-
+        expected_moves = [
+            (key, rM),
+            (lock, dM + 2*rM + uM + rM),
+            (water, lM + dM + 2*lM + uM + 4*rM),
+            (end, 3*rM)]
+        self.assert_moves_equal(moves, expected_moves)
 
 
     def test_sokoban_unsolvable(self):

@@ -16,7 +16,6 @@ class Solver:
         # print(level)
         layer = np.array(level.upper_layer)
         solution_node_order = [n for n in solution_node_order if not isinstance(n, Room)]
-        # solution_node_order = Solver.remove_rooms_from_solution_nodes(solution_node_order)
         visited_nodes = set()
         reached = set()
         unreached = set(solution_node_order)
@@ -36,9 +35,8 @@ class Solver:
                 if sokoban_moves is None:
                     return False, solution_moves
                 else:
-                    solution_moves.extend(sokoban_moves)
-            else:
-                solution_moves.extend(moves)
+                    moves = sokoban_moves
+            solution_moves.append((node, moves))
 
             Solver.update_state(layer, player_status, node, positions_map, visited_nodes, start_position, solution_moves)
 
@@ -51,9 +49,9 @@ class Solver:
                 return False, solution_moves
             
         # We've made it to the final node, rejoice!
-        # solution_moves.append(moves[-1])
         return True, solution_moves
     
+
     @staticmethod
     def remove_rooms_from_solution_nodes(solution_node_order):
         new_nodes = copy.deepcopy(solution_node_order)
@@ -185,14 +183,18 @@ class Solver:
             elif tile_type == TileTypes.item_hazard:
                 Solver.remove_hazard_component(layer, current_position, current_tile)
                 
-        if current_tile == Tiles.sokoban_block:
+        if current_tile == Tiles.sokoban_block or isinstance(current_node, Start):
             del moves[-1]
         player_status.player_position = Solver.get_player_position_after_movement(start_position, moves)
 
 
     @staticmethod
     def get_player_position_after_movement(start_position, moves):
-        offset = np.sum(np.array(moves, dtype=int), axis=0)
+        flattened_moves = []
+        for move_list in moves:
+            for move in move_list[1]:
+                flattened_moves.append(move)
+        offset = np.sum(np.array(flattened_moves, dtype=int), axis=0)
         offset_position = offset + start_position
         return offset_position
 
