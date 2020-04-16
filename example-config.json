@@ -38,7 +38,8 @@
             "branch_probability":[0.8, 0.2, 0.0, 0.0],
             "max_multi_lock_count":2,
             "max_locks_per_multi_lock":4,
-            "collectable_in_room_probability":0.75
+            "collectable_in_room_probability":0.75,
+            "insert_room_probability":0.4
         }
     }
 }

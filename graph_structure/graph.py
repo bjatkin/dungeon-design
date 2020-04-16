@@ -1,4 +1,4 @@
-from graph_structure.graph_node import Node, Start, Key, Lock, End, Collectable, CollectableBarrier
+from graph_structure.graph_node import Node, Start, Key, Lock, End, Collectable, CollectableBarrier, Room
 import numpy as np
 
 class Graph():
@@ -12,6 +12,8 @@ class Graph():
         self.lock_id = -1
         self.key_id = -1
         self.collect_id = -1
+        self.room_id = -1
+        
 
         node_to_grow = start
         tree_depth = np.random.randint(aesthetic.min_depth, aesthetic.max_depth)
@@ -27,6 +29,7 @@ class Graph():
             for _ in range(np.random.randint(aesthetic.max_multi_lock_count)):
                 self.add_multi_lock(lock_count=np.random.randint(aesthetic.max_locks_per_multi_lock))
 
+        self.insert_rooms(aesthetic)
         self.fill_rooms_with_collectables(aesthetic)
     
 
@@ -110,9 +113,20 @@ class Graph():
         return collectable
 
 
+    def insert_rooms(self, aesthetic):
+        nodes = Node.find_all_nodes(self.start, method="topological-sort")
+        for node in nodes:
+            keys = [n for n in node.child_s if isinstance(n, Key)]
+            if len(keys) > 0 and np.random.random() < aesthetic.insert_room_probability:
+                room = Room(str(self.get_room_id()), parent_s=node)
+                for key in keys:
+                    key.remove_parent_s(node)
+                    key.add_parent_s(room)
+
+
     def fill_rooms_with_collectables(self, aesthetic):
         def can_node_contain_collectable(node):
-            return isinstance(node, Start) or isinstance(node, Lock)
+            return isinstance(node, Start) or isinstance(node, Lock) or isinstance(node, Room)
 
         collectables = []
         possible_collectable_room_nodes = [node for node in Node.find_all_nodes(self.start) if can_node_contain_collectable(node)]
@@ -152,6 +166,10 @@ class Graph():
     def get_collectable_id(self):
         self.collect_id += 1
         return self.collect_id
+
+    def get_room_id(self):
+        self.room_id += 1
+        return self.room_id
 
 
     def string(self):

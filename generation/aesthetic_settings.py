@@ -1,9 +1,14 @@
 import numpy as np
+import re
 from dungeon_level.dungeon_tiles import Tiles
 
 class AestheticBase:
     def from_config_data(self, config):
         for setting in self.__dict__:
+            if setting not in config:
+                aesthetic_name = re.sub("(?!^)([A-Z]+)", r"_\1", type(self).__name__).lower()
+                raise LookupError("You are missing 'aesthetic.{}.{}' in your config file!".format(aesthetic_name, setting))
+
             self.__dict__[setting] = config[setting]
 
 
@@ -44,6 +49,7 @@ class AestheticSettings:
             self.max_multi_lock_count = 2
             self.max_locks_per_multi_lock = 4
             self.collectable_in_room_probability = 0.75
+            self.insert_room_probability = 0.4
             
         
     def __init__(self):

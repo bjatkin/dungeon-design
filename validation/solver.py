@@ -4,8 +4,9 @@ from validation.player_status import PlayerStatus
 from validation.sokoban.sokoban_solver import SokobanSolver
 from dungeon_level.dungeon_tiles import Tiles, lock_tiles, TileTypes, hazard_tiles
 from dungeon_level.level import Level
-from graph_structure.graph_node import Start, End, Key, Lock, Collectable, CollectableBarrier
+from graph_structure.graph_node import Start, End, Key, Lock, Collectable, CollectableBarrier, Room
 from scipy.ndimage.measurements import label as label_connected_components
+import copy
 
 import numpy as np
 
@@ -14,6 +15,8 @@ class Solver:
     def does_level_follow_mission(level, solution_node_order, positions_map, give_failure_reason=False):
         # print(level)
         layer = np.array(level.upper_layer)
+        solution_node_order = [n for n in solution_node_order if not isinstance(n, Room)]
+        # solution_node_order = Solver.remove_rooms_from_solution_nodes(solution_node_order)
         visited_nodes = set()
         reached = set()
         unreached = set(solution_node_order)
@@ -40,6 +43,18 @@ class Solver:
             
         # We've made it to the final node, rejoice!
         return Solver.get_return_result(False, True, give_failure_reason)
+    
+    @staticmethod
+    def remove_rooms_from_solution_nodes(solution_node_order):
+        new_nodes = copy.deepcopy(solution_node_order)
+        for node in new_nodes:
+            if isinstance(node, Room):
+                parent = next(iter(node.parent_s))
+                for child in node.child_s:
+                    child.remove_parent_s(node)
+                    child.add_parent_s(parent)
+        new_nodes = [n for n in new_nodes if not isinstance(n, Room)]
+        return new_nodes
 
 
     @staticmethod
@@ -87,7 +102,8 @@ class Solver:
     def update_reachability(current_node, unreached, reached, solution_node_order):
         reached.add(current_node)
         if not isinstance(current_node, Key):
-            new_reachable_nodes = set(current_node.child_s).intersection(solution_node_order)
+            children = Solver.get_nodes_skipping_rooms(current_node.child_s, direction="children")
+            new_reachable_nodes = set(children).intersection(solution_node_order)
             reached.update(new_reachable_nodes)
         else:
             new_reachable_nodes = set()
@@ -95,6 +111,22 @@ class Solver:
         unreached -= reached
 
         return new_reachable_nodes
+
+    
+    @staticmethod
+    def get_nodes_skipping_rooms(nodes, direction="children"):
+        new_nodes = set()
+        for node in nodes:
+            if not isinstance(node, Room):
+                new_nodes.add(node)
+            else:
+                if direction == 'children':
+                    add_nodes = node.child_s
+                else:
+                    add_nodes = node.parent_s
+                new_nodes.update(add_nodes)
+        return new_nodes
+
 
 
     @staticmethod
@@ -159,7 +191,7 @@ class Solver:
             elif tile_type == TileTypes.item_hazard:
                 Solver.remove_hazard_component(layer, current_position, current_tile)
                 
-        # Step backwards on the path 1
+        # TODO: Step backwards on the path 1
         # player_status.player_position = path[-1]
 
 

@@ -14,13 +14,7 @@ class PlayerTraverser:
         if next_tile == Tiles.wall: # We can never walk through walls
             return False
 
-        if current_tile == Tiles.finish: # We can walk to the finish, but we can't walk through it since the level will have completed.
-            return False
-
-        if current_tile == Tiles.required_collectable_barrier: # To pass through the collectable barrier, you need to have all the collectables first.
-            return False
-
-        if current_tile == Tiles.sokoban_block:
+        if current_tile in [Tiles.finish, Tiles.required_collectable_barrier, Tiles.sokoban_block]:
             return False
 
         # We can't have the player go past a lock because we can't have the level change as we
