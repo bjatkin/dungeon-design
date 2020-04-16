@@ -7,7 +7,7 @@ from validation.path_finder import PathFinder
 
 class SokobanSolver:
     @staticmethod
-    def is_sokoban_solvable(level_layer, player_position, sokoban_key, sokoban_lock, get_solution=False):
+    def is_sokoban_solvable(level_layer, player_position, sokoban_key, sokoban_lock, return_type="moves"):
 
         layer = copy.deepcopy(level_layer)
         layer[tuple(sokoban_key)] = Tiles.empty
@@ -15,8 +15,20 @@ class SokobanSolver:
         def can_traverse(layer, previous_position, current_position, next_position):
             return sokoban_traverser.can_traverse(layer, previous_position, current_position, next_position)
 
-        is_solvable = PathFinder.find_path(layer, sokoban_key, sokoban_lock, can_traverse)
-        return is_solvable
+        sokoban_moves = PathFinder.find_path(layer, sokoban_key, sokoban_lock, can_traverse, return_type="moves")
+        player_moves = None
+        if sokoban_moves is not None:
+            player_moves = PathFinder.find_path(level_layer, player_position, sokoban_key - sokoban_moves[0], PlayerTraverser.can_traverse, return_type="moves")
+
+        path_exists = sokoban_moves is not None and player_moves is not None
+        if return_type == "path_exists":
+            return path_exists
+        else:
+            if path_exists:
+                combined_moves = player_moves + sokoban_moves
+                return combined_moves
+            else:
+                return None
 
 
 class SokobanTraverser:

@@ -12,7 +12,7 @@ import numpy as np
 
 class Solver:
     @staticmethod
-    def does_level_follow_mission(level, solution_node_order, positions_map, give_failure_reason=False):
+    def does_level_follow_mission(level, solution_node_order, positions_map, return_path=False):
         # print(level)
         layer = np.array(level.upper_layer)
         solution_node_order = [n for n in solution_node_order if not isinstance(n, Room)]
@@ -21,28 +21,38 @@ class Solver:
         reached = set()
         unreached = set(solution_node_order)
         player_status = PlayerStatus(level.required_collectable_count)
-        player_status.player_position = positions_map[solution_node_order[0]]
+        start_position = positions_map[solution_node_order[0]]
+        player_status.player_position = start_position.copy()
+        solution_moves = []
 
         for i, node in enumerate(solution_node_order):
-            path = Solver.can_reach_node(node, positions_map, layer, player_status, return_path=True)
-            if path is None:
-                return Solver.get_return_result(False, False, give_failure_reason)
+            moves = Solver.can_reach_node(node, positions_map, layer, player_status.player_position, return_type="moves")
+            if moves is None:
+                return False, solution_moves
 
-            if not Solver.can_solve_sokoban(layer, player_status.player_position, node, positions_map):
-                return Solver.get_return_result(False, False, give_failure_reason)
+            sokoban_key_position, sokoban_lock_position = Solver.get_sokoban_key_and_lock(layer, node, positions_map)
+            if sokoban_key_position is not None:
+                sokoban_moves = Solver.get_sokoban_moves(layer, player_status.player_position, sokoban_key_position, sokoban_lock_position)
+                if sokoban_moves is None:
+                    return False, solution_moves
+                else:
+                    solution_moves.extend(sokoban_moves)
+            else:
+                solution_moves.extend(moves)
 
-            Solver.update_state(layer, player_status, node, positions_map, visited_nodes, path)
+            Solver.update_state(layer, player_status, node, positions_map, visited_nodes, start_position, solution_moves)
 
             new_reachable_nodes = Solver.update_reachability(node, unreached, reached, solution_node_order)
 
             if not Solver.do_keys_open_correct_locks(node, reached, positions_map, layer, player_status):
-                return Solver.get_return_result(True, False, give_failure_reason)
+                return False, solution_moves
 
-            if not Solver.are_correct_nodes_reachable(unreached, new_reachable_nodes, positions_map, layer, player_status):
-                return Solver.get_return_result(True, False, give_failure_reason)
+            if not Solver.are_correct_nodes_reachable(unreached, new_reachable_nodes, positions_map, layer, player_status.player_position):
+                return False, solution_moves
             
         # We've made it to the final node, rejoice!
-        return Solver.get_return_result(False, True, give_failure_reason)
+        # solution_moves.append(moves[-1])
+        return True, solution_moves
     
     @staticmethod
     def remove_rooms_from_solution_nodes(solution_node_order):
@@ -58,29 +68,25 @@ class Solver:
 
 
     @staticmethod
-    def get_sokoban_key_position_from_lock(layer, current_node, positions_map):
+    def get_sokoban_key_and_lock(layer, current_node, positions_map):
         if isinstance(current_node, Lock) and len(current_node.key_s) > 0:
             key_node = next(iter(current_node.key_s))
             key_position = positions_map[key_node]
+            lock_position = positions_map[current_node]
             key_tile = layer[tuple(key_position)]
             if key_tile == Tiles.sokoban_block:
-                return key_position
-        return None
+                return key_position, lock_position
+        return None, None
 
 
     @staticmethod
-    def can_solve_sokoban(layer, player_position, current_node, positions_map):
-        sokoban_key_position = Solver.get_sokoban_key_position_from_lock(layer, current_node, positions_map)
-        if not sokoban_key_position is None:
-            lock_position = positions_map[current_node]
-            can_solve_sokoban = SokobanSolver.is_sokoban_solvable(layer, player_position, sokoban_key_position, lock_position)
-            if can_solve_sokoban:
-                layer[tuple(lock_position)] = Tiles.empty
-                layer[tuple(sokoban_key_position)] = Tiles.empty
-            
-            return can_solve_sokoban
-        else:
-            return True
+    def get_sokoban_moves(layer, player_position, sokoban_key_position, sokoban_lock_position):
+        sokoban_moves = SokobanSolver.is_sokoban_solvable(layer, player_position, sokoban_key_position, sokoban_lock_position, return_type="moves")
+        if sokoban_moves is not None:
+            layer[tuple(sokoban_lock_position)] = Tiles.empty
+            layer[tuple(sokoban_key_position)] = Tiles.empty
+        
+        return sokoban_moves
         
 
 
@@ -130,41 +136,29 @@ class Solver:
 
 
     @staticmethod
-    def are_correct_nodes_reachable(unreached, new_reachable_nodes, positions_map, layer, player_status):
-        can_reach_unreachables = [Solver.can_reach_node(n, positions_map, layer, player_status) for n in unreached]
+    def are_correct_nodes_reachable(unreached, new_reachable_nodes, positions_map, layer, player_position):
+        can_reach_unreachables = [Solver.can_reach_node(n, positions_map, layer, player_position) for n in unreached]
 
-        can_reach_reachables = [Solver.can_reach_node(n, positions_map, layer, player_status) for n in new_reachable_nodes]
+        can_reach_reachables = [Solver.can_reach_node(n, positions_map, layer, player_position) for n in new_reachable_nodes]
 
         are_correct_nodes_reachable = all(can_reach_reachables) and not any(can_reach_unreachables)
         return are_correct_nodes_reachable
 
 
     @staticmethod
-    def get_return_result(reached_node_too_soon, reached_final_node, give_failure_reason):
-        if give_failure_reason:
-            if reached_node_too_soon:
-                return False, "trivial"
-            if not reached_final_node:
-                return False, "unsolvable"
-            return True, ""
-        else:
-            return reached_final_node and not reached_node_too_soon
-
-
-    @staticmethod
-    def can_reach_node(node, positions_map, layer, player_status, return_path=False):
+    def can_reach_node(node, positions_map, layer, player_position, return_type="path_exists"):
         if node not in positions_map:
-            if return_path:
-                return None
-            else:
+            if return_type == "path_exists":
                 return False
+            else:
+                return None
         tile_position = positions_map[node]
-        result = PathFinder.find_path(layer, player_status.player_position, tile_position, PlayerTraverser.can_traverse, return_path=return_path)
+        result = PathFinder.find_path(layer, player_position, tile_position, PlayerTraverser.can_traverse, return_type=return_type)
         return result
 
 
     @staticmethod
-    def update_state(layer, player_status, current_node, positions_map, visited_nodes, path):
+    def update_state(layer, player_status, current_node, positions_map, visited_nodes, start_position, moves):
         visited_nodes.add(current_node)
         current_position = tuple(positions_map[current_node])
         current_tile = layer[current_position]
@@ -191,8 +185,16 @@ class Solver:
             elif tile_type == TileTypes.item_hazard:
                 Solver.remove_hazard_component(layer, current_position, current_tile)
                 
-        # TODO: Step backwards on the path 1
-        # player_status.player_position = path[-1]
+        if current_tile == Tiles.sokoban_block:
+            del moves[-1]
+        player_status.player_position = Solver.get_player_position_after_movement(start_position, moves)
+
+
+    @staticmethod
+    def get_player_position_after_movement(start_position, moves):
+        offset = np.sum(np.array(moves, dtype=int), axis=0)
+        offset_position = offset + start_position
+        return offset_position
 
 
     @staticmethod

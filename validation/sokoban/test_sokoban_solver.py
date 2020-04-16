@@ -36,7 +36,7 @@ class TestSokobanSolver(unittest.TestCase):
         player_position = np.array([1, 1])
         sokoban_key = np.array([2, 2])
         sokoban_lock = np.array([2, 4])
-        is_solvable = SokobanSolver.is_sokoban_solvable(layer, player_position, sokoban_key, sokoban_lock, get_solution=True)
+        is_solvable = SokobanSolver.is_sokoban_solvable(layer, player_position, sokoban_key, sokoban_lock, return_type="moves")
         self.assertTrue(is_solvable)
 
 
@@ -51,7 +51,7 @@ class TestSokobanSolver(unittest.TestCase):
         player_position = np.array([2, 3])
         sokoban_key = np.array([2, 2])
         sokoban_lock = np.array([1, 5])
-        is_solvable = SokobanSolver.is_sokoban_solvable(layer, player_position, sokoban_key, sokoban_lock, get_solution=True)
+        is_solvable = SokobanSolver.is_sokoban_solvable(layer, player_position, sokoban_key, sokoban_lock, return_type="moves")
         self.assertTrue(is_solvable)
 
 
@@ -66,7 +66,7 @@ class TestSokobanSolver(unittest.TestCase):
         player_position = np.array([2, 3])
         sokoban_key = np.array([2, 2])
         sokoban_lock = np.array([2, 3])
-        is_solvable = SokobanSolver.is_sokoban_solvable(layer, player_position, sokoban_key, sokoban_lock, get_solution=True)
+        is_solvable = SokobanSolver.is_sokoban_solvable(layer, player_position, sokoban_key, sokoban_lock, return_type="moves")
         self.assertTrue(is_solvable)
 
 
@@ -80,7 +80,7 @@ class TestSokobanSolver(unittest.TestCase):
         player_position = np.array([1, 1])
         sokoban_key = np.array([2, 2])
         sokoban_lock = np.array([1, 5])
-        is_solvable = SokobanSolver.is_sokoban_solvable(layer, player_position, sokoban_key, sokoban_lock, get_solution=True)
+        is_solvable = SokobanSolver.is_sokoban_solvable(layer, player_position, sokoban_key, sokoban_lock, return_type="moves")
         self.assertFalse(is_solvable)
 
     def test_sokoban_solver_cant_reach_push(self):
@@ -92,7 +92,7 @@ class TestSokobanSolver(unittest.TestCase):
         player_position = np.array([1, 2])
         sokoban_key = np.array([1, 4])
         sokoban_lock = np.array([1, 1])
-        is_solvable = SokobanSolver.is_sokoban_solvable(layer, player_position, sokoban_key, sokoban_lock, get_solution=True)
+        is_solvable = SokobanSolver.is_sokoban_solvable(layer, player_position, sokoban_key, sokoban_lock, return_type="moves")
         self.assertFalse(is_solvable)
         
 
@@ -107,7 +107,7 @@ class TestSokobanSolver(unittest.TestCase):
         player_position = np.array([2, 2])
         sokoban_key = np.array([2, 4])
         sokoban_lock = np.array([1, 6])
-        is_solvable = SokobanSolver.is_sokoban_solvable(layer, player_position, sokoban_key, sokoban_lock, get_solution=True)
+        is_solvable = SokobanSolver.is_sokoban_solvable(layer, player_position, sokoban_key, sokoban_lock, return_type="moves")
         self.assertTrue(is_solvable)
         
 
@@ -122,5 +122,5 @@ class TestSokobanSolver(unittest.TestCase):
         player_position = np.array([2, 2])
         sokoban_key = np.array([2, 4])
         sokoban_lock = np.array([1, 6])
-        is_solvable = SokobanSolver.is_sokoban_solvable(layer, player_position, sokoban_key, sokoban_lock, get_solution=True)
+        is_solvable = SokobanSolver.is_sokoban_solvable(layer, player_position, sokoban_key, sokoban_lock, return_type="moves")
         self.assertFalse(is_solvable)

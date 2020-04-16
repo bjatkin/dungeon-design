@@ -63,3 +63,4 @@ class PlayerStatus:
         def op(index):
             self.item_counts[index] -= remove_count
         return PlayerStatus._perform_indexed_operation(tile, item_tiles, hazard_tiles, op)
+

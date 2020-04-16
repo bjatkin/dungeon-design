@@ -24,9 +24,9 @@ class PathFinder:
     neighbor_offsets = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
     @staticmethod
-    def find_path(layer, position_a, position_b, can_traverse, allow_diagonal=False, return_path=False):
+    def find_path(layer, position_a, position_b, can_traverse, allow_diagonal=False, return_type="path_exists"):
         f_costs, parents = PathFinder.a_star(layer, position_a, position_b, can_traverse, allow_diagonal=allow_diagonal)
-        if not return_path:
+        if return_type == "path_exists":
             return parents is not None
         else:
             if parents is None:
@@ -34,12 +34,21 @@ class PathFinder:
             else:
                 current_position = position_b
                 path = [current_position]
+                moves = []
                 while not np.array_equal(current_position, position_a):
                     direction = parents[tuple(current_position)]
+                    moves.append(-direction)
                     current_position = current_position + direction
                     path.append(current_position)
                 path.reverse()
-                return path
+                moves.reverse()
+                if return_type == "path":
+                    return path
+                elif return_type == "moves":
+                    return moves
+
+
+
 
 
     @staticmethod
