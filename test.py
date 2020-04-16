@@ -13,6 +13,7 @@ from graph_to_level.test_subgraph_finder import TestSubgraphFinder
 from generation.test_drawing import TestDrawing
 from generation.test_aesthetic_settings import TestAestheticSettings
 from generation.test_mission_generator import TestMissionGenerator
+from tile_world.tile_world_writer.test_tile_world_solution_writer import TestTileWorldSolutionWriter
 from log import Log
 
 Log.verbose = True
