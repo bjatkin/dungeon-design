@@ -3,17 +3,20 @@ from graph_structure.graph_node import GNode, Start, End, Key, Lock, Node
 from graph_structure.graph import Graph
 from graph_structure.graph_visualizer import GraphVisualizer
 from validation.solver import Solver
-import numpy as np
 from generation.mission_generator import MissionGenerator
 from generation.level_space_generator import LevelSpaceGenerator
 from generation.image_level_generator import ImageLevelGenerator
 from generation.level_tweaker import LevelTweaker
 from log import Log
+import numpy as np
+import string
 import time
 
 class Generator:
+    LEVEL_PASSWORD_LENGTH = 4
     @staticmethod
-    def generate(level, size, aesthetic_settings, max_retry_count=500, pregenerated_solution_node_order=None, pregenerated_level_layer=None, draw_graph=False):
+    def generate(level_type, size, aesthetic_settings, max_retry_count=500, pregenerated_solution_node_order=None, pregenerated_level_layer=None, draw_graph=False):
+        level = level_type()
         size = np.array(size)
 
         start_time = time.time()
@@ -23,10 +26,23 @@ class Generator:
             is_solvable, solution = MissionGenerator.generate_mission(level, solution_node_order, aesthetic_settings.mission_aesthetic)
             if is_solvable:
                 LevelTweaker.tweak_level(level, aesthetic_settings.tweaker_aesthetic)
+                Generator._set_level_properties(level, solution, mission, aesthetic_settings)
                 break
+
         end_time = time.time()
         # Log.print("Level generated in {} seconds".format(end_time - start_time))
-        return is_solvable, solution
+        return is_solvable, level
+
+
+    @staticmethod
+    def _set_level_properties(level, solution, mission, aesthetic_settings):
+        level.map_title = "Level"
+        level.password = "".join(np.random.choice(list(string.ascii_uppercase), Generator.LEVEL_PASSWORD_LENGTH))
+
+        min_seconds = aesthetic_settings.mission_aesthetic.min_seconds_per_mission_step
+        max_seconds = aesthetic_settings.mission_aesthetic.max_seconds_per_mission_step
+        seconds_per_step = np.random.randint(min_seconds, max_seconds, len(level.solution.steps))
+        level.time_limit = sum(seconds_per_step)
 
 
     @staticmethod

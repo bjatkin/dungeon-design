@@ -1,4 +1,3 @@
-from dungeon_level.level_set import LevelSet
 from dungeon_level.dungeon_tiles import Tiles
 from generation.generator import Generator
 from tile_world.tile_world_level import TileWorldLevel
@@ -7,6 +6,7 @@ from puzzle_script.puzzle_world_writer.level_set_writer import LevelSetWriter as
 from tile_world.tile_world_writer.level_set_writer import LevelSetWriter as TWLeveSetWriter
 from validation.solver import Solver
 from generation.aesthetic_settings import AestheticSettings
+from creation.creator import Creator
 from log import Log
 from config import ConfigReader
 from ratings.ratings import Ratings
@@ -30,8 +30,6 @@ if level_count == 0:
     print("You must generate at least one level, level_count =", level_count)
     exit()
 
-size = (30,30)
-level_set = LevelSet()
 aesthetic_settings = config.aesthetic
 
 seeds = []
@@ -50,18 +48,12 @@ for i in range(level_count):
     random.seed(seed)
     np.random.seed(seed)
 
-    level = TileWorldLevel()
-    if config.engine == 'PS':
-        level = PuzzleScriptLevel()
+    if config.engine == "PS":
+        level_type = PuzzleScriptLevel
+    else:
+        level_type = TileWorldLevel
 
-    level.map_title = "Level {}".format(i + 1)
-    level.map_password = "    "
-    level.time_limit = 100
-
-    was_successful = Generator.generate(level, size, aesthetic_settings, draw_graph=config.draw_graph)
-    print("Was Generator Successful: {}".format(was_successful))
-
-    level_set.levels.append(level)
+    level_set = Creator.create_level_set(level_type, aesthetic_settings, config.generate_level_count, config.keep_level_count, config.draw_graph)
 
     if config.play_or_generate == "generate":
         ratings.add_level(i, seed)

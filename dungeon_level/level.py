@@ -10,6 +10,8 @@ class Level:
         self.upper_layer = np.array([])
         self.lower_layer = np.array([])
         self.map_title = ""
+        self.solution = None
+        self.mission_graph = None
 
     
     def convert_to_native_tiles(self, layer):

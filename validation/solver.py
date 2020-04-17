@@ -2,9 +2,9 @@ from validation.path_finder import PathFinder
 from validation.player_traverser import PlayerTraverser
 from validation.player_status import PlayerStatus
 from validation.sokoban.sokoban_solver import SokobanSolver
-from analysis.solution import Solution
 from dungeon_level.dungeon_tiles import Tiles, lock_tiles, TileTypes, hazard_tiles
 from dungeon_level.level import Level
+from dungeon_level.solution import Solution
 from graph_structure.graph_node import Start, End, Key, Lock, Collectable, CollectableBarrier, Room, SokobanKey, SokobanLock
 from scipy.ndimage.measurements import label as label_connected_components
 import copy

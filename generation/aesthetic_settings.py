@@ -33,6 +33,8 @@ class AestheticSettings:
             super(AestheticSettings.MissionAesthetic, self).from_config_data(config)
             KEY_MAP = {'water': Tiles.water, 'fire': Tiles.fire}
             self.hazard_spread_probability = { KEY_MAP[key]:value for key,value in self.hazard_spread_probability.items() }
+            self.min_seconds_per_mission_step = 5
+            self.max_seconds_per_mission_step = 15
 
 
     class TweakerAesthetic(AestheticBase):
