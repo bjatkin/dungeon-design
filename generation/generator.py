@@ -23,12 +23,11 @@ class Generator:
         for retry_count in range(max_retry_count):
             Generator._set_level_space(level, size, pregenerated_level_layer, aesthetic_settings.level_space_aesthetic)
             mission_start_node = Generator._get_mission_graph(pregenerated_mission_start_node, aesthetic_settings.mission_graph_aesthetic, draw_graph)
-            is_solvable, solution = MissionGenerator.generate_mission(level, mission_start_node, aesthetic_settings.mission_aesthetic)
+            level.mission = mission_start_node
+            is_solvable, solution = MissionGenerator.generate_mission(level, aesthetic_settings.mission_aesthetic)
             if is_solvable:
-                # GraphVisualizer.show_graph(mission_start_node)
-                # print(Solver.get_efficient_node_order(mission_start_node))
                 LevelTweaker.tweak_level(level, aesthetic_settings.tweaker_aesthetic)
-                Generator._set_level_properties(level, solution, mission_start_node, aesthetic_settings)
+                Generator._set_level_properties(level, solution, aesthetic_settings)
                 break
 
         end_time = time.time()
@@ -37,8 +36,7 @@ class Generator:
 
 
     @staticmethod
-    def _set_level_properties(level, solution, mission, aesthetic_settings):
-        level.mission = mission
+    def _set_level_properties(level, solution, aesthetic_settings):
         level.solution = solution
         level.map_title = "Level"
         level.password = "".join(np.random.choice(list(string.ascii_uppercase), Generator.LEVEL_PASSWORD_LENGTH))

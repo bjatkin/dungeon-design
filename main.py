@@ -12,10 +12,10 @@ from log import Log
 from config import ConfigReader
 from ratings.ratings import Ratings
 
+import csv
 import numpy as np
 import random
 import subprocess
-import pdb
 
 config = ConfigReader('config.json')
 
@@ -54,7 +54,7 @@ for i in range(level_count):
     else:
         level_type = TileWorldLevel
 
-    level_set = Creator.create_level_set(level_type, aesthetic_settings, config.generate_level_count, config.keep_level_count, config.draw_graph)
+    level_set, quality_scores = Creator.create_level_set(level_type, aesthetic_settings, generate_level_count=config.generate_level_count, keep_level_count=config.keep_level_count, draw_graph=config.draw_graph, return_quality_scores=True)
 
     if config.play_or_generate == "generate":
         ratings.add_level(i, seed)
@@ -63,6 +63,11 @@ def save_tile_world_solutions(level_set, folder):
     for level in level_set.levels:
         filename = "{}\\succsave\\test\\{}.json".format(folder, level.map_title)
         TileWorldSolutionWriter.write(filename, level.solution)
+
+
+def save_quality_scores(quality_scores, folder):
+    with open(folder + ".json", "w") as file:
+        json.dump(quality_scores, file)
     
 
 def rate_levels(ratings, name, seeds, aesthetic_settings, level_count):
@@ -86,6 +91,7 @@ if config.engine == 'TW':
 elif config.engine == 'CC':
     TWLeveSetWriter.write(level_set, config.tile_world_save_file)
     save_tile_world_solutions(level_set, config.super_cc_loc)
+    save_quality_scores(quality_scores, config.super_cc_save_file)
 
     # Run SuperCC
     wd = config.super_cc_loc

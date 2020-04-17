@@ -9,24 +9,23 @@ from log import Log
 
 class MissionGenerator:
     @staticmethod
-    def generate_mission(level, mission_start_node, mission_aesthetic):
-        positions_map = dict()
+    def generate_mission(level, mission_aesthetic):
         node_to_tile = dict()
-        solution_node_order = Node.find_all_nodes(mission_start_node, method="topological-sort")
+        solution_node_order = Node.find_all_nodes(level.mission, method="topological-sort")
 
         spatial_graph = SpatialGraph(level.upper_layer)
         mission_spatial_nodes, mission_to_mission_spatial = MissionGenerator.convert_mission_graph_to_spatial_subgraph_form(solution_node_order)
         mission_to_spaces_mapping = SubgraphFinder.get_subgraph_mapping(spatial_graph.nodes, mission_spatial_nodes)
         if mission_to_spaces_mapping is not None:
-            MissionGenerator.apply_mission_mapping_to_level(level, solution_node_order, mission_to_mission_spatial, mission_to_spaces_mapping, positions_map, node_to_tile, mission_aesthetic)
+            MissionGenerator.apply_mission_mapping_to_level(level, solution_node_order, mission_to_mission_spatial, mission_to_spaces_mapping, node_to_tile, mission_aesthetic)
 
             level.required_collectable_count = np.count_nonzero(level.upper_layer == Tiles.collectable)
-            return Solver.does_level_follow_mission(level, mission_start_node, positions_map)
+            return Solver.does_level_follow_mission(level)
         return False, None
 
 
     @staticmethod
-    def apply_mission_mapping_to_level(level, solution_node_order, mission_to_mission_spatial, mission_to_spaces_mapping, positions_map, node_to_tile, mission_aesthetic):
+    def apply_mission_mapping_to_level(level, solution_node_order, mission_to_mission_spatial, mission_to_spaces_mapping, node_to_tile, mission_aesthetic):
         for mission_node in solution_node_order:
             space_node = mission_to_spaces_mapping[mission_to_mission_spatial[mission_node]]
 
@@ -37,44 +36,45 @@ class MissionGenerator:
             else:
                 mask = space_node.mask
 
-            MissionGenerator.add_mission_tile_in_mask(level.upper_layer, mission_node, mask, positions_map, node_to_tile, mission_aesthetic)
+            MissionGenerator.add_mission_tile_in_mask(level, mission_node, mask, node_to_tile, mission_aesthetic)
 
 
     @staticmethod
-    def add_mission_tile_in_mask(layer, mission_node, mask, positions_map, node_to_tile, mission_aesthetic):
-        available_space = np.clip(mask - MissionGenerator.get_mission_mask(layer), 0, 1)
+    def add_mission_tile_in_mask(level, mission_node, mask, node_to_tile, mission_aesthetic):
+        available_space = np.clip(mask - MissionGenerator.get_mission_mask(level.upper_layer), 0, 1)
         random_position = MissionGenerator.get_random_positions_in_mask(available_space)
         if len(random_position) > 0:
             random_position = random_position[0]
         else:
             return
-        MissionGenerator.add_mission_tile(layer, mission_node, random_position, positions_map, node_to_tile, mission_aesthetic)
+        MissionGenerator.add_mission_tile(level, mission_node, random_position, node_to_tile, mission_aesthetic)
 
 
     @staticmethod
-    def add_mission_tile(layer, node, position, positions_map, node_to_tile, mission_aesthetic):
-            positions_map[node] = position
-            position = tuple(position)
+    def add_mission_tile(level, node, position, node_to_tile, mission_aesthetic):
+        level.add_node_position(node, position)
+        position = tuple(position)
+        layer = level.upper_layer
 
-            if isinstance(node, Start):
-                layer[position] = Tiles.player
-            elif isinstance(node, End):
-                layer[position] = Tiles.finish
-            elif isinstance(node, Collectable):
-                layer[position] = Tiles.collectable
-            elif isinstance(node, CollectableBarrier):
-                layer[position] = Tiles.required_collectable_barrier
-            elif isinstance(node, Key):
-                key_tile = MissionGenerator.get_matching_tile(node_to_tile, node, mission_aesthetic, get='key')
-                layer[position] = key_tile
-            elif isinstance(node, Lock):
-                lock_tile = MissionGenerator.get_matching_tile(node_to_tile, node, mission_aesthetic, get='lock')
-                if lock_tile.get_tile_type() == TileTypes.item_hazard:
-                    MissionGenerator.spread_hazard(layer, lock_tile, position, mission_aesthetic)
-                else:
-                    layer[position] = lock_tile
-            elif isinstance(node, Room):
-                layer[position] = Tiles.empty
+        if isinstance(node, Start):
+            layer[position] = Tiles.player
+        elif isinstance(node, End):
+            layer[position] = Tiles.finish
+        elif isinstance(node, Collectable):
+            layer[position] = Tiles.collectable
+        elif isinstance(node, CollectableBarrier):
+            layer[position] = Tiles.required_collectable_barrier
+        elif isinstance(node, Key):
+            key_tile = MissionGenerator.get_matching_tile(node_to_tile, node, mission_aesthetic, get='key')
+            layer[position] = key_tile
+        elif isinstance(node, Lock):
+            lock_tile = MissionGenerator.get_matching_tile(node_to_tile, node, mission_aesthetic, get='lock')
+            if lock_tile.get_tile_type() == TileTypes.item_hazard:
+                MissionGenerator.spread_hazard(layer, lock_tile, position, mission_aesthetic)
+            else:
+                layer[position] = lock_tile
+        elif isinstance(node, Room):
+            layer[position] = Tiles.empty
 
 
     @staticmethod
@@ -116,7 +116,9 @@ class MissionGenerator:
         if get == 'key':
             return tile
         elif get == 'lock':
-            if tile.get_tile_type() == TileTypes.key_lock:
+            if tile == Tiles.sokoban_block:
+                return Tiles.sokoban_goal
+            elif tile.get_tile_type() == TileTypes.key_lock:
                 return key_to_lock[tile]
             elif tile.get_tile_type() == TileTypes.item_hazard:
                 return item_to_hazard[tile]

@@ -1,4 +1,5 @@
 import unittest
+from creation.test_level_analyzer import TestLevelAnalyzer
 from tile_world.tile_world_writer.test_level_writer import TestTileWorldLevel
 from validation.test_path_finder import TestPathFinder
 from validation.test_solver import TestSolver

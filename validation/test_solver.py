@@ -63,10 +63,13 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,3]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, True)
 
         expected_steps = [
+            (start, []),
             (key, rM),
             (lock, rM),
             (end, rM)]
@@ -121,10 +124,13 @@ class TestSolver(unittest.TestCase):
             end:          np.array([0,9]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, True)
 
         expected_steps = [
+            (start, []),
             (key_red, rM),
             (lock_red, 2*lM),
             (key_blue, lM),
@@ -158,7 +164,9 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,3]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, False)
         
 
@@ -186,7 +194,9 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,4]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, False)
         
 
@@ -213,7 +223,9 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,3]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, False)
         
 
@@ -251,11 +263,10 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,5]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, True)
-
-
-
         
 
     def test_solver_branch_trivial1(self):
@@ -289,7 +300,9 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,5]),
         }
         
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -334,7 +347,9 @@ class TestSolver(unittest.TestCase):
             # end:    np.array([2,2]),
         }
         
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -369,7 +384,9 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,4])
             }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, True)
 
     def test_node_seen_too_soon_correct_layout(self):
@@ -405,7 +422,9 @@ class TestSolver(unittest.TestCase):
             end:    np.array([2,3]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, True)
 
     def test_node_seen_too_soon_incorrect_layout(self):
@@ -440,7 +459,9 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,4]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -479,7 +500,9 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,4]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, True)
 
 
@@ -519,7 +542,9 @@ class TestSolver(unittest.TestCase):
             end:    np.array([2,3]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -562,7 +587,9 @@ class TestSolver(unittest.TestCase):
             end:    np.array([1,7]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -594,7 +621,9 @@ class TestSolver(unittest.TestCase):
             end:    np.array([2,3]),
         }
         
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -632,7 +661,9 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,5]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, True)
 
 
@@ -670,7 +701,9 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,5]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -705,7 +738,9 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,15]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, True)
 
 
@@ -740,7 +775,9 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,15]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -779,7 +816,9 @@ class TestSolver(unittest.TestCase):
             end:        np.array([2,4]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -838,7 +877,9 @@ class TestSolver(unittest.TestCase):
             end:        np.array([0,0])
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, True)
 
 
@@ -866,17 +907,21 @@ class TestSolver(unittest.TestCase):
             end:     np.array([0,3]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, True)
 
-        if solution.steps[0][0] == c1:
+        if solution.steps[1][0] == c1:
             expected_steps = [
+                (start, []),
                 (c1, dM + rM),
                 (c0, lM),
                 (barrier, rM + uM + rM),
                 (end, rM)]
         else:
             expected_steps = [
+                (start, []),
                 (c0, dM),
                 (c1, rM),
                 (barrier, uM + rM),
@@ -909,7 +954,9 @@ class TestSolver(unittest.TestCase):
             end:     np.array([0,3]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -938,7 +985,9 @@ class TestSolver(unittest.TestCase):
             end:     np.array([0,3]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -971,11 +1020,15 @@ class TestSolver(unittest.TestCase):
             end:    np.array([2,8]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, True)
 
         expected_steps = [
+            (start, []),
             (key, rM),
+            (block, []),
             (water, uM + rM + dM + lM + dM + 4*rM),
             (lock, 2*rM),
             (end, rM)]
@@ -1010,11 +1063,15 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,8]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, True)
 
         expected_steps = [
+            (start, []),
             (key, rM),
+            (block, []),
             (lock, dM + 2*rM + uM + rM),
             (water, lM + dM + 2*lM + uM + 4*rM),
             (end, 3*rM)]
@@ -1049,5 +1106,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,8]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
+        level.mission = start
+        level.positions_map = positions_map
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level)
         self.assertEqual(does_level_follow_mission, False)

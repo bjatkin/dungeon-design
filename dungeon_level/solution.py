@@ -8,12 +8,15 @@ class Solution:
 
 
     def add_step(self, node, moves, sokoban_moves=None):
-        if not isinstance(node, SokobanKey) and not isinstance(node, Start):
-            if sokoban_moves is not None:
-                step = (node, sokoban_moves)
-            else:
-                step = (node, moves)
-            self.steps.append(step)
+        if isinstance(node, SokobanKey) or isinstance(node, Start):
+            moves = []
+            sokoban_moves = []
+
+        if sokoban_moves is not None:
+            step = (node, sokoban_moves)
+        else:
+            step = (node, moves)
+        self.steps.append(step)
 
 
     def get_flattened_moves(self):
@@ -31,12 +34,18 @@ class Solution:
         return final_position
 
 
-    def get_steps_of_type(self, step_types):
+    def get_steps_of_type(self, step_types, not_of_step_types=None):
         if not isinstance(step_types, list):
             step_types = [step_types]
+        if not_of_step_types is None:
+            not_of_step_types = []
+        elif not isinstance(not_of_step_types, list):
+            not_of_step_types = [not_of_step_types]
 
         steps_of_type = []
         for step in self.steps:
-            if any([isinstance(step, step_type) for step_type in step_types]):
+            node, _ = step
+            if (any([isinstance(node, step_type) for step_type in step_types]) 
+                    and not any([isinstance(node, not_of_step_type) for not_of_step_type in not_of_step_types])):
                 steps_of_type.append(step)
         return steps_of_type

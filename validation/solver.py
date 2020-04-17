@@ -13,35 +13,35 @@ import numpy as np
 
 class Solver:
     @staticmethod
-    def does_level_follow_mission(level, mission_start_node, positions_map, return_path=False):
+    def does_level_follow_mission(level):
         # print(level)
         layer = np.array(level.upper_layer)
-        solution_node_order = Solver.get_efficient_node_order(mission_start_node)
+        solution_node_order = Solver.get_efficient_node_order(level.mission)
         visited_nodes = set()
         reached = set()
         unreached = set(solution_node_order)
         player_status = PlayerStatus(level.required_collectable_count)
-        solution = Solution(positions_map[solution_node_order[0]])
+        solution = Solution(level.get_node_position(level.mission))
         player_status.player_position = solution.start_position.copy()
 
         for i, current_node in enumerate(solution_node_order):
-            moves = Solver.can_reach_node(current_node, positions_map, layer, player_status.player_position, return_type="moves")
+            moves = Solver.can_reach_node(current_node, level.positions_map, layer, player_status.player_position, return_type="moves")
             if moves is None:
                 return False, solution
 
-            is_sokoban_step, sokoban_moves = Solver.get_sokoban_moves(layer, player_status.player_position, current_node, positions_map)
+            is_sokoban_step, sokoban_moves = Solver.get_sokoban_moves(layer, player_status.player_position, current_node, level.positions_map)
             if is_sokoban_step and sokoban_moves is None:
                 return False, solution
 
             solution.add_step(current_node, moves, sokoban_moves)
-            Solver.update_state(layer, player_status, current_node, positions_map, visited_nodes, solution)
+            Solver.update_state(layer, player_status, current_node, level.positions_map, visited_nodes, solution)
 
             new_reachable_nodes = Solver.update_reachability(current_node, unreached, reached, solution_node_order)
 
-            if not Solver.do_keys_open_correct_locks(current_node, reached, positions_map, layer, player_status):
+            if not Solver.do_keys_open_correct_locks(current_node, reached, level.positions_map, layer, player_status):
                 return False, solution
 
-            if not Solver.are_correct_nodes_reachable(unreached, new_reachable_nodes, positions_map, layer, player_status.player_position):
+            if not Solver.are_correct_nodes_reachable(unreached, new_reachable_nodes, level.positions_map, layer, player_status.player_position):
                 return False, solution
             
         # We've made it to the final node, rejoice!

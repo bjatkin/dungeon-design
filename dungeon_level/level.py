@@ -11,11 +11,23 @@ class Level:
         self.lower_layer = np.array([])
         self.map_title = ""
         self.solution = None
-        self.mission_graph = None
+        self.mission = None
+        self.positions_map = dict()
 
     
     def convert_to_native_tiles(self, layer):
         pass
+
+
+    def add_node_position(self, node, position):
+        self.positions_map[node] = position
+
+
+    def get_node_position(self, node):
+        if node in self.positions_map:
+            return self.positions_map[node]
+        else:
+            return None
 
 
     @staticmethod
