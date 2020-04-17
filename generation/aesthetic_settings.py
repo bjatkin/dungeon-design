@@ -28,18 +28,18 @@ class AestheticSettings:
         def __init__(self):
             self.hazard_spread_probability = {Tiles.water: 0.8, Tiles.fire: 0.3}
             self.single_lock_is_hazard_probability = 0.1
+            self.min_seconds_per_move = 1
+            self.max_seconds_per_move = 3
         
         def from_config_data(self, config):
             super(AestheticSettings.MissionAesthetic, self).from_config_data(config)
             KEY_MAP = {'water': Tiles.water, 'fire': Tiles.fire}
             self.hazard_spread_probability = { KEY_MAP[key]:value for key,value in self.hazard_spread_probability.items() }
-            self.min_seconds_per_mission_step = 5
-            self.max_seconds_per_mission_step = 15
 
 
     class TweakerAesthetic(AestheticBase):
         def __init__(self):
-            self.should_fill_unused_space = True
+            self.should_fill_unused_space = 0.7
 
 
     class MissionGraphAesthetic(AestheticBase):

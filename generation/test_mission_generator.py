@@ -44,7 +44,7 @@ class TestMissionGenerator(unittest.TestCase):
 
         aesthetic_settings = AestheticSettings()
         was_successful = Generator.generate(
-            level=level, 
+            level_type=Level,
             size=layer.shape, 
             aesthetic_settings=aesthetic_settings,
             max_retry_count=10, 
@@ -90,7 +90,7 @@ class TestMissionGenerator(unittest.TestCase):
 
         aesthetic_settings = AestheticSettings()
         was_successful = Generator.generate(
-            level=level, 
+            level_type=Level,
             size=layer.shape, 
             aesthetic_settings=aesthetic_settings,
             max_retry_count=10, 

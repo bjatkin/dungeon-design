@@ -26,7 +26,7 @@ class Generator:
             is_solvable, solution = MissionGenerator.generate_mission(level, solution_node_order, aesthetic_settings.mission_aesthetic)
             if is_solvable:
                 LevelTweaker.tweak_level(level, aesthetic_settings.tweaker_aesthetic)
-                Generator._set_level_properties(level, solution, mission, aesthetic_settings)
+                Generator._set_level_properties(level, solution, solution_node_order[0], aesthetic_settings)
                 break
 
         end_time = time.time()
@@ -36,11 +36,13 @@ class Generator:
 
     @staticmethod
     def _set_level_properties(level, solution, mission, aesthetic_settings):
+        level.mission = mission
+        level.solution = solution
         level.map_title = "Level"
         level.password = "".join(np.random.choice(list(string.ascii_uppercase), Generator.LEVEL_PASSWORD_LENGTH))
 
-        min_seconds = aesthetic_settings.mission_aesthetic.min_seconds_per_mission_step
-        max_seconds = aesthetic_settings.mission_aesthetic.max_seconds_per_mission_step
+        min_seconds = aesthetic_settings.mission_aesthetic.min_seconds_per_move
+        max_seconds = aesthetic_settings.mission_aesthetic.max_seconds_per_move
         seconds_per_step = np.random.randint(min_seconds, max_seconds, len(level.solution.steps))
         level.time_limit = sum(seconds_per_step)
 
