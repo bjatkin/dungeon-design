@@ -15,31 +15,43 @@ class SokobanSolver:
         def can_traverse(layer, previous_position, current_position, next_position):
             return sokoban_traverser.can_traverse(layer, previous_position, current_position, next_position)
 
-        sokoban_moves = PathFinder.find_path(layer, sokoban_key, sokoban_lock, can_traverse, return_type="moves")
-        player_moves = None
-        if sokoban_moves is not None:
-            player_moves = PathFinder.find_path(level_layer, player_position, sokoban_key - sokoban_moves[0], PlayerTraverser.can_traverse, return_type="moves")
+        sokoban_path = PathFinder.find_path(layer, sokoban_key, sokoban_lock, can_traverse, return_type="path")
 
-        path_exists = sokoban_moves is not None and player_moves is not None
         if return_type == "path_exists":
-            return path_exists
+            return sokoban_path is not None
         else:
-            if path_exists:
-                combined_moves = player_moves + sokoban_moves
-                return combined_moves
+            if sokoban_path is not None:
+                sokoban_moves = sokoban_traverser.insert_player_moves(sokoban_path)
             else:
-                return None
+                sokoban_moves = None
+            return sokoban_moves
 
 
 class SokobanTraverser:
     def __init__(self, player_start_position):
         self.player_start_position = player_start_position
+        self.player_moves = dict()
 
 
     def print_status(self, layer, push_from_position, current_block_position, previous_block_position):
         current_player_position = self.get_current_player_position(previous_block_position)
         string = Level.layer_to_string(layer, {"*":push_from_position, "P":current_player_position, "[]":current_block_position})
         print("\n{}".format(string))
+
+    
+    def insert_player_moves(self, sokoban_path):
+        new_sokoban_moves = []
+        sokoban_path.insert(0, None)
+        for i in range(2, len(sokoban_path)):
+            previous_position = sokoban_path[i - 2]
+            if previous_position is not None:
+                previous_position = tuple(previous_position)
+            current_position = tuple(sokoban_path[i - 1])
+            next_position = tuple(sokoban_path[i])
+            move_key = (previous_position, current_position, next_position)
+            player_move = self.player_moves[move_key]
+            new_sokoban_moves.extend(player_move)
+        return new_sokoban_moves
 
 
     def can_traverse(self, layer, previous_block_position, current_block_position, next_block_position):
@@ -56,8 +68,15 @@ class SokobanTraverser:
         if not self.is_tile_empty(layer, next_block_position):
             return False
 
-        if not self.can_player_reach_push_position(layer, push_from_position, current_block_position, current_player_position):
+        player_to_push_position_moves = self.can_player_reach_push_position(layer, push_from_position, current_block_position, current_player_position)
+        if player_to_push_position_moves is None:
             return False
+        else:
+            if previous_block_position is not None:
+                previous_block_position = tuple(previous_block_position)
+            move_key = (previous_block_position, tuple(current_block_position), tuple(next_block_position))
+            player_to_push_position_moves.append(push_direction)
+            self.player_moves[move_key] = player_to_push_position_moves
 
         return True
 
@@ -83,6 +102,6 @@ class SokobanTraverser:
         current_block_position_t = tuple(current_block_position)
         previous_tile = layer[current_block_position_t]
         layer[current_block_position_t] = Tiles.sokoban_block
-        can_player_reach_push_position = PathFinder.find_path(layer, current_player_position, push_from_position, PlayerTraverser.can_traverse)
+        player_to_push_position_moves = PathFinder.find_path(layer, current_player_position, push_from_position, PlayerTraverser.can_traverse, return_type="moves")
         layer[current_block_position_t] = previous_tile
-        return can_player_reach_push_position
+        return player_to_push_position_moves

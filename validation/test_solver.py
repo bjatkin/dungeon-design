@@ -945,8 +945,9 @@ class TestSolver(unittest.TestCase):
     def test_sokoban_solvable(self):
         level = Level()
         level.upper_layer = np.array([
-            [s,kR, b, e, e, e, g,lR, f ],
-            [e, e, e, e, e, e, w, w, e ]], dtype=object)
+            [e, e, e, e, e, e, e, e, e ],
+            [s,kR, b, e, e, e, w, w, w ],
+            [e, e, e, e, e, e, g,lR, f ]], dtype=object)
         
 
         start = Start()
@@ -962,12 +963,12 @@ class TestSolver(unittest.TestCase):
         lock.add_child_s(end)
 
         positions_map = {
-            start:  np.array([0,0]),
-            key:    np.array([0,1]),
-            block:  np.array([0,2]),
-            water:  np.array([0,6]),
-            lock:   np.array([0,7]),
-            end:    np.array([0,8]),
+            start:  np.array([1,0]),
+            key:    np.array([1,1]),
+            block:  np.array([1,2]),
+            water:  np.array([2,6]),
+            lock:   np.array([2,7]),
+            end:    np.array([2,8]),
         }
 
         does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
@@ -975,7 +976,7 @@ class TestSolver(unittest.TestCase):
 
         expected_steps = [
             (key, rM),
-            (water, 4*rM),
+            (water, uM + rM + dM + lM + dM + 4*rM),
             (lock, 2*rM),
             (end, rM)]
         self.assert_steps_equal(solution.steps, expected_steps)
