@@ -5,7 +5,7 @@ from validation.sokoban.sokoban_solver import SokobanSolver
 from dungeon_level.dungeon_tiles import Tiles, lock_tiles, TileTypes, hazard_tiles
 from dungeon_level.level import Level
 from dungeon_level.solution import Solution
-from graph_structure.graph_node import Start, End, Key, Lock, Collectable, CollectableBarrier, Room, SokobanKey, SokobanLock
+from graph_structure.graph_node import Start, End, Key, Lock, Collectable, CollectableBarrier, Room, SokobanKey, SokobanLock, Node
 from scipy.ndimage.measurements import label as label_connected_components
 import copy
 
@@ -13,10 +13,10 @@ import numpy as np
 
 class Solver:
     @staticmethod
-    def does_level_follow_mission(level, solution_node_order, positions_map, return_path=False):
-        print(level)
+    def does_level_follow_mission(level, mission_start_node, positions_map, return_path=False):
+        # print(level)
         layer = np.array(level.upper_layer)
-        solution_node_order = [n for n in solution_node_order if not isinstance(n, Room)]
+        solution_node_order = Solver.get_efficient_node_order(mission_start_node)
         visited_nodes = set()
         reached = set()
         unreached = set(solution_node_order)
@@ -188,3 +188,24 @@ class Solver:
         labeled_components, component_count = label_connected_components(hazard_mask)
         hazard_label = labeled_components[hazard_position]
         layer[labeled_components == hazard_label] = Tiles.empty
+
+
+    @staticmethod
+    def get_efficient_node_order(mission_start_node):
+        def sort_keys_last(node):
+            if isinstance(node, Collectable):
+                return 5
+            elif isinstance(node, SokobanKey):
+                return 3
+            elif isinstance(node, Key):
+                return 4
+            elif isinstance(node, SokobanLock):
+                return 2
+            elif isinstance(node, Lock):
+                return 1
+            else:
+                return 0
+
+        solution_node_order = Node.find_all_nodes(mission_start_node, method="topological-sort", child_sort_method=sort_keys_last)
+        solution_node_order = [n for n in solution_node_order if not isinstance(n, Room)]
+        return solution_node_order

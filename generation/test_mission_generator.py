@@ -40,8 +40,6 @@ class TestMissionGenerator(unittest.TestCase):
             [w, e, e, w, e, e, e, w],
             [w, w, w, w, w, w, w, w]], dtype=object)
 
-        solution_node_order = Node.find_all_nodes(start, method="topological-sort")
-
         aesthetic_settings = AestheticSettings()
         was_successful = Generator.generate(
             level_type=Level,
@@ -49,7 +47,7 @@ class TestMissionGenerator(unittest.TestCase):
             aesthetic_settings=aesthetic_settings,
             max_retry_count=10, 
             pregenerated_level_layer=layer, 
-            pregenerated_solution_node_order=solution_node_order)
+            pregenerated_mission_start_node=start)
         self.assertTrue(was_successful)
 
 
@@ -86,8 +84,6 @@ class TestMissionGenerator(unittest.TestCase):
             [w, e, e, w, e, e, e, w],
             [w, w, w, w, w, w, w, w]], dtype=object)
 
-        solution_node_order = Node.find_all_nodes(start, method="topological-sort")
-
         aesthetic_settings = AestheticSettings()
         was_successful = Generator.generate(
             level_type=Level,
@@ -95,6 +91,6 @@ class TestMissionGenerator(unittest.TestCase):
             aesthetic_settings=aesthetic_settings,
             max_retry_count=10, 
             pregenerated_level_layer=layer, 
-            pregenerated_solution_node_order=solution_node_order)
+            pregenerated_mission_start_node=start)
         self.assertTrue(was_successful)
 

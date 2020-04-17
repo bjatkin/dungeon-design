@@ -1,5 +1,5 @@
 from dungeon_level.dungeon_tiles import Tiles, key_to_lock, key_tiles
-from graph_structure.graph_node import GNode, Start, End, Key, Lock, Node
+from graph_structure.graph_node import Start, End, Key, Lock, Node, SokobanKey, SokobanLock, Collectable
 from graph_structure.graph import Graph
 from graph_structure.graph_visualizer import GraphVisualizer
 from validation.solver import Solver
@@ -15,18 +15,20 @@ import time
 class Generator:
     LEVEL_PASSWORD_LENGTH = 4
     @staticmethod
-    def generate(level_type, size, aesthetic_settings, max_retry_count=500, pregenerated_solution_node_order=None, pregenerated_level_layer=None, draw_graph=False):
+    def generate(level_type, size, aesthetic_settings, max_retry_count=500, pregenerated_mission_start_node=None, pregenerated_level_layer=None, draw_graph=False):
         level = level_type()
         size = np.array(size)
 
         start_time = time.time()
         for retry_count in range(max_retry_count):
             Generator._set_level_space(level, size, pregenerated_level_layer, aesthetic_settings.level_space_aesthetic)
-            solution_node_order = Generator._get_mission_graph(pregenerated_solution_node_order, aesthetic_settings.mission_graph_aesthetic, draw_graph)
-            is_solvable, solution = MissionGenerator.generate_mission(level, solution_node_order, aesthetic_settings.mission_aesthetic)
+            mission_start_node = Generator._get_mission_graph(pregenerated_mission_start_node, aesthetic_settings.mission_graph_aesthetic, draw_graph)
+            is_solvable, solution = MissionGenerator.generate_mission(level, mission_start_node, aesthetic_settings.mission_aesthetic)
             if is_solvable:
+                # GraphVisualizer.show_graph(mission_start_node)
+                # print(Solver.get_efficient_node_order(mission_start_node))
                 LevelTweaker.tweak_level(level, aesthetic_settings.tweaker_aesthetic)
-                Generator._set_level_properties(level, solution, solution_node_order[0], aesthetic_settings)
+                Generator._set_level_properties(level, solution, mission_start_node, aesthetic_settings)
                 break
 
         end_time = time.time()
@@ -56,11 +58,11 @@ class Generator:
 
 
     @staticmethod
-    def _get_mission_graph(pregenerated_solution_node_order, mission_graph_aesthetic, draw=False):
-        if pregenerated_solution_node_order is None:
+    def _get_mission_graph(pregenerated_mission_start_node, mission_graph_aesthetic, draw=False):
+        if pregenerated_mission_start_node is None:
             return Generator._generate_mission_graph(mission_graph_aesthetic, draw)
         else:
-            return pregenerated_solution_node_order
+            return pregenerated_mission_start_node
 
     @staticmethod
     def _generate_mission_graph(mission_graph_aesthetic, draw=False):
@@ -68,8 +70,7 @@ class Generator:
         if draw:
             GraphVisualizer.show_graph(graph.start)
 
-        return Node.find_all_nodes(graph.start, method="topological-sort")
-        # return Generator._get_simple_graph()
+        return graph.start
 
 
     @staticmethod

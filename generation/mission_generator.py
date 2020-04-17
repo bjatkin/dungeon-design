@@ -9,9 +9,10 @@ from log import Log
 
 class MissionGenerator:
     @staticmethod
-    def generate_mission(level, solution_node_order, mission_aesthetic):
+    def generate_mission(level, mission_start_node, mission_aesthetic):
         positions_map = dict()
         node_to_tile = dict()
+        solution_node_order = Node.find_all_nodes(mission_start_node, method="topological-sort")
 
         spatial_graph = SpatialGraph(level.upper_layer)
         mission_spatial_nodes, mission_to_mission_spatial = MissionGenerator.convert_mission_graph_to_spatial_subgraph_form(solution_node_order)
@@ -20,7 +21,7 @@ class MissionGenerator:
             MissionGenerator.apply_mission_mapping_to_level(level, solution_node_order, mission_to_mission_spatial, mission_to_spaces_mapping, positions_map, node_to_tile, mission_aesthetic)
 
             level.required_collectable_count = np.count_nonzero(level.upper_layer == Tiles.collectable)
-            return Solver.does_level_follow_mission(level, solution_node_order, positions_map)
+            return Solver.does_level_follow_mission(level, mission_start_node, positions_map)
         return False, None
 
 

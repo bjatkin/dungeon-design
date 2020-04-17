@@ -63,7 +63,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,3]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, True)
 
         expected_steps = [
@@ -121,7 +121,7 @@ class TestSolver(unittest.TestCase):
             end:          np.array([0,9]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, True)
 
         expected_steps = [
@@ -158,7 +158,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,3]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, False)
         
 
@@ -186,7 +186,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,4]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, False)
         
 
@@ -213,7 +213,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,3]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, False)
         
 
@@ -251,7 +251,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,5]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, True)
 
 
@@ -289,7 +289,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,5]),
         }
         
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -334,7 +334,7 @@ class TestSolver(unittest.TestCase):
             # end:    np.array([2,2]),
         }
         
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -369,7 +369,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,4])
             }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, True)
 
     def test_node_seen_too_soon_correct_layout(self):
@@ -405,7 +405,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([2,3]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, True)
 
     def test_node_seen_too_soon_incorrect_layout(self):
@@ -440,7 +440,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,4]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -479,7 +479,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,4]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, True)
 
 
@@ -519,7 +519,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([2,3]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -562,7 +562,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([1,7]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -594,7 +594,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([2,3]),
         }
         
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -632,7 +632,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,5]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, True)
 
 
@@ -670,7 +670,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,5]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -705,7 +705,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,15]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, True)
 
 
@@ -740,7 +740,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,15]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -779,7 +779,7 @@ class TestSolver(unittest.TestCase):
             end:        np.array([2,4]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -838,7 +838,7 @@ class TestSolver(unittest.TestCase):
             end:        np.array([0,0])
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, True)
 
 
@@ -866,7 +866,7 @@ class TestSolver(unittest.TestCase):
             end:     np.array([0,3]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, True)
 
         if solution.steps[0][0] == c1:
@@ -909,7 +909,7 @@ class TestSolver(unittest.TestCase):
             end:     np.array([0,3]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -938,7 +938,7 @@ class TestSolver(unittest.TestCase):
             end:     np.array([0,3]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, False)
 
 
@@ -970,21 +970,14 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,8]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, True)
 
-        if solution.steps[0][0] == water:
-            expected_steps = [
-                (water, 5*rM),
-                (key, 4*lM),
-                (lock, 6*rM),
-                (end, rM)]
-        else:
-            expected_steps = [
-                (key, rM),
-                (water, 4*rM),
-                (lock, 2*rM),
-                (end, rM)]
+        expected_steps = [
+            (key, rM),
+            (water, 4*rM),
+            (lock, 2*rM),
+            (end, rM)]
         self.assert_steps_equal(solution.steps, expected_steps)
 
 
@@ -1016,7 +1009,7 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,8]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, True)
 
         expected_steps = [
@@ -1055,5 +1048,5 @@ class TestSolver(unittest.TestCase):
             end:    np.array([0,8]),
         }
 
-        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, Node.find_all_nodes(start, method="topological-sort"), positions_map)
+        does_level_follow_mission, solution = Solver.does_level_follow_mission(level, start, positions_map)
         self.assertEqual(does_level_follow_mission, False)
