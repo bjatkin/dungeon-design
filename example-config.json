@@ -29,8 +29,8 @@
                 "fire":0.3
             },
             "single_lock_is_hazard_probability": 0.1,
-            "min_seconds_per_move": 1,
-            "max_seconds_per_move": 3
+            "min_seconds_per_move": 0.2,
+            "max_seconds_per_move": 0.6
         },
         "tweaker_aesthetic":{
             "should_fill_unused_space":0.7

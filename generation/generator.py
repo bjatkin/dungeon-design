@@ -43,8 +43,8 @@ class Generator:
 
         min_seconds = aesthetic_settings.mission_aesthetic.min_seconds_per_move
         max_seconds = aesthetic_settings.mission_aesthetic.max_seconds_per_move
-        seconds_per_step = np.random.randint(min_seconds, max_seconds, len(level.solution.steps))
-        level.time_limit = sum(seconds_per_step)
+        seconds_per_move = np.random.uniform(min_seconds, max_seconds, len(level.solution.get_flattened_moves()))
+        level.time_limit = int(sum(seconds_per_move))
 
 
     @staticmethod

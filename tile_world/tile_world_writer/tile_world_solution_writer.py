@@ -4,17 +4,10 @@ import json
 class TileWorldSolutionWriter:
     @staticmethod
     def convert_solution_to_json(solution):
+        direction_to_move = { (1,0):"d", (-1,0):"u", (0,1):"r", (0,-1):"l" }
         moves = []
-        for step in solution:
-            step = tuple(step)
-            if step == (1,0):
-                move = "d"
-            elif step == (-1,0):
-                move = "u"
-            elif step == (0,1):
-                move = "r"
-            elif step == (0,-1):
-                move = "l"
+        for direction in solution.get_flattened_moves():
+            move = direction_to_move[tuple(direction)]
             moves.append(move)
         moves = "-".join(moves)
 

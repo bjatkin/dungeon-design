@@ -4,6 +4,7 @@ from tile_world.tile_world_level import TileWorldLevel
 from puzzle_script.puzzle_script_level import PuzzleScriptLevel
 from puzzle_script.puzzle_world_writer.level_set_writer import LevelSetWriter as PSLevelSetWriter
 from tile_world.tile_world_writer.level_set_writer import LevelSetWriter as TWLeveSetWriter
+from tile_world.tile_world_writer.tile_world_solution_writer import TileWorldSolutionWriter
 from validation.solver import Solver
 from generation.aesthetic_settings import AestheticSettings
 from creation.creator import Creator
@@ -57,6 +58,11 @@ for i in range(level_count):
 
     if config.play_or_generate == "generate":
         ratings.add_level(i, seed)
+
+def save_tile_world_solutions(level_set, folder):
+    for level in level_set.levels:
+        filename = "{}\\succsave\\test\\{}.json".format(folder, level.map_title)
+        TileWorldSolutionWriter.write(filename, level.solution)
     
 
 def rate_levels(ratings, name, seeds, aesthetic_settings, level_count):
@@ -79,6 +85,7 @@ if config.engine == 'TW':
 
 elif config.engine == 'CC':
     TWLeveSetWriter.write(level_set, config.tile_world_save_file)
+    save_tile_world_solutions(level_set, config.super_cc_loc)
 
     # Run SuperCC
     wd = config.super_cc_loc
