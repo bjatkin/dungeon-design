@@ -61,13 +61,15 @@ for i in range(level_count):
 
 def save_tile_world_solutions(level_set, folder):
     for level in level_set.levels:
-        filename = "{}\\succsave\\test\\{}.json".format(folder, level.map_title)
+        filename = "{}\\solutions\\{}.json".format(folder, level.map_title)
         TileWorldSolutionWriter.write(filename, level.solution)
 
 
 def save_quality_scores(quality_scores, folder):
-    with open(folder + ".json", "w") as file:
-        json.dump(quality_scores, file)
+    with open(folder + ".csv", "w") as file:
+        csv_writer = csv.writer(file, delimiter=",")
+        for quality_score in quality_scores:
+            csv_writer.writerow(quality_score)
     
 
 def rate_levels(ratings, name, seeds, aesthetic_settings, level_count):

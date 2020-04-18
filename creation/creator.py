@@ -9,7 +9,7 @@ class Creator:
     @staticmethod
     def create_level_set(level_type, aesthetic_settings, generate_level_count=10, keep_level_count=5, draw_graph=False, return_quality_scores=False):
         generated_levels = Creator._generate_levels(level_type, aesthetic_settings, generate_level_count, draw_graph)
-        best_levels = Creator._pick_best_k_levels(generated_levels)
+        best_levels = Creator._pick_best_k_levels(generated_levels, k=keep_level_count)
         level_set = Creator._create_level_set_from_levels(best_levels)
 
         if return_quality_scores:
@@ -61,7 +61,7 @@ class Creator:
     @staticmethod
     def _create_level_set_from_levels(levels):
         level_set = LevelSet()
-        levels = Creator._sort_levels_by_metric(levels, LevelAnalyzer.difficulty_metrics, sort_order="ascending")
+        # levels = Creator._sort_levels_by_metric(levels, LevelAnalyzer.difficulty_metrics, sort_order="ascending")
         for i, level in enumerate(levels):
             level.map_title = "Level {}".format(i + 1)
         level_set.levels = levels

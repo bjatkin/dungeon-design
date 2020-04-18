@@ -42,8 +42,8 @@ class TileTypes(Enum):
     monster                         = 0x02
     other                           = 0x03
 
-key_tiles = [Tiles.key_blue, Tiles.key_red, Tiles.key_green, Tiles.key_yellow]
-lock_tiles = [Tiles.lock_blue, Tiles.lock_red, Tiles.lock_green, Tiles.lock_yellow]
+key_tiles = [Tiles.key_blue, Tiles.key_red, Tiles.key_green, Tiles.key_yellow, Tiles.sokoban_block]
+lock_tiles = [Tiles.lock_blue, Tiles.lock_red, Tiles.lock_green, Tiles.lock_yellow, Tiles.sokoban_goal]
 key_to_lock = {Tiles.key_blue: Tiles.lock_blue, Tiles.key_red: Tiles.lock_red, Tiles.key_green: Tiles.lock_green, Tiles.key_yellow: Tiles.lock_yellow, Tiles.sokoban_block: Tiles.sokoban_goal}
 lock_to_key = {Tiles.lock_blue: Tiles.key_blue, Tiles.lock_red: Tiles.key_red, Tiles.lock_green: Tiles.key_green, Tiles.lock_yellow: Tiles.key_yellow, Tiles.sokoban_goal: Tiles.sokoban_block}
 

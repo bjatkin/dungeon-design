@@ -116,9 +116,7 @@ class MissionGenerator:
         if get == 'key':
             return tile
         elif get == 'lock':
-            if tile == Tiles.sokoban_block:
-                return Tiles.sokoban_goal
-            elif tile.get_tile_type() == TileTypes.key_lock:
+            if tile.get_tile_type() == TileTypes.key_lock:
                 return key_to_lock[tile]
             elif tile.get_tile_type() == TileTypes.item_hazard:
                 return item_to_hazard[tile]
