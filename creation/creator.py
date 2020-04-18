@@ -61,7 +61,7 @@ class Creator:
     @staticmethod
     def _create_level_set_from_levels(levels):
         level_set = LevelSet()
-        # levels = Creator._sort_levels_by_metric(levels, LevelAnalyzer.difficulty_metrics, sort_order="ascending")
+        levels = Creator._sort_levels_by_metric(levels, LevelAnalyzer.difficulty_metrics, sort_order="ascending")
         for i, level in enumerate(levels):
             level.map_title = "Level {}".format(i + 1)
         level_set.levels = levels

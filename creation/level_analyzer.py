@@ -11,9 +11,9 @@ class LevelAnalyzer:
     @staticmethod
     def get_score_from_metrics(level, metrics, return_type="total", raw_scores=False):
         if raw_scores:
-            metric_scores = [metric(level) for weight, metric in metrics]
+            metric_scores = [metric(level) for weight, normalizer, metric in metrics]
         else:
-            metric_scores = [weight * metric(level) for weight, metric in metrics]
+            metric_scores = [weight * normalizer * metric(level) for weight, normalizer, metric in metrics]
         if return_type == "total":
             level_score = sum(metric_scores)
             return level_score
@@ -113,14 +113,13 @@ class LevelAnalyzer:
 
 
 LevelAnalyzer.quality_metrics = [
-    (1.0, LevelAnalyzer._get_mission_length_score),
-    (0.5, LevelAnalyzer._get_moves_length_score),
-    (1.0, LevelAnalyzer._get_sokoban_turn_score),
-    (1.0, LevelAnalyzer._get_sokoban_count_score),
-    (1.0, LevelAnalyzer._get_average_length_of_step_score),
-    (1.0, LevelAnalyzer._get_decision_count_score),
-    (1.0, LevelAnalyzer._get_average_decisions_per_step_score),
-    (1.0, LevelAnalyzer._get_average_distance_between_locks_and_keys_score) ]
+    (8.0,  20.0, LevelAnalyzer._get_mission_length_score),
+    (-2.0,  1.0, LevelAnalyzer._get_moves_length_score),
+    (6.0,  8.0, LevelAnalyzer._get_sokoban_turn_score),
+    (5.0, 80.0, LevelAnalyzer._get_sokoban_count_score),
+    (-2.0,  6.0, LevelAnalyzer._get_average_length_of_step_score),
+    (1.0, 10.0, LevelAnalyzer._get_decision_count_score),
+    (1.0, 40.0, LevelAnalyzer._get_average_decisions_per_step_score),
+    (3.0, 5.0, LevelAnalyzer._get_average_distance_between_locks_and_keys_score) ]
 
-LevelAnalyzer.difficulty_metrics = [
-    (1, LevelAnalyzer._get_mission_length_score) ]
+LevelAnalyzer.difficulty_metrics = LevelAnalyzer.quality_metrics
