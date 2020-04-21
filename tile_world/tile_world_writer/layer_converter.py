@@ -9,7 +9,7 @@ class LayerConverter:
         DungeonTiles.player                         : TWTiles.player,
         DungeonTiles.finish                         : TWTiles.finish,
         DungeonTiles.sokoban_block                  : TWTiles.movable_block,
-        DungeonTiles.sokoban_goal                   : TWTiles.water,
+        DungeonTiles.sokoban_goal                   : TWTiles.bomb,
         DungeonTiles.collectable                    : TWTiles.chip,
         DungeonTiles.required_collectable_barrier   : TWTiles.socket,
         DungeonTiles.water                          : TWTiles.water,
