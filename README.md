@@ -6,9 +6,9 @@ design in the legend of zelda games created by nintendo. However, due to the leg
 associated with integrating code with a legend of zelda game we chose to use a diffent game for this project.
 
 ## Examples
-[![Example Level Set](https://github.com/bjatkin/dungeon-design/blob/master/LevelSetThumbnail.png)](https://www.youtube.com/watch?v=OMKOFWbV2nM)
-[![Example Puzzle Script Level](https://github.com/bjatkin/dungeon-design/blob/master/PuzzleScriptThumbnail.png)](https://www.youtube.com/watch?v=a96jft9shLM)
-[![Example Sokoban Level](https://github.com/bjatkin/dungeon-design/blob/master/SokobanThumbnail.png)](https://www.youtube.com/watch?v=3zBTDilPgyc)
+[![Example Level Set](https://github.com/bjatkin/dungeon-design/blob/master/images/LevelSetThumbnail.png)](https://www.youtube.com/watch?v=OMKOFWbV2nM)
+[![Example Puzzle Script Level](https://github.com/bjatkin/dungeon-design/blob/master/images/PuzzleScriptThumbnail.png)](https://www.youtube.com/watch?v=a96jft9shLM)
+[![Example Sokoban Level](https://github.com/bjatkin/dungeon-design/blob/master/images/SokobanThumbnail.png)](https://www.youtube.com/watch?v=3zBTDilPgyc)
 
 ## Chips Challenge
 
@@ -27,7 +27,7 @@ games.
 
 ## System Overview
 
-[System Design!](https://github.com/bjatkin/dungeon-design/blob/master/SystemDesign.png)
+![System Design](https://github.com/bjatkin/dungeon-design/blob/master/images/SystemDesign.png)
 This system uses several 'Aesthetic Settings' in order to deteriming how a level should be generated. The goal is that
 these settings controll the broad strokes of the levels generation rather than being overly perscriptive on how
 the final level looks. These settings are used to generate both a level graph (inspired by GMTK's level graphs). As well
@@ -39,7 +39,7 @@ levels with a gradual challenge rampup.
 
 ## Level Graphs
 
-[Level Graph!](https://github.com/bjatkin/dungeon-design/blob/master/LevelGraph.png)
+![Level Graph](https://github.com/bjatkin/dungeon-design/blob/master/images/LevelGraph.png)
 Level graphs are a key portion of the system and were inspired by GMTK's 
 [Boss Keys youtube series](https://www.youtube.com/watch?v=ouO1R6vFDBo&list=PLc38fcMFcV_ul4D6OChdWhsNsYY3NA5B2) 
 This graph reperesent the abstract critical path through a level. Squares represnt bariers that players must overcome
@@ -52,12 +52,12 @@ an order in which keys and barries can be encountered in the level.
 
 ## Level Space
 
-[Level Space!](https://github.com/bjatkin/dungeon-design/blob/master/LevelSpace.png)
+![Level Space](https://github.com/bjatkin/dungeon-design/blob/master/images/LevelSpace.png)
 The level space is the phsyical space that the player will move around. This space has no information about the
 level graph but rather is generated as it's own separate step. Each level consists of different sized/ shaped
 rooms with various connections. With some additional 'noise' added to keep each room unique and interesting.
 This space is eventially converted into a graph and the level space and level graph are merged using 
-[subgraph Isomorphism!](https://en.wikipedia.org/wiki/Subgraph_isomorphism_problem).
+[subgraph Isomorphism](https://en.wikipedia.org/wiki/Subgraph_isomorphism_problem).
 
 ## System Output
 
