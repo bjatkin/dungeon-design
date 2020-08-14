@@ -6,6 +6,9 @@ design in the legend of zelda games created by nintendo. However, due to the leg
 associated with integrating code with a legend of zelda game we chose to use a diffent game for this project.
 
 ## Examples
+
+below are several examples of the output of this system. Click on the images to see videos of gameplay.
+
 [![Example Level Set](https://github.com/bjatkin/dungeon-design/blob/master/images/LevelSetThumbnail.png)](https://www.youtube.com/watch?v=OMKOFWbV2nM)
 [![Example Puzzle Script Level](https://github.com/bjatkin/dungeon-design/blob/master/images/PuzzleScriptThumbnail.png)](https://www.youtube.com/watch?v=a96jft9shLM)
 [![Example Sokoban Level](https://github.com/bjatkin/dungeon-design/blob/master/images/SokobanThumbnail.png)](https://www.youtube.com/watch?v=3zBTDilPgyc)
@@ -40,6 +43,8 @@ levels with a gradual challenge rampup.
 ## Level Graphs
 
 ![Level Graph](https://github.com/bjatkin/dungeon-design/blob/master/images/LevelGraph.png)
+
+
 Level graphs are a key portion of the system and were inspired by GMTK's 
 [Boss Keys youtube series](https://www.youtube.com/watch?v=ouO1R6vFDBo&list=PLc38fcMFcV_ul4D6OChdWhsNsYY3NA5B2) 
 This graph reperesent the abstract critical path through a level. Squares represnt bariers that players must overcome
@@ -53,6 +58,8 @@ an order in which keys and barries can be encountered in the level.
 ## Level Space
 
 ![Level Space](https://github.com/bjatkin/dungeon-design/blob/master/images/LevelSpace.png)
+
+
 The level space is the phsyical space that the player will move around. This space has no information about the
 level graph but rather is generated as it's own separate step. Each level consists of different sized/ shaped
 rooms with various connections. With some additional 'noise' added to keep each room unique and interesting.
